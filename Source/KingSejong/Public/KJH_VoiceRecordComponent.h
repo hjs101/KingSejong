@@ -31,7 +31,7 @@ class KINGSEJONG_API UKJH_VoiceRecordComponent : public UAudioCaptureComponent
 	// Called to generate more audio
 	virtual int32 OnGenerateAudio(float* OutAudio, int32 NumSamples) override;
 
-	// Sets the oscillator's frequency
+	// Sets the oscillator's frequencyca
 	UFUNCTION(BlueprintCallable, Category = "Synth|Components|Audio")
 	void SetFrequency(const float FrequencyHz = 440.0f);
 

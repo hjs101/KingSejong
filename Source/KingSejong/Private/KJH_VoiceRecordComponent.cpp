@@ -21,6 +21,7 @@ bool UKJH_VoiceRecordComponent::Init(int32& SampleRate)
 	if(VoiceRecoredSoundSubMix)
 		this->SoundSubmix = VoiceRecoredSoundSubMix;
 
+
 	return true;
 }
 
@@ -53,6 +54,8 @@ void UKJH_VoiceRecordComponent::SetFrequency(const float InFrequencyHz)
 void UKJH_VoiceRecordComponent::StartRecord()
 {
 	if (IsRecording()) return;
+
+	UE_LOG(LogTemp, Warning, TEXT("Start Record!"));
 	this->Start();
 
 	UAudioMixerBlueprintLibrary::StartRecordingOutput(GetWorld(), 0, VoiceRecoredSoundSubMix.Get());
@@ -63,37 +66,47 @@ void UKJH_VoiceRecordComponent::StopRecord(const bool bOnlyStop)
 {
 	if (!IsRecording())	return;
 
+
+
 	if (!bOnlyStop)
 	{
-		FString fileDirectoryPath = FPaths::ProjectSavedDir();
+		//FString fileDirectoryPath = FPaths::ProjectSavedDir();
 
-		Audio::FMixerDevice* mixerDevice = FAudioDeviceManager::GetAudioMixerDeviceFromWorldContext(GetWorld());
+		//Audio::FMixerDevice* mixerDevice = FAudioDeviceManager::GetAudioMixerDeviceFromWorldContext(GetWorld());
 
-		if (mixerDevice)
-		{
-			float OutSampleRate;
-			float OutChannelCount;
+		//if (mixerDevice)
+		//{
+		//	float OutSampleRate;
+		//	float OutChannelCount;
 
-			Audio::FAlignedFloatBuffer& recordedBuffer = mixerDevice->StopRecording(VoiceRecoredSoundSubMix.Get(), OutChannelCount, OutSampleRate);
+		//	Audio::FAlignedFloatBuffer& recordedBuffer = mixerDevice->StopRecording(VoiceRecoredSoundSubMix.Get(), OutChannelCount, OutSampleRate);
 
-			if (recordedBuffer.Num() == 0)
-			{
-				return;
-			}
+		//	if (recordedBuffer.Num() == 0)
+		//	{
+		//		return;
+		//	}
 
-			RecordingData.Reset(new Audio::FAudioRecordingData());
-			RecordingData->InputBuffer = Audio::TSampleBuffer<int16>(recordedBuffer, OutChannelCount, OutSampleRate);
-			RecordingData->Writer.BeginWriteToWavFile(RecordingData->InputBuffer, TEXT("RecordVoiceFile_Q&A"), fileDirectoryPath, [this]()
-			{
-					if (VoiceRecoredSoundSubMix && VoiceRecoredSoundSubMix->OnSubmixRecordedFileDone.IsBound())
-					{
-						VoiceRecoredSoundSubMix->OnSubmixRecordedFileDone.Broadcast(nullptr);
-					}
-					RecordingData.Reset();
-			});
-		}
+		//	RecordingData.Reset(new Audio::FAudioRecordingData());
+		//	RecordingData->InputBuffer = Audio::TSampleBuffer<int16>(recordedBuffer, OutChannelCount, OutSampleRate);
+		//	RecordingData->Writer.BeginWriteToWavFile(RecordingData->InputBuffer, TEXT("RecordVoiceFile_Question"), fileDirectoryPath, [this]()
+		//	{
+		//			if (VoiceRecoredSoundSubMix && VoiceRecoredSoundSubMix->OnSubmixRecordedFileDone.IsBound())
+		//			{
+		//				VoiceRecoredSoundSubMix->OnSubmixRecordedFileDone.Broadcast(nullptr);
+		//			}
+		//			RecordingData.Reset();
+		//	});
+		//}
 	}
 	this->Stop();
+
+	if (!bOnlyStop)
+	{
+		UAudioMixerBlueprintLibrary::StopRecordingOutput(GetWorld(), EAudioRecordingExportType::WavFile, TEXT("RecordVoiceFile_Question"), TEXT(""), VoiceRecoredSoundSubMix);
+	}
+
+	UE_LOG(LogTemp, Warning, TEXT("Stop Record!"));
+
 
 	// todo: 델리게이트 연동
 }
