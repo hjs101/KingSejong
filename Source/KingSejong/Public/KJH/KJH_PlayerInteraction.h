@@ -35,7 +35,7 @@ private:
 	class UCameraComponent* CameraComp;
 
 	UPROPERTY()
-	class AActor* HitActor;
+	class AKJH_InteractiveActor* HitActor;
 
 	UPROPERTY(EditDefaultsOnly)
 	class UInputAction* IA_Interaction;

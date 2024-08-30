@@ -48,13 +48,6 @@ void AKJH_Player::BeginPlay()
 		}
 	}
 
-	//// UI
-	//KeyGuideWidget = CreateWidget(GetWorld(), KeyGuideFactory);
-	//if (KeyGuideWidget)
-	//{
-	//	KeyGuideWidget->AddToViewport();
-	//	SetActiveKeyGuide(false);
-	//}
 
 }
 
@@ -63,12 +56,12 @@ void AKJH_Player::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	FTransform t = FTransform(GetControlRotation());
-	Direction = t.TransformVector(Direction);
-	Direction.Z = 0;
+	//FTransform t = FTransform(GetControlRotation());
+	//Direction = t.TransformVector(Direction);
+	//Direction.Z = 0;
 
-	AddMovementInput(Direction);
-	Direction = FVector::ZeroVector;
+	//AddMovementInput(Direction);
+	//Direction = FVector::ZeroVector;
 }
 
 // Called to bind functionality to input
@@ -96,8 +89,22 @@ void AKJH_Player::OnActionMove(const FInputActionValue& value)
 {
 	FVector2D v = value.Get<FVector2D>();
 
-	Direction.X = v.X;
-	Direction.Y = v.Y;
+	//Direction.X = v.X;
+	//Direction.Y = v.Y;
+
+	// find out which way is forward
+	const FRotator Rotation = Controller->GetControlRotation();
+	const FRotator YawRotation(0, Rotation.Yaw, 0);
+
+	// get forward vector
+	const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+
+	// get right vector 
+	const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+
+	// add movement 
+	AddMovementInput(ForwardDirection, v.Y);
+	AddMovementInput(RightDirection, v.X);
 }
 
 void AKJH_Player::OnActionLook(const FInputActionValue& value)
@@ -113,14 +120,3 @@ void AKJH_Player::OnActionJump(const FInputActionValue& value)
 	Jump();
 }
 
-//void AKJH_Player::SetActiveKeyGuide(bool bValue)
-//{
-//	if (bValue)
-//	{
-//		KeyGuideWidget->SetVisibility(ESlateVisibility::Visible);
-//	}
-//	else
-//	{
-//		KeyGuideWidget->SetVisibility(ESlateVisibility::Hidden);
-//	}
-//}

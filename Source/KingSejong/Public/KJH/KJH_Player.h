@@ -59,19 +59,9 @@ private:
 	// πÊ«‚
 	FVector Direction;
 
-	//// UI
- //   UPROPERTY(EditDefaultsOnly)
- //   TSubclassOf<class UUserWidget> KeyGuideFactory;
-
- //   UPROPERTY()
- //   class UUserWidget* KeyGuideWidget;
-	
-
 private:
 	void OnActionMove(const FInputActionValue& value);
 	void OnActionLook(const FInputActionValue& value);
 	void OnActionJump(const FInputActionValue& value);
 
-public:
-	//void SetActiveKeyGuide(bool bValue);
 };

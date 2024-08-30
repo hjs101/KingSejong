@@ -6,6 +6,7 @@
 #include "EnhancedInputComponent.h"
 #include "Camera/CameraComponent.h"
 #include "Blueprint/UserWidget.h"
+#include "KJH/KJH_InteractiveActor.h"
 
 // Sets default values for this component's properties
 UKJH_PlayerInteraction::UKJH_PlayerInteraction()
@@ -65,17 +66,21 @@ void UKJH_PlayerInteraction::TickComponent(float DeltaTime, ELevelTick TickType,
 
 	if (GetWorld()->LineTraceSingleByChannel(outHit, start, end, traceChannel, params))
 	{
-		HitActor = outHit.GetActor();
+		AActor* actor = outHit.GetActor();
+		if (actor != nullptr)
+		{
+            HitActor = Cast<AKJH_InteractiveActor>(actor);
 
-		if (HitActor && HitActor->ActorHasTag(TEXT("Interaction")))
-		{
-			GEngine->AddOnScreenDebugMessage(-1, 2, FColor::Red, outHit.GetActor()->GetName());
-			
+            if (HitActor)
+            {
+                //GEngine->AddOnScreenDebugMessage(-1, 2, FColor::Red, outHit.GetActor()->GetName());
+            }
+            else
+            {
+                HitActor = nullptr;
+            }
 		}
-		else
-		{
-			HitActor = nullptr;
-		}
+
 	}
 	else
 	{
@@ -95,6 +100,8 @@ void UKJH_PlayerInteraction::OnActionInteraction(const FInputActionValue& value)
 {
 	// HitActor 상호작용
 	if(HitActor == nullptr) return;
+
+	HitActor->OnInteracted();
 
 	UE_LOG(LogTemp, Warning, TEXT("OnActionInteraction!!"));
 }
