@@ -4,25 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "Engine/GameInstance.h"
+#include "JJH/QuizData.h"
 #include "RunningGameInstance.generated.h"
-
-USTRUCT(BlueprintType)
-struct FWordsData : public FTableRowBase
-{
-	GENERATED_BODY()
-
-public:
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FString Word;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FString Meaning;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FString Initials;
-};
-
 
 
 /**
@@ -35,6 +18,7 @@ class KINGSEJONG_API URunningGameInstance : public UGameInstance
 
 	URunningGameInstance();
 public:
+
 	FWordsData* GetWordsData(int32 Level);
 
 private:

@@ -66,22 +66,12 @@ void ARunner::Run(const FInputActionValue& value)
 {
 	if (HasAuthority())
 	{
-		if (GEngine && GetWorld())
-		{
-			// 화면에 디버깅 메시지 표시
-			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Server is handling the teleport request."));
-		}
 		// 서버에서 실행할 경우, 직접 이동을 처리합니다.
 		ServerTeleportForward(RunningSpeed);
 
 	}
 	else
 	{
-		if (GEngine && GetWorld())
-		{
-			// 화면에 디버깅 메시지 표시
-			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, TEXT("Client is requesting teleport to server."));
-		}
 		// 클라이언트에서 서버 호출을 통해 이동을 요청합니다.
 		ServerTeleportForward(RunningSpeed);
 	}
