@@ -6,11 +6,45 @@
 #include "JJH/QuizWidget.h"
 #include "JJH/RunnerController.h"
 
+void ARunningGameModeBase::BeginPlay()
+{
+	Super::BeginPlay();
+
+	FTimerHandle QuizTimer;
+	//3초이따 퀴즈띄우기
+	GetWorld()->GetTimerManager().SetTimer(QuizTimer, this, &ARunningGameModeBase::StartQuiz, 3.f, false);
+
+}
 
 void ARunningGameModeBase::StartQuiz()
 {
+	//랜덤 데이터 가져오기
 	FWordsData SelectedQuiz = SelectRandomQuizData();
+
+	//가져온데이터로 퀴즈뿌리기
 	MulticastSendQuizData(SelectedQuiz);
+}
+
+void ARunningGameModeBase::PlayerCrossedFinishLine(APlayerController* PlayerController)
+{
+	if (PlayerFinishOrder.Num() == 0) // 첫 번째 플레이어가 결승선에 도착했을 때
+	{
+		MulticastStartCountdownTimer();
+	}
+	PlayerFinishOrder.Add(PlayerController);
+}
+
+void ARunningGameModeBase::MulticastStartCountdownTimer_Implementation()
+{
+
+	for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
+	{
+		ARunnerController* MyPC = Cast<ARunnerController>(It->Get());
+		if (MyPC)
+		{
+			MyPC->ClientStartWidgetCountDown();  // 클라이언트의 카운트다운 UI 시작
+		}
+	}
 }
 
 FWordsData ARunningGameModeBase::SelectRandomQuizData()
@@ -48,14 +82,6 @@ FWordsData ARunningGameModeBase::SelectRandomQuizData()
 	return FWordsData();
 }
 
-void ARunningGameModeBase::BeginPlay()
-{
-	Super::BeginPlay();
-
-	FTimerHandle QuizTimer;
-	GetWorld()->GetTimerManager().SetTimer(QuizTimer,this, &ARunningGameModeBase::StartQuiz, 3.f, false);
-}
-
 void ARunningGameModeBase::MulticastSendQuizData_Implementation(const FWordsData& QuizData)
 {
 	for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
@@ -70,6 +96,7 @@ void ARunningGameModeBase::MulticastSendQuizData_Implementation(const FWordsData
 				// 클라이언트가 자신의 로컬 플레이어 컨트롤러에서만 위젯을 생성하도록 명령
 				MyPC->ClientCreateQuizWidget(QuizData);
 				FString PCAddress = FString::Printf(TEXT("PlayerController Address: %p"), MyPC);
+				PlayerCrossedFinishLine(MyPC);
 				GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, PCAddress);
 			}
 	}

@@ -27,8 +27,12 @@ void ARunnerController::ClientCreateQuizWidget_Implementation(const FWordsData& 
 
     }
 }
-
 void ARunnerController::ShowAnswerTextBox()
 {
     QuizWidgetInstance->ShowAnswerTextBox();
+}
+
+void ARunnerController::ClientStartWidgetCountDown_Implementation()
+{
+    QuizWidgetInstance->StartCountDown();
 }

@@ -31,4 +31,6 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FString Initials;
+
+
 };

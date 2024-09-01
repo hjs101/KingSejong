@@ -36,4 +36,11 @@ public:
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastSendQuizData(const FWordsData& QuizData);
 
+
+	void PlayerCrossedFinishLine(APlayerController* PlayerController);
+	
+	TArray<APlayerController*> PlayerFinishOrder;
+	
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastStartCountdownTimer();
 };

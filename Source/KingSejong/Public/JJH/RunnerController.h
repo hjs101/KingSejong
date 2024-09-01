@@ -28,4 +28,7 @@ public:
 	void ClientCreateQuizWidget(const FWordsData& QuizData);
 	
 	void ShowAnswerTextBox();
+
+	UFUNCTION(Client, Reliable)
+	void ClientStartWidgetCountDown();
 };
