@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "KJH/KJH_PlayerInteraction.h"
@@ -15,6 +15,8 @@ UKJH_PlayerInteraction::UKJH_PlayerInteraction()
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
 	bWantsInitializeComponent = true;
+
+	//SetIsReplicatedByDefault(true);
 }
 
 void UKJH_PlayerInteraction::InitializeComponent()
@@ -25,9 +27,7 @@ void UKJH_PlayerInteraction::InitializeComponent()
 	if (MyActor)
 	{
 		MyActor->OnInputBindingDelegate.AddUObject(this, &UKJH_PlayerInteraction::SetupInputBinding);
-		UE_LOG(LogTemp, Warning, TEXT("SetupInputBinding..."));
 	}
-
 }
 
 // Called when the game starts
@@ -35,13 +35,8 @@ void UKJH_PlayerInteraction::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// UI
-	KeyGuideWidget = CreateWidget(GetWorld(), KeyGuideFactory);
-	if (KeyGuideWidget)
-	{
-		KeyGuideWidget->AddToViewport();
-		SetActiveKeyGuide(false);
-	}
+	if ( MyActor && MyActor->IsLocallyControlled() )
+		CreateKeyGuide();
 }
 
 
@@ -61,7 +56,7 @@ void UKJH_PlayerInteraction::TickComponent(float DeltaTime, ELevelTick TickType,
 	params.AddIgnoredActor(MyActor);
 
 
-	// ÀÎÅÍ·º¼Ç ´ë»ó Ã£±â
+	// ì¸í„°ë ‰ì…˜ ëŒ€ìƒ ì°¾ê¸°
 	HitActor = nullptr;
 
 	if (GetWorld()->LineTraceSingleByChannel(outHit, start, end, traceChannel, params))
@@ -80,13 +75,13 @@ void UKJH_PlayerInteraction::TickComponent(float DeltaTime, ELevelTick TickType,
                 HitActor = nullptr;
             }
 		}
-
 	}
 	else
 	{
 		//DrawDebugLine(GetWorld(), start, end, FColor::Cyan, false, 1);
 	}
-	SetActiveKeyGuide(HitActor != nullptr);
+
+	SetActiveKeyGuide(IsInteractableActor(HitActor));
 }
 
 void UKJH_PlayerInteraction::SetupInputBinding(UEnhancedInputComponent* Input)
@@ -98,17 +93,31 @@ void UKJH_PlayerInteraction::SetupInputBinding(UEnhancedInputComponent* Input)
 
 void UKJH_PlayerInteraction::OnActionInteraction(const FInputActionValue& value)
 {
-	// HitActor »óÈ£ÀÛ¿ë
+	// HitActor ìƒí˜¸ìž‘ìš©
 	if(HitActor == nullptr) return;
+	if(HitActor->IsInteractable() == false) return;
 
-	HitActor->OnInteracted();
+	HitActor->OnBeginInteraction(MyActor);
 
 	UE_LOG(LogTemp, Warning, TEXT("OnActionInteraction!!"));
 }
 
 
+void UKJH_PlayerInteraction::CreateKeyGuide()
+{
+	if ( KeyGuideWidget ) return;
+	// UI
+	KeyGuideWidget = CreateWidget(GetWorld(), KeyGuideFactory);
+	if ( KeyGuideWidget )
+	{
+		KeyGuideWidget->AddToViewport();
+		SetActiveKeyGuide(false);
+	}
+}
+
 void UKJH_PlayerInteraction::SetActiveKeyGuide(bool bValue)
 {
+	if ( KeyGuideWidget == nullptr ) return;
 	if (bValue)
 	{
 		KeyGuideWidget->SetVisibility(ESlateVisibility::Visible);
@@ -117,4 +126,9 @@ void UKJH_PlayerInteraction::SetActiveKeyGuide(bool bValue)
 	{
 		KeyGuideWidget->SetVisibility(ESlateVisibility::Hidden);
 	}
+}
+
+bool UKJH_PlayerInteraction::IsInteractableActor(AKJH_InteractiveActor* OtherActor)
+{
+	return OtherActor && OtherActor->IsInteractable();
 }

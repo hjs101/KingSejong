@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -16,7 +16,7 @@ class KINGSEJONG_API UKJH_PlayerInteraction : public UActorComponent
 public:	
 	// Sets default values for this component's properties
 	UKJH_PlayerInteraction();
-
+	 
 protected:
 	virtual void InitializeComponent() override;
 
@@ -54,8 +54,13 @@ private:
 
 		
 private:
+
 	void SetupInputBinding(class UEnhancedInputComponent* Input);
 	void OnActionInteraction(const FInputActionValue& value);
 
+	void CreateKeyGuide();
 	void SetActiveKeyGuide(bool bValue);
+
+	bool IsInteractableActor(class AKJH_InteractiveActor* OtherActor);
+
 };

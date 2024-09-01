@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "KJH/KJH_InteractiveActor.h"
@@ -15,7 +15,7 @@ AKJH_InteractiveActor::AKJH_InteractiveActor()
 void AKJH_InteractiveActor::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
 }
 
 // Called every frame
@@ -25,8 +25,18 @@ void AKJH_InteractiveActor::Tick(float DeltaTime)
 
 }
 
-void AKJH_InteractiveActor::OnInteracted()
+void AKJH_InteractiveActor::OnBeginInteraction(AActor* OtherActor)
 {
-	OnInteractedDelegate.Broadcast();
+	OnBeginInteractionDelegate.Broadcast(OtherActor);
+}
+
+void AKJH_InteractiveActor::OnEndInteraction()
+{
+	OnEndInteractionDelegate.Broadcast();
+}
+
+bool AKJH_InteractiveActor::IsInteractable()
+{
+	return true;
 }
 

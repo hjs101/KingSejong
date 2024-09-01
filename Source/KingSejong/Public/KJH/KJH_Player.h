@@ -7,7 +7,8 @@
 #include "InputActionValue.h"
 #include "KJH_Player.generated.h"
 
-DECLARE_MULTICAST_DELEGATE_OneParam(FInputBindingDelegate, class UEnhancedInputComponent*)
+DECLARE_MULTICAST_DELEGATE_OneParam(FInputBindingSignature, class UEnhancedInputComponent*);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FEndedSitSignature);
 
 UCLASS()
 class KINGSEJONG_API AKJH_Player : public ACharacter
@@ -30,9 +31,9 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 public: 
-	FInputBindingDelegate OnInputBindingDelegate;
-
-
+	FInputBindingSignature OnInputBindingDelegate;
+	UPROPERTY(BlueprintAssignable)
+	FEndedSitSignature OnEndSitDelegate;
 
 public:
 	// Camera
@@ -42,9 +43,6 @@ public:
 private:
 	UPROPERTY(EditDefaultsOnly)
 	class USpringArmComponent* SpringArmComp;
-
-	UPROPERTY(EditDefaultsOnly)
-	class UKJH_PlayerInteraction* InteractionComp;
 
 	// Input
 	UPROPERTY(EditDefaultsOnly)
@@ -56,12 +54,26 @@ private:
 	UPROPERTY(EditDefaultsOnly)
 	class UInputAction* IA_Jump;
 
-	// πÊ«‚
-	FVector Direction;
+	// Interaction
+	UPROPERTY(EditDefaultsOnly)
+	class UKJH_PlayerInteraction* InteractionComp;
+
+	// Animation
+	class UKJH_PlayerAnimInstance* PlayerAnim;
+
+	
+	bool bIsSit;
 
 private:
 	void OnActionMove(const FInputActionValue& value);
 	void OnActionLook(const FInputActionValue& value);
 	void OnActionJump(const FInputActionValue& value);
+
+public:
+	UFUNCTION(BlueprintCallable)
+	void OnStartSit();
+	UFUNCTION(BlueprintCallable)
+	void OnEndSit();
+
 
 };

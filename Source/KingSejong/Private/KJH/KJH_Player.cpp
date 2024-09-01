@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "KJH/KJH_Player.h"
@@ -8,6 +8,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "EnhancedInputComponent.h"
 #include "KJH/KJH_PlayerInteraction.h"
+#include "KJH/KJH_PlayerAnimInstance.h"
 #include "Blueprint/UserWidget.h"
 
 
@@ -16,6 +17,8 @@ AKJH_Player::AKJH_Player()
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+
+	bReplicates = true;
 
 	InteractionComp = CreateDefaultSubobject<UKJH_PlayerInteraction>(TEXT("InteractionComp"));
 
@@ -29,7 +32,6 @@ AKJH_Player::AKJH_Player()
 	CameraComp->SetupAttachment(SpringArmComp);
 
 	GetMesh()->SetRelativeLocationAndRotation(FVector(0, 0, -90), FRotator(0, -90, 0));
-
 }
 
 // Called when the game starts or when spawned
@@ -48,6 +50,8 @@ void AKJH_Player::BeginPlay()
 		}
 	}
 
+	// Animation
+	PlayerAnim = CastChecked<UKJH_PlayerAnimInstance>(GetMesh()->GetAnimInstance());
 
 }
 
@@ -87,6 +91,9 @@ void AKJH_Player::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 
 void AKJH_Player::OnActionMove(const FInputActionValue& value)
 {
+	// 앉아있는 상태라면 움직임 종료
+	if (bIsSit) return;
+		
 	FVector2D v = value.Get<FVector2D>();
 
 	//Direction.X = v.X;
@@ -105,6 +112,8 @@ void AKJH_Player::OnActionMove(const FInputActionValue& value)
 	// add movement 
 	AddMovementInput(ForwardDirection, v.Y);
 	AddMovementInput(RightDirection, v.X);
+
+
 }
 
 void AKJH_Player::OnActionLook(const FInputActionValue& value)
@@ -118,5 +127,29 @@ void AKJH_Player::OnActionLook(const FInputActionValue& value)
 void AKJH_Player::OnActionJump(const FInputActionValue& value)
 {
 	Jump();
+
+	OnEndSitDelegate.Broadcast();
+	//OnEndSit();
 }
 
+void AKJH_Player::OnStartSit()
+{
+	if (PlayerAnim == nullptr) return;
+	if (bIsSit) return;
+
+	PlayerAnim->SetSitState(true);
+	bIsSit = true;
+
+}
+
+void AKJH_Player::OnEndSit()
+{
+	if (PlayerAnim == nullptr) return;
+	if (bIsSit == false) return;
+
+	
+	PlayerAnim->SetSitState(false);
+	bIsSit = false;
+
+	//OnEndSitDelegate.Broadcast();
+}
