@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -27,12 +27,12 @@ public:
 	float Speed;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	bool bIsSit;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	bool bIsJump;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	bool bIsSit;
+
 public:
-	void SetSitState(bool bValue);
+	//void SetSitState(bool bValue);
 	
 };

@@ -21,9 +21,11 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
 
 private:
-	UPROPERTY()
+	UPROPERTY(Replicated)
 	class AKJH_Player* TargetPlayer;
 
 public:
@@ -50,23 +52,17 @@ public:
 public:
 
 	// 앉기
-	UFUNCTION()
-	void SitDown(class AActor* OtherActor);
-
-	//UFUNCTION(Server, Unreliable)
-	UFUNCTION(Server, Reliable)
+	UFUNCTION(Server, Unreliable)
 	void ServerSitDown(class AActor* OtherActor);
 
-	UFUNCTION(NetMulticast, Reliable)
+	UFUNCTION(NetMulticast, Unreliable)
 	void MulticastSitDown(class AActor* OtherActor);
 
 
 	// 일어나기
-	UFUNCTION()
-	void StandUp();
-	UFUNCTION(Server, Reliable)
+	UFUNCTION(Server, Unreliable)
 	void ServerStandUp();
-	UFUNCTION(NetMulticast, Reliable)
+	UFUNCTION(NetMulticast, Unreliable)
 	void MulticastStandUp();
 
 

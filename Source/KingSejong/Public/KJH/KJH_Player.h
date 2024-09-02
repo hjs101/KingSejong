@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -30,6 +30,8 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
 public: 
 	FInputBindingSignature OnInputBindingDelegate;
 	UPROPERTY(BlueprintAssignable)
@@ -39,6 +41,10 @@ public:
 	// Camera
 	UPROPERTY(EditDefaultsOnly)
 	class UCameraComponent* CameraComp;
+
+	// Player 상태
+	UPROPERTY(Replicated)
+	bool bIsSit;
 
 private:
 	UPROPERTY(EditDefaultsOnly)
@@ -59,21 +65,21 @@ private:
 	class UKJH_PlayerInteraction* InteractionComp;
 
 	// Animation
+	UPROPERTY(EditDefaultsOnly)
 	class UKJH_PlayerAnimInstance* PlayerAnim;
 
-	
-	bool bIsSit;
 
 private:
 	void OnActionMove(const FInputActionValue& value);
 	void OnActionLook(const FInputActionValue& value);
 	void OnActionJump(const FInputActionValue& value);
 
+	void SetIsSit(bool bValue);
+
 public:
 	UFUNCTION(BlueprintCallable)
 	void OnStartSit();
 	UFUNCTION(BlueprintCallable)
 	void OnEndSit();
-
 
 };

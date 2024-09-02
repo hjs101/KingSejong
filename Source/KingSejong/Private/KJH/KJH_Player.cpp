@@ -10,6 +10,7 @@
 #include "KJH/KJH_PlayerInteraction.h"
 #include "KJH/KJH_PlayerAnimInstance.h"
 #include "Blueprint/UserWidget.h"
+#include "Net/UnrealNetwork.h"
 
 
 // Sets default values
@@ -86,7 +87,13 @@ void AKJH_Player::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 
 		UE_LOG(LogTemp, Warning, TEXT("OnInputBindingDelegate Call!!"));
 	}
+}
 
+void AKJH_Player::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(AKJH_Player, bIsSit);
 }
 
 void AKJH_Player::OnActionMove(const FInputActionValue& value)
@@ -132,13 +139,21 @@ void AKJH_Player::OnActionJump(const FInputActionValue& value)
 	//OnEndSit();
 }
 
+void AKJH_Player::SetIsSit(bool bValue)
+{
+	//if ( HasAuthority() )
+	//{
+		bIsSit = bValue;
+	//}
+}
+
 void AKJH_Player::OnStartSit()
 {
 	if (PlayerAnim == nullptr) return;
 	if (bIsSit) return;
 
-	PlayerAnim->SetSitState(true);
-	bIsSit = true;
+	//PlayerAnim->SetSitState(true);
+	SetIsSit(true);
 
 }
 
@@ -148,8 +163,7 @@ void AKJH_Player::OnEndSit()
 	if (bIsSit == false) return;
 
 	
-	PlayerAnim->SetSitState(false);
-	bIsSit = false;
-
-	//OnEndSitDelegate.Broadcast();
+	//PlayerAnim->SetSitState(false);
+	//bIsSit = false;
+	SetIsSit(false);
 }

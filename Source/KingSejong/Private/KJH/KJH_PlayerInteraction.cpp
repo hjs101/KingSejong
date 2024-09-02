@@ -97,7 +97,9 @@ void UKJH_PlayerInteraction::OnActionInteraction(const FInputActionValue& value)
 	if(HitActor == nullptr) return;
 	if(HitActor->IsInteractable() == false) return;
 
-	HitActor->OnBeginInteraction(MyActor);
+	
+	ServerRPCInteractiveActor(HitActor, MyActor);
+
 
 	UE_LOG(LogTemp, Warning, TEXT("OnActionInteraction!!"));
 }
@@ -131,4 +133,9 @@ void UKJH_PlayerInteraction::SetActiveKeyGuide(bool bValue)
 bool UKJH_PlayerInteraction::IsInteractableActor(AKJH_InteractiveActor* OtherActor)
 {
 	return OtherActor && OtherActor->IsInteractable();
+}
+
+void UKJH_PlayerInteraction::ServerRPCInteractiveActor_Implementation(AKJH_InteractiveActor* TargetActor, AKJH_Player* PlayerActor)
+{
+	TargetActor->OnBeginInteraction(PlayerActor);
 }

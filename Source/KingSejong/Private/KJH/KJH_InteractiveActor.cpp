@@ -27,12 +27,18 @@ void AKJH_InteractiveActor::Tick(float DeltaTime)
 
 void AKJH_InteractiveActor::OnBeginInteraction(AActor* OtherActor)
 {
-	OnBeginInteractionDelegate.Broadcast(OtherActor);
+	if(OnBeginInteractionDelegate.IsBound())
+	{
+		OnBeginInteractionDelegate.Broadcast(OtherActor);
+	}
 }
 
 void AKJH_InteractiveActor::OnEndInteraction()
 {
-	OnEndInteractionDelegate.Broadcast();
+	if (OnEndInteractionDelegate.IsBound())
+	{
+		OnEndInteractionDelegate.Broadcast();
+	}
 }
 
 bool AKJH_InteractiveActor::IsInteractable()

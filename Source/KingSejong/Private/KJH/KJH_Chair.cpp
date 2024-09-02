@@ -5,10 +5,10 @@
 #include "KJH/KJH_Player.h"
 #include "Components/BoxComponent.h"
 #include "Components/ArrowComponent.h"
+#include "Net/UnrealNetwork.h"
 
 AKJH_Chair::AKJH_Chair()
 {
-
 	bReplicates = true;
 
 	BoxComp = CreateDefaultSubobject<UBoxComponent>(TEXT("BoxComp"));
@@ -27,18 +27,27 @@ void AKJH_Chair::BeginPlay()
 	Super::BeginPlay();
 }
 
+void AKJH_Chair::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(AKJH_Chair, TargetPlayer);
+}
+
 void AKJH_Chair::OnBeginInteraction(AActor* OtherActor)
 {
 	Super::OnBeginInteraction(OtherActor);
 
-	SitDown(OtherActor);
+	SetOwner(OtherActor);
+	ServerSitDown(OtherActor);
+
 }
 
 void AKJH_Chair::OnEndInteraction()
 {
 	Super::OnEndInteraction();
 
-	StandUp();
+	ServerStandUp();
 }
 
 bool AKJH_Chair::IsInteractable()
@@ -46,20 +55,11 @@ bool AKJH_Chair::IsInteractable()
 	return TargetPlayer == nullptr;
 }
 
-void AKJH_Chair::SitDown(AActor* OtherActor)
-{
-	DebugLog(TEXT("SitDown!!!"));
-
-	SetOwner(OtherActor); // 먼저 소유자를 설정하고
-	ServerSitDown(OtherActor); // 서버 RPC를 호출
-}
-
-
 void AKJH_Chair::ServerSitDown_Implementation(AActor* OtherActor)
 {
-	//UE_LOG(LogTemp, Warning, TEXT("ServerSitDown_Implementation!!!"));
+	
 
-	GEngine->AddOnScreenDebugMessage(-1, 2, FColor::Cyan, TEXT("ServerSitDown_Implementation!!!"));
+	DebugLog(TEXT("ServerSitDown_Implementation!!!!"));
 
 	MulticastSitDown(OtherActor);
 }
@@ -67,8 +67,8 @@ void AKJH_Chair::ServerSitDown_Implementation(AActor* OtherActor)
 
 void AKJH_Chair::MulticastSitDown_Implementation(AActor* OtherActor)
 {
-	//UE_LOG(LogTemp, Warning, TEXT("MulticastSitDown_Implementation!!!"));
-	GEngine->AddOnScreenDebugMessage(-1, 2, FColor::Cyan, TEXT("MulticastSitDown_Implementation!!!"));
+	DebugLog(TEXT("MulticastSitDown_Implementation!!!"));
+
 
 	if ( TargetPlayer )
 	{
@@ -89,29 +89,9 @@ void AKJH_Chair::MulticastSitDown_Implementation(AActor* OtherActor)
 	}
 	//UE_LOG(LogTemp, Warning, TEXT("%s에 %s가 앉았습니다."), *this->GetName(), *TargetPlayer->GetName());
 
-	SetOwner(OtherActor);
+	//SetOwner(OtherActor);
 }
 
-void AKJH_Chair::StandUp()
-{
-	ServerStandUp();
-}
-
-void AKJH_Chair::DebugLog(FString Message)
-{
-	FString message;
-	if ( HasAuthority() )
-	{
-		
-		message = FString::Printf(TEXT("Server : %s"), *Message);
-	}
-	else
-	{
-		message = FString::Printf(TEXT("Client : %s"), *Message);
-	}
-
-	GEngine->AddOnScreenDebugMessage(-1, 10, FColor::Cyan, message);
-}
 
 void AKJH_Chair::ServerStandUp_Implementation()
 {
@@ -125,15 +105,33 @@ void AKJH_Chair::MulticastStandUp_Implementation()
 		UE_LOG(LogTemp, Warning, TEXT("앉아 있는 플레이어가 없습니다."));
 		return;
 	}
-	//UE_LOG(LogTemp, Warning, TEXT("%s가 %s에서 일어났습니다."), *TargetPlayer->GetName(), *this->GetName());
 
 	
 	FString msg = FString::Printf(TEXT("%s가 %s에서 일어났습니다."), *TargetPlayer->GetName(), *this->GetName());
 	DebugLog(msg);
 
 	TargetPlayer->OnEndSit();
-
-	TargetPlayer = nullptr;
+    TargetPlayer = nullptr;
 
 	SetOwner(nullptr);
+}
+
+
+void AKJH_Chair::DebugLog(FString Message)
+{
+	FString message;
+	FColor color;
+	if ( HasAuthority() )
+	{
+		message = FString::Printf(TEXT("Server : %s"), *Message);
+		color = FColor::Cyan;
+	}
+	else
+	{
+		message = FString::Printf(TEXT("Client : %s"), *Message);
+		color = FColor::Red;
+
+	}
+
+	GEngine->AddOnScreenDebugMessage(-1, 100, color, message);
 }

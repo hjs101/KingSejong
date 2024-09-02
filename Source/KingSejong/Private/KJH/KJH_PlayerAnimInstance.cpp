@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "KJH/KJH_PlayerAnimInstance.h"
@@ -23,10 +23,13 @@ void UKJH_PlayerAnimInstance::NativeUpdateAnimation(float DeltaTime)
 
         auto* movement = Player->GetCharacterMovement();
         bIsJump = movement->IsFalling();
+    
+        // 플레이어의 상태에 따라 애니메이션의 변수를 업데이트를 해야 동기화됨
+        bIsSit = Player->bIsSit;
     }
 }
 
-void UKJH_PlayerAnimInstance::SetSitState(bool bValue)
-{
-    bIsSit = bValue;
-}
+//void UKJH_PlayerAnimInstance::SetSitState(bool bValue)
+//{
+//    bIsSit = bValue;
+//}
