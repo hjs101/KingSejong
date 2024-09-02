@@ -27,7 +27,8 @@ public:
 	UFUNCTION(Client, Reliable)
 	void ClientCreateQuizWidget(const FWordsData& QuizData);
 	
-	void ShowAnswerTextBox();
+	UFUNCTION(Client, Reliable)
+	void ClientShowAnswerTextBox();
 
 	UFUNCTION(Client, Reliable)
 	void ClientStartWidgetCountDown();

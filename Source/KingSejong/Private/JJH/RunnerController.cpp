@@ -17,22 +17,30 @@ void ARunnerController::ClientCreateQuizWidget_Implementation(const FWordsData& 
     {
         if (QuizWidgetClass)
         {
-			QuizWidgetInstance = CreateWidget<UQuizWidget>(this, QuizWidgetClass);
+			QuizWidgetInstance = CreateWidget<UQuizWidget>(GetWorld(), QuizWidgetClass);
 			if (QuizWidgetInstance)
-			{
+			{               
 				QuizWidgetInstance->AddToViewport();
 				QuizWidgetInstance->InitializeQuiz(QuizData);
+         
 			}
         }
 
     }
 }
-void ARunnerController::ShowAnswerTextBox()
+void ARunnerController::ClientShowAnswerTextBox_Implementation()
 {
-    QuizWidgetInstance->ShowAnswerTextBox();
+    if (IsLocalPlayerController()) // 로컬 플레이어 컨트롤러에서만 위젯 생성
+    {
+        QuizWidgetInstance->ShowAnswerTextBox();
+    }
 }
 
 void ARunnerController::ClientStartWidgetCountDown_Implementation()
 {
-    QuizWidgetInstance->StartCountDown();
+    if (IsLocalPlayerController()) // 로컬 플레이어 컨트롤러에서만 위젯 생성
+    {
+        QuizWidgetInstance->StartCountDown();
+        GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("StartCount"));
+    }
 }

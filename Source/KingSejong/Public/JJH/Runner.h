@@ -43,18 +43,37 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	void PlayRunMontageSection(const FName& SectionName);
+	void PlayWinMontage();
+	UFUNCTION(Server, Reliable)
+	void ServerPlayWinMontage();
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastPlayWinMontage();
+	void PlayLoseMontage();
+	UFUNCTION(Server, Reliable)
+	void ServerPlayLoseMontage();
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastPlayLoseMontage();
+
+	UPROPERTY(EditAnywhere)
+	class UAnimMontage* RunMontage;
+	UPROPERTY(EditAnywhere)
+	class UAnimMontage* WinMontage;
+	UPROPERTY(EditAnywhere)
+	class UAnimMontage* LoseMontage;
+
 	// 클라이언트 입력 처리 함수 선언
 	void TeleportForward(float Speed);
 
 	// 서버 함수 선언
 	UFUNCTION(Server, Reliable)
-	void ServerTeleportForward(float Speed);
-	void ServerTeleportForward_Implementation(float Speed);
+	void ServerTeleportForward(float Speed, float InputValue);
+	void ServerTeleportForward_Implementation(float Speed, float InputValue);
 
 	//멀티캐스트함수
 	UFUNCTION(NetMulticast, Reliable)
-	void MulticastTeleportForward(float Speed);
-	void MulticastTeleportForward_Implementation(float Speed);
+	void MulticastTeleportForward(float Speed, float InputValue);
+	void MulticastTeleportForward_Implementation(float Speed, float InputValue);
 
 
 };

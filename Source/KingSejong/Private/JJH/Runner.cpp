@@ -62,31 +62,108 @@ void ARunner::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	}
 }
 
-void ARunner::Run(const FInputActionValue& value)
+void ARunner::PlayRunMontageSection(const FName& SectionName)
+{
+	if (RunMontage && GetMesh()->GetAnimInstance())
+	{
+		GetMesh()->GetAnimInstance()->Montage_Play(RunMontage);
+		GetMesh()->GetAnimInstance()->Montage_JumpToSection(SectionName, RunMontage);
+	}
+}
+void ARunner::PlayWinMontage()
 {
 	if (HasAuthority())
 	{
-		// 서버에서 실행할 경우, 직접 이동을 처리합니다.
-		ServerTeleportForward(RunningSpeed);
+		ServerPlayWinMontage();
+	}
+}
+void ARunner::ServerPlayWinMontage_Implementation()
+{
+	PlayAnimMontage(WinMontage);
+	
+	MulticastPlayWinMontage();
+}
+void ARunner::MulticastPlayWinMontage_Implementation()
+{
+	PlayAnimMontage(WinMontage);	
+}
 
+void ARunner::PlayLoseMontage()
+{
+	if (HasAuthority())
+	{
+		ServerPlayLoseMontage();
+	}
+}
+void ARunner::ServerPlayLoseMontage_Implementation()
+{
+	PlayAnimMontage(LoseMontage);
+
+	MulticastPlayLoseMontage();
+}
+void ARunner::MulticastPlayLoseMontage_Implementation()
+{
+	PlayAnimMontage(LoseMontage);
+}
+
+
+void ARunner::Run(const FInputActionValue& value)
+{
+
+	if (HasAuthority())
+	{
+		// 서버에서 실행할 경우, 직접 이동을 처리합니다.
+		ServerTeleportForward(RunningSpeed, value.Get<float>());
 	}
 	else
 	{
 		// 클라이언트에서 서버 호출을 통해 이동을 요청합니다.
-		ServerTeleportForward(RunningSpeed);
+		ServerTeleportForward(RunningSpeed, value.Get<float>());
 	}
 }
 
-void ARunner::ServerTeleportForward_Implementation(float Speed)
+void ARunner::ServerTeleportForward_Implementation(float Speed, float InputValue)
 {
+
+	FName SectionToPlay;
+
+	if (InputValue < 0)  // 'A' 키 입력
+	{
+		SectionToPlay = "Left";
+	}
+	else if (InputValue > 0)  // 'D' 키 입력
+	{
+		SectionToPlay = "Right";
+	}
+
+	if (!SectionToPlay.IsNone())
+	{
+		PlayRunMontageSection(SectionToPlay);
+	}
 	FVector Direction = FRotationMatrix(Controller->GetControlRotation()).GetScaledAxis(EAxis::X);
 	SetActorLocation(GetActorLocation() + Direction * Speed);
 
-	MulticastTeleportForward(RunningSpeed);
-}
+	MulticastTeleportForward(RunningSpeed, InputValue);
+} 
 
-void ARunner::MulticastTeleportForward_Implementation(float Speed)
+void ARunner::MulticastTeleportForward_Implementation(float Speed, float InputValue)
 {
+	FName SectionToPlay;
+
+	if (InputValue < 0)  // 'A' 키 입력
+	{
+		SectionToPlay = "Left";
+	}
+	else if (InputValue > 0)  // 'D' 키 입력
+	{
+		SectionToPlay = "Right";
+	}
+
+	if (!SectionToPlay.IsNone())
+	{
+		PlayRunMontageSection(SectionToPlay);
+	}
+
 	FVector Direction = FRotationMatrix(GetControlRotation()).GetScaledAxis(EAxis::X);
 	SetActorLocation(GetActorLocation() + Direction * Speed);
 }

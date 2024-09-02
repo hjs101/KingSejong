@@ -33,14 +33,20 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void StartQuiz();
 
+	TArray<class ARunnerController*> PlayerControllers;  // 플레이어 컨트롤러를 저장할 배열
+
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastSendQuizData(const FWordsData& QuizData);
 
 
-	void PlayerCrossedFinishLine(APlayerController* PlayerController);
+	void PlayerCrossedFinishLine(ARunnerController* PlayerController);
 	
-	TArray<APlayerController*> PlayerFinishOrder;
+	TArray<class ARunnerController*> PlayerFinishOrder;
 	
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastStartCountdownTimer();
+
+
+	FTimerHandle ShowAnswerTextBoxTimerHandle;
+	void ShowAnswerUIToPlayerInOrder();
 };

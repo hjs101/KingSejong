@@ -5,6 +5,7 @@
 #include "JJH/RunningGameInstance.h"
 #include "JJH/QuizWidget.h"
 #include "JJH/RunnerController.h"
+#include "JJH/Runner.h"
 
 void ARunningGameModeBase::BeginPlay()
 {
@@ -25,28 +26,57 @@ void ARunningGameModeBase::StartQuiz()
 	MulticastSendQuizData(SelectedQuiz);
 }
 
-void ARunningGameModeBase::PlayerCrossedFinishLine(APlayerController* PlayerController)
+void ARunningGameModeBase::PlayerCrossedFinishLine(ARunnerController* PlayerController)
 {
 	if (PlayerFinishOrder.Num() == 0) // 첫 번째 플레이어가 결승선에 도착했을 때
 	{
+		//들어온 플레이어 제외한 모두의 위젯에서 카운트가 시작되어야함
+		PlayerControllers.Remove(PlayerController);
+		//10초후에 정답판 띄우기
+		GetWorld()->GetTimerManager().SetTimer(ShowAnswerTextBoxTimerHandle, this, &ARunningGameModeBase::ShowAnswerUIToPlayerInOrder, 10.0f, true);
+
 		MulticastStartCountdownTimer();
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("1111"));
 	}
+	//들어온 순서대로 더하기
+	//들어오면 카운트하는 위젯 숨기기
 	PlayerFinishOrder.Add(PlayerController);
+	ARunner* Runner = Cast<ARunner>(PlayerController->GetPawn());
+	if (Runner)
+	{
+		Runner->PlayWinMontage();
+	}
 }
+
 
 void ARunningGameModeBase::MulticastStartCountdownTimer_Implementation()
 {
 
-	for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
+	for (ARunnerController* RPC : PlayerControllers)
 	{
-		ARunnerController* MyPC = Cast<ARunnerController>(It->Get());
-		if (MyPC)
-		{
-			MyPC->ClientStartWidgetCountDown();  // 클라이언트의 카운트다운 UI 시작
-		}
+		RPC->ClientStartWidgetCountDown();  // 클라이언트의 카운트다운 UI 시작
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Start CountDown"));
+		
+		FString PCAddress = FString::Printf(TEXT("StartCountDownController: %p"), RPC);
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, PCAddress);
 	}
 }
 
+void ARunningGameModeBase::ShowAnswerUIToPlayerInOrder()
+{
+	for (ARunnerController* RPC : PlayerFinishOrder)
+	{
+		RPC->ClientShowAnswerTextBox(); //정답박스 보여주기-> 이거는 다 들어오고 몇 초 이따가 보여줘야할듯?? 
+	}
+	for (ARunnerController* RPCS : PlayerControllers)
+	{
+		ARunner* Runner = Cast<ARunner>(RPCS->GetPawn());
+		if (Runner)
+		{
+			Runner->PlayLoseMontage();
+		}
+	}
+}
 FWordsData ARunningGameModeBase::SelectRandomQuizData()
 {
 	if (!WordsDataTable)
@@ -93,11 +123,14 @@ void ARunningGameModeBase::MulticastSendQuizData_Implementation(const FWordsData
 			ARunnerController* MyPC = Cast<ARunnerController>(PC);
 			if (MyPC)
 			{
-				// 클라이언트가 자신의 로컬 플레이어 컨트롤러에서만 위젯을 생성하도록 명령
-				MyPC->ClientCreateQuizWidget(QuizData);
-				FString PCAddress = FString::Printf(TEXT("PlayerController Address: %p"), MyPC);
-				PlayerCrossedFinishLine(MyPC);
-				GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, PCAddress);
+				PlayerControllers.Add(MyPC);  // 배열에 추가
+				if (HasAuthority())
+				{
+					// 클라이언트가 자신의 로컬 플레이어 컨트롤러에서만 위젯을 생성하도록 명령
+					MyPC->ClientCreateQuizWidget(QuizData);
+					FString PCAddress = FString::Printf(TEXT("PlayerController Address: %p"), MyPC);
+					GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, PCAddress);
+				}
 			}
 	}
 }}
