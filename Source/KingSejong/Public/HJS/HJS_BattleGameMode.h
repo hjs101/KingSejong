@@ -30,7 +30,23 @@ public:
     UFUNCTION()
     void Client_StartRecording(APlayerController* PlayerController, int32 Index);
 
-    //UFUNCTION(Client, Reliable)
-    //void Client_StopRecording(APlayerController* PlayerController);
+	FString AnswerString = "";
+
+	FString Player0Result = "";
+	UPROPERTY()
+	APlayerController* PC0;
+
+	FString Player1Result = "";
+	UPROPERTY()
+	APlayerController* PC1;
+
+	UFUNCTION()
+	void SettingPlayerAnswer(const FString& Result, APlayerController* PC);
+
+	UFUNCTION()
+	int32 CompareString();
+
+	UFUNCTION()
+	void BattleResult(int32 WinnerNum);
 
 };
