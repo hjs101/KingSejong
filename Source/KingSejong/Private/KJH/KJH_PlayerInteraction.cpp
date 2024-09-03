@@ -55,7 +55,6 @@ void UKJH_PlayerInteraction::TickComponent(float DeltaTime, ELevelTick TickType,
 	FCollisionQueryParams params;
 	params.AddIgnoredActor(MyActor);
 
-
 	// 인터렉션 대상 찾기
 	HitActor = nullptr;
 
@@ -69,10 +68,6 @@ void UKJH_PlayerInteraction::TickComponent(float DeltaTime, ELevelTick TickType,
             if (HitActor)
             {
                 //GEngine->AddOnScreenDebugMessage(-1, 2, FColor::Red, outHit.GetActor()->GetName());
-            }
-            else
-            {
-                HitActor = nullptr;
             }
 		}
 	}

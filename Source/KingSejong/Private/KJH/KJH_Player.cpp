@@ -11,6 +11,7 @@
 #include "KJH/KJH_PlayerAnimInstance.h"
 #include "Blueprint/UserWidget.h"
 #include "Net/UnrealNetwork.h"
+#include "KJH/KJH_VoiceRecorder.h"
 
 
 // Sets default values
@@ -20,8 +21,6 @@ AKJH_Player::AKJH_Player()
 	PrimaryActorTick.bCanEverTick = true;
 
 	bReplicates = true;
-
-	InteractionComp = CreateDefaultSubobject<UKJH_PlayerInteraction>(TEXT("InteractionComp"));
 
 	SpringArmComp = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArmComp"));
 	SpringArmComp->SetupAttachment(RootComponent);
@@ -33,6 +32,9 @@ AKJH_Player::AKJH_Player()
 	CameraComp->SetupAttachment(SpringArmComp);
 
 	GetMesh()->SetRelativeLocationAndRotation(FVector(0, 0, -90), FRotator(0, -90, 0));
+
+	InteractionComp = CreateDefaultSubobject<UKJH_PlayerInteraction>(TEXT("InteractionComp"));
+	VoiceRecorderComp = CreateDefaultSubobject<UKJH_VoiceRecorder>(TEXT("VoiceRecorderComp"));
 }
 
 // Called when the game starts or when spawned
@@ -103,24 +105,14 @@ void AKJH_Player::OnActionMove(const FInputActionValue& value)
 		
 	FVector2D v = value.Get<FVector2D>();
 
-	//Direction.X = v.X;
-	//Direction.Y = v.Y;
-
-	// find out which way is forward
 	const FRotator Rotation = Controller->GetControlRotation();
 	const FRotator YawRotation(0, Rotation.Yaw, 0);
 
-	// get forward vector
 	const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
-
-	// get right vector 
 	const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
 
-	// add movement 
 	AddMovementInput(ForwardDirection, v.Y);
 	AddMovementInput(RightDirection, v.X);
-
-
 }
 
 void AKJH_Player::OnActionLook(const FInputActionValue& value)

@@ -60,14 +60,16 @@ private:
 	UPROPERTY(EditDefaultsOnly)
 	class UInputAction* IA_Jump;
 
-	// Interaction
-	UPROPERTY(EditDefaultsOnly)
-	class UKJH_PlayerInteraction* InteractionComp;
-
 	// Animation
 	UPROPERTY(EditDefaultsOnly)
 	class UKJH_PlayerAnimInstance* PlayerAnim;
 
+	// Component
+	UPROPERTY(EditDefaultsOnly)
+	class UKJH_PlayerInteraction* InteractionComp;
+
+	UPROPERTY(EditDefaultsOnly)
+	class UKJH_VoiceRecorder* VoiceRecorderComp;
 
 private:
 	void OnActionMove(const FInputActionValue& value);
