@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -34,6 +34,24 @@ public:
 	
 	UPROPERTY(meta = (BindWidget))
 	class UTextBlock* CountDownText;
+	
+	UPROPERTY(meta = (BindWidget))
+	class UWidgetSwitcher* QuizLoadingSwitcher;
+
+	UPROPERTY(meta = (BindWidget))
+	class UCanvasPanel* Quiz;	
+	
+	UPROPERTY(meta = (BindWidget))
+	class UCanvasPanel* Loading;
+	
+	UPROPERTY(meta = (BindWidget))
+	class UTextBlock* TeacherText;	
+	
+	UPROPERTY(meta = (BindWidget))
+	class UImage* Teacher;
+
+	class UTexture2D* SmileTeacher = nullptr;;
+
 
 	UPROPERTY(EditAnywhere)
 	float CountDownNum;
@@ -49,4 +67,9 @@ public:
 	FTimerHandle CountDownTimerHandle;
 	void StartCountDown();
 	void UpdateCountDown();
+
+	virtual void NativeConstruct() override;
+
+	UFUNCTION()
+	void SubmitAnswer();
 };

@@ -1,8 +1,11 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "JJH/RunnerController.h"
 #include "JJH/QuizWidget.h"
+#include "Components/Button.h"
+#include "Components/EditableTextBox.h"
+
 
 void ARunnerController::BeginPlay()
 {
@@ -22,7 +25,6 @@ void ARunnerController::ClientCreateQuizWidget_Implementation(const FWordsData& 
 			{               
 				QuizWidgetInstance->AddToViewport();
 				QuizWidgetInstance->InitializeQuiz(QuizData);
-         
 			}
         }
 
@@ -41,6 +43,10 @@ void ARunnerController::ClientStartWidgetCountDown_Implementation()
     if (IsLocalPlayerController()) // 로컬 플레이어 컨트롤러에서만 위젯 생성
     {
         QuizWidgetInstance->StartCountDown();
-        GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("StartCount"));
     }
+}
+
+void ARunnerController::ClientDisableInput_Implementation()
+{
+    SetInputMode(FInputModeUIOnly());
 }

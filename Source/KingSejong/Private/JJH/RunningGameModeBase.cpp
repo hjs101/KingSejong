@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "JJH/RunningGameModeBase.h"
@@ -41,11 +41,16 @@ void ARunningGameModeBase::PlayerCrossedFinishLine(ARunnerController* PlayerCont
 	//들어온 순서대로 더하기
 	//들어오면 카운트하는 위젯 숨기기
 	PlayerFinishOrder.Add(PlayerController);
+
+	//들어온 사람들 승리 춤
 	ARunner* Runner = Cast<ARunner>(PlayerController->GetPawn());
 	if (Runner)
 	{
 		Runner->PlayWinMontage();
 	}
+	//입력 안받음
+	PlayerController->ClientDisableInput();
+	PlayerControllers.Remove(PlayerController);                                                                   
 }
 
 
@@ -75,6 +80,7 @@ void ARunningGameModeBase::ShowAnswerUIToPlayerInOrder()
 		{
 			Runner->PlayLoseMontage();
 		}
+		RPCS->ClientDisableInput();
 	}
 }
 FWordsData ARunningGameModeBase::SelectRandomQuizData()
