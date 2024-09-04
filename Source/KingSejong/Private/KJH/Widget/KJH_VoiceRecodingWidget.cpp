@@ -31,7 +31,7 @@ void UKJH_VoiceRecodingWidget::NativeDestruct()
 {
     Super::NativeDestruct();
 
-    if( OnCloseWidgetDelegate.IsBound())
+    if( OnCloseWidgetDelegate.IsBound()&& bResponseResult == false)
         OnCloseWidgetDelegate.Broadcast();
 
     if( bIsRecording && VoiceRecorder )
@@ -58,14 +58,19 @@ void UKJH_VoiceRecodingWidget::OnClickedBtnRecStop()
     
     bool bResult = VoiceRecorder->OnStopRecord();
 
-    // todo : 통신 추가
+
     if ( bResult )
     {
         bIsRecording = false;
+        // todo : 통신 추가
 
-        ButtonSwitcher->SetActiveWidgetIndex(0);
+        bResponseResult = true;
 
-        if ( OnSuccessedAnswerDelegate.IsBound())
-            OnSuccessedAnswerDelegate.Broadcast(FString("Say~~~~~"));
+        if ( OnResponseVoiceChatbotResultDelegate.IsBound() )
+        {
+            OnResponseVoiceChatbotResultDelegate.Broadcast(bResult, FString("TTS~~"));
+        }
+        
+        RemoveFromParent();
     }
 }

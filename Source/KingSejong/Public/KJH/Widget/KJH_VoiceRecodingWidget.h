@@ -8,6 +8,7 @@
 
 DECLARE_MULTICAST_DELEGATE(FCloseWidgetSignature);
 DECLARE_MULTICAST_DELEGATE_OneParam(FSuccessedAnswerSignature, FString);
+DECLARE_MULTICAST_DELEGATE_TwoParams(FResponseVoiceChatbotResultSignature, bool, FString);
 
 UCLASS()
 class KINGSEJONG_API UKJH_VoiceRecodingWidget : public UKJH_WidgetBase
@@ -20,7 +21,7 @@ public:
 
 public:
 	FCloseWidgetSignature OnCloseWidgetDelegate;
-	FSuccessedAnswerSignature OnSuccessedAnswerDelegate;
+	FResponseVoiceChatbotResultSignature OnResponseVoiceChatbotResultDelegate;
 
 public:
 	// UI
@@ -36,6 +37,7 @@ private:
 	class UKJH_VoiceRecorder* VoiceRecorder;
 
 	bool bIsRecording = false;
+	bool bResponseResult = false;
 
 private:
 	UFUNCTION(BlueprintCallable)

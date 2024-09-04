@@ -36,11 +36,12 @@ void AKJH_Teacher::BeginPlay()
 {
     Super::BeginPlay();
     
-    // CastSpeechBubbleText();
     // SetSpeechBubbleText(FString("Idle"));
 
     SetVisiblityStateWidget(true);
+    CastSpeechBubbleText();
 
+    SetTeacherState(ETeacherState::Idle);
 }
 
 // Called every frame
@@ -58,12 +59,21 @@ void AKJH_Teacher::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLife
     DOREPLIFETIME(AKJH_Teacher, SpeechBubbleWidget);
 }
 
+/// <summary>
+/// Server에서 실행되고 있는 함수
+/// </summary>
+/// <param name="OtherActor"> 상호작용을 한 플레이어 </param>
 void AKJH_Teacher::OnBeginInteraction(AActor* OtherActor)
 {
     Super::OnBeginInteraction(OtherActor);
 
-    SetOwner(OtherActor);
+    if ( OtherActor == nullptr )
+    {
+        UE_LOG(LogTemp, Warning, TEXT("OtherActor이 없습니다."));
+        return;
+    }
 
+    //SetOwner(OtherActor);
     ClientRPC_CreateRecodingWidget();
 }
 
@@ -85,9 +95,14 @@ bool AKJH_Teacher::IsInteractable()
 
 void AKJH_Teacher::SetTeacherStateToIdle()
 {
-    SetTeacherState(ETeacherState::Idle);
+    //SetTeacherState(ETeacherState::Idle);
+    ServerRPC_SetTeacherState(ETeacherState::Idle);
 }
 
+/// <summary>
+/// Server에서 상호작용을 한 Client에게 Widget 생성을 요청하는 함수
+/// - Local 함수
+/// </summary>
 void AKJH_Teacher::CreateRecodingWidget()
 {
     // 질문 UI 열기
@@ -98,8 +113,9 @@ void AKJH_Teacher::CreateRecodingWidget()
     {
         RecodingWidget->AddToViewport(0);
         RecodingWidget->OnCloseWidgetDelegate.AddUObject(this, &AKJH_Teacher::SetTeacherStateToIdle);
-        RecodingWidget->OnSuccessedAnswerDelegate.AddUObject(this, &AKJH_Teacher::SetSpeechBubbleText);
+        RecodingWidget->OnResponseVoiceChatbotResultDelegate.AddUObject(this, &AKJH_Teacher::OnResChatbotResult);
 
+        // 서버에게 훈장님 상태를 변경 요청
         ServerRPC_SetTeacherState(ETeacherState::Listen);
     }
     else
@@ -121,7 +137,18 @@ void AKJH_Teacher::SetVisiblityStateWidget(bool bValue)
 
 void AKJH_Teacher::SetTeacherState(ETeacherState NewState)
 {
-    ServerRPC_SetTeacherState(NewState);
+    // 훈장님 상태 변경
+    TeacherState = NewState;
+
+    if ( TeacherState != ETeacherState::Answer )
+    {
+        CastSpeechBubbleText();
+
+        FString message = GetMessageByTeacherState(NewState);
+        SpeechBubbleWidget->SetTextMessage(message);
+    }
+
+    //ServerRPC_SetTeacherState(NewState);
 }
 
 void AKJH_Teacher::ServerRPC_SetTeacherState_Implementation(ETeacherState NewState)
@@ -131,15 +158,16 @@ void AKJH_Teacher::ServerRPC_SetTeacherState_Implementation(ETeacherState NewSta
 
 void AKJH_Teacher::MulticastRPC_SetTeacherState_Implementation(ETeacherState NewState)
 {
-    TeacherState = NewState;
-
+    SetTeacherState(NewState);
 }
 
 void AKJH_Teacher::SetSpeechBubbleText(FString Message)
 {
-    //SpeechBubbleWidget->SetTextMessage(Message);
+    CastSpeechBubbleText();
 
-    ServerRPC_SetSpeechBubbleText(Message);
+    SpeechBubbleWidget->SetTextMessage(Message);
+
+    //ServerRPC_SetSpeechBubbleText(Message);
 }
 
 void AKJH_Teacher::ServerRPC_SetSpeechBubbleText_Implementation( const FString& Message)
@@ -149,12 +177,21 @@ void AKJH_Teacher::ServerRPC_SetSpeechBubbleText_Implementation( const FString& 
 
 void AKJH_Teacher::MulticastRPC_SetSpeechBubbleText_Implementation(const FString& Message)
 {
-
     CastSpeechBubbleText();
-    SpeechBubbleWidget->SetTextMessage(Message);
+    SetSpeechBubbleText(Message);
+    //SpeechBubbleWidget->SetTextMessage(Message);
 
-    FTimerHandle timderHandle;
-    GetWorld()->GetTimerManager().SetTimer(timderHandle, this, &AKJH_Teacher::SetSpeechBubbleText_Test, 3 );
+    // 임시 코드
+    FTimerHandle timerHandle;
+    GetWorld()->GetTimerManager().SetTimer(timerHandle,
+        [ this ] ()
+        {
+            //ServerRPC_SetTeacherState(ETeacherState::Idle);
+            SetTeacherState(ETeacherState::Idle);
+        },
+        5.0f, false
+    );
+
 }
 
 void AKJH_Teacher::CastSpeechBubbleText()
@@ -194,7 +231,62 @@ void AKJH_Teacher::CastSpeechBubbleText()
     }
 }
 
-void AKJH_Teacher::SetSpeechBubbleText_Test()
+FString AKJH_Teacher::GetMessageByTeacherState(ETeacherState NewState)
 {
-    SpeechBubbleWidget->SetTextMessage(FString("sdfsdfsdf"));
+    FString message;
+    switch ( NewState )
+    {
+    case ETeacherState::Idle:
+        message = FString("Idle..");
+        break;
+    case ETeacherState::Listen:
+        message = FString("Listen..");
+        break;
+    case ETeacherState::Think:
+        message = FString("Think..");
+        break;
+    case ETeacherState::Answer:
+        message = FString("Answer..");
+        break;
+    default:
+        break;
+    }
+
+    return message;
+}
+
+
+void AKJH_Teacher::OnResChatbotResult(bool bResult, FString Message)
+{
+    // 통신 성공
+    if ( bResult )
+    {
+        // - 음성 재생
+        // - 성공 text 로드
+
+    }
+    // 통신 실패
+    else
+    {
+        // - 실패 text 로드
+       
+    }
+
+    ServerRPC_SetTeacherState(ETeacherState::Answer);
+    ServerRPC_SetSpeechBubbleText(Message);
+
+    // todo : 녹음 파일 재생하도록 변경
+    // 녹음 파일 재생이 끝나면 훈장님 상태를 Idle로 변경해야 함
+
+    //// 임시 코드
+    //FTimerHandle timerHandle;
+    //GetWorld()->GetTimerManager().SetTimer(timerHandle,
+    //    [ this ] ()
+    //    {
+    //        ServerRPC_SetTeacherState(ETeacherState::Idle);
+    //        //SetTeacherState(ETeacherState::Idle);
+    //    },
+    //    5.0f, false
+    //);
+
 }

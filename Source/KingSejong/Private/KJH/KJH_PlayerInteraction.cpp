@@ -132,5 +132,6 @@ bool UKJH_PlayerInteraction::IsInteractableActor(AKJH_InteractiveActor* OtherAct
 
 void UKJH_PlayerInteraction::ServerRPCInteractiveActor_Implementation(AKJH_InteractiveActor* TargetActor, AKJH_Player* PlayerActor)
 {
+	TargetActor->SetOwner(PlayerActor);
 	TargetActor->OnBeginInteraction(PlayerActor);
 }

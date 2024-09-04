@@ -91,7 +91,8 @@ private:
 	
 	void CastSpeechBubbleText();
 
-	void SetSpeechBubbleText_Test();
+	FString GetMessageByTeacherState(ETeacherState NewState);
 
+	void OnResChatbotResult(bool bResult, FString Message);
 	
 };
