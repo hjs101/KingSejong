@@ -70,26 +70,26 @@ private:
 	void SetVisiblityStateWidget(bool bValue);
 
 	/**/
-    UFUNCTION(Client, Unreliable)
+    UFUNCTION(Client, Reliable)
     void ClientRPC_CreateRecodingWidget();
 
-	UFUNCTION(Server, Unreliable)
+	UFUNCTION(Server, Reliable)
 	void ServerRPC_SetTeacherState(ETeacherState NewState);
 
-	UFUNCTION(NetMulticast, Unreliable)
+	UFUNCTION(NetMulticast, Reliable)
 	void MulticastRPC_SetTeacherState(ETeacherState NewState);
 
 	/**/
 	void SetSpeechBubbleText(FString Message);
 
-	UFUNCTION(Server, Unreliable)
+	UFUNCTION(Server, Reliable)
 	void ServerRPC_SetSpeechBubbleText(const FString& Message);
 
-	UFUNCTION(NetMulticast, Unreliable)
+	UFUNCTION(NetMulticast, Reliable)
 	void MulticastRPC_SetSpeechBubbleText(const FString& Message);
 
 	
-	void CastSpeechBubbleText();
+	void CastSpeechBubbleWidget();
 
 	FString GetMessageByTeacherState(ETeacherState NewState);
 

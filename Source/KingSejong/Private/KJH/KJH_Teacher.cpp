@@ -39,9 +39,20 @@ void AKJH_Teacher::BeginPlay()
     // SetSpeechBubbleText(FString("Idle"));
 
     SetVisiblityStateWidget(true);
-    CastSpeechBubbleText();
+    CastSpeechBubbleWidget();
+    
 
-    SetTeacherState(ETeacherState::Idle);
+    FTimerHandle timerHandle;
+    GetWorld()->GetTimerManager().SetTimer(timerHandle,
+        [ this ] ()
+        {
+            UE_LOG(LogTemp, Warning, TEXT("begin play에서 TeacherState : %d"), TeacherState);
+            SetTeacherState(TeacherState);
+        },
+        0.05f, false
+    );
+
+
 }
 
 // Called every frame
@@ -73,8 +84,11 @@ void AKJH_Teacher::OnBeginInteraction(AActor* OtherActor)
         return;
     }
 
-    //SetOwner(OtherActor);
+    // SetOwner(OtherActor);
     ClientRPC_CreateRecodingWidget();
+
+    if( RecodingWidget )
+        ServerRPC_SetTeacherState(ETeacherState::Listen);
 }
 
 void AKJH_Teacher::OnEndInteraction()
@@ -116,7 +130,7 @@ void AKJH_Teacher::CreateRecodingWidget()
         RecodingWidget->OnResponseVoiceChatbotResultDelegate.AddUObject(this, &AKJH_Teacher::OnResChatbotResult);
 
         // 서버에게 훈장님 상태를 변경 요청
-        ServerRPC_SetTeacherState(ETeacherState::Listen);
+        //ServerRPC_SetTeacherState(ETeacherState::Listen);
     }
     else
     {
@@ -142,7 +156,7 @@ void AKJH_Teacher::SetTeacherState(ETeacherState NewState)
 
     if ( TeacherState != ETeacherState::Answer )
     {
-        CastSpeechBubbleText();
+        CastSpeechBubbleWidget();
 
         FString message = GetMessageByTeacherState(NewState);
         SpeechBubbleWidget->SetTextMessage(message);
@@ -163,7 +177,7 @@ void AKJH_Teacher::MulticastRPC_SetTeacherState_Implementation(ETeacherState New
 
 void AKJH_Teacher::SetSpeechBubbleText(FString Message)
 {
-    CastSpeechBubbleText();
+    CastSpeechBubbleWidget();
 
     SpeechBubbleWidget->SetTextMessage(Message);
 
@@ -177,7 +191,7 @@ void AKJH_Teacher::ServerRPC_SetSpeechBubbleText_Implementation( const FString& 
 
 void AKJH_Teacher::MulticastRPC_SetSpeechBubbleText_Implementation(const FString& Message)
 {
-    CastSpeechBubbleText();
+    CastSpeechBubbleWidget();
     SetSpeechBubbleText(Message);
     //SpeechBubbleWidget->SetTextMessage(Message);
 
@@ -194,7 +208,7 @@ void AKJH_Teacher::MulticastRPC_SetSpeechBubbleText_Implementation(const FString
 
 }
 
-void AKJH_Teacher::CastSpeechBubbleText()
+void AKJH_Teacher::CastSpeechBubbleWidget()
 {
     if ( SpeechBubbleWidget == nullptr )
     {
