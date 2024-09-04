@@ -48,9 +48,21 @@ public:
 	class UTextBlock* TeacherText;	
 	
 	UPROPERTY(meta = (BindWidget))
-	class UImage* Teacher;
+	class UImage* Teacher;	
+	
+	UPROPERTY(meta = (BindWidget))
+	class UHorizontalBox* AnswerHorizontal;
+
+	UPROPERTY(meta = (BindWidgetAnim), Transient)
+	class UWidgetAnimation* TeacherIntro;	
+	
+	UPROPERTY(meta = (BindWidgetAnim) , Transient)
+	class UWidgetAnimation* TeacherAngry;
+
+
 
 	class UTexture2D* SmileTeacher = nullptr;;
+	class UTexture2D* AngryTeacher = nullptr;;
 
 
 	UPROPERTY(EditAnywhere)

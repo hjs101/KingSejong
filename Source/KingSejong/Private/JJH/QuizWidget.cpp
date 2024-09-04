@@ -5,6 +5,7 @@
 #include "Components/EditableTextBox.h"
 #include "Components/Button.h"
 #include "Components/CanvasPanel.h"
+#include "Components/HorizontalBox.h"
 #include "Components/Image.h"
 #include "Engine/Texture2D.h"
 #include "Kismet/KismetSystemLibrary.h"
@@ -29,18 +30,15 @@ void UQuizWidget::InitializeQuiz(const FWordsData& WordData)
 	//카운트다운 넘버 숨겨놓기
 	CountDownText->SetText(FText::FromString(FString::FromInt(CountDownNum)));
 
+	//웃는 훈장
 	FString AssetPath = TEXT("/Game/JJH/UI/SmileTeacher");
 	SmileTeacher = Cast<UTexture2D>(StaticLoadObject(UTexture2D::StaticClass() , nullptr , *AssetPath));
+	 
+	//화난 훈장
+	FString AssetPath2 = TEXT("/Game/JJH/UI/AngryTeacher");
+	AngryTeacher = Cast<UTexture2D>(StaticLoadObject(UTexture2D::StaticClass() , nullptr , *AssetPath2));
 
-	//static ConstructorHelpers::FObjectFinder<UTexture> TextureFinder(TEXT("/Game/JJH/UI/SmileTeacher"));
-	//if ( TextureFinder.Succeeded() )
-	//{
-	//	SmileTeacher = TextureFinder.Object;
-	//}
-	//else
-	//{
-	//	UKismetSystemLibrary::QuitGame(GetWorld() , nullptr , EQuitPreference::Quit , false);
-	//}
+	PlayAnimation(TeacherIntro);
 }
 
 void UQuizWidget::ShowInitials()
@@ -60,7 +58,9 @@ void UQuizWidget::ShowInitials()
 
 void UQuizWidget::ShowAnswerTextBox()
 {
-	AnswerTextBox->SetVisibility(ESlateVisibility::Visible);
+	AnswerHorizontal->SetVisibility(ESlateVisibility::Visible);
+	Meaning->SetVisibility(ESlateVisibility::Visible);
+	Initials->SetVisibility(ESlateVisibility::Visible);
 }
 
 void UQuizWidget::StartCountDown()
@@ -81,10 +81,11 @@ void UQuizWidget::UpdateCountDown()
 	}
 	else
 	{
-		// 타이머 종료
+		// 들어오면 종료텍스트 빼고 다 빼야함
 		GetWorld()->GetTimerManager().ClearTimer(CountDownTimerHandle);
 		CountDownText->SetText(FText::FromString(TEXT("Finish!")));
-		
+		Meaning->SetVisibility(ESlateVisibility::Hidden);
+		Initials->SetVisibility(ESlateVisibility::Hidden);
 	}
 }
 
@@ -93,7 +94,7 @@ void UQuizWidget::NativeConstruct()
 	Super::NativeConstruct();
 
 	//정답칸 히든으로 숨겨놓기
-	AnswerTextBox->SetVisibility(ESlateVisibility::Hidden);
+	AnswerHorizontal->SetVisibility(ESlateVisibility::Hidden);
 	//카운트다운
 	CountDownText->SetVisibility(ESlateVisibility::Hidden);
 
@@ -108,17 +109,22 @@ void UQuizWidget::SubmitAnswer()
 	{
 		FString UserAnswer = AnswerTextBox->GetText().ToString();
 		FString Answer = CurrentWordData.Word;
-
+		AnswerHorizontal->SetVisibility(ESlateVisibility::Hidden);
 		if ( UserAnswer.Equals(Answer) )
 		{
+			//맞추면 퀴즈창 없애고 몇초 이따가 레벨 초기화
+			Quiz->SetVisibility(ESlateVisibility::Hidden);
 			Loading->SetVisibility(ESlateVisibility::Visible);
 			Teacher->SetBrushFromTexture(SmileTeacher);
 			TeacherText->SetText(FText::FromString(TEXT("대단하구나!")));
 		}
 		else
 		{
+			//틀리면 퀴즈창 유지하고 다른 사람한테 넘어가기?
 			Loading->SetVisibility(ESlateVisibility::Visible);
+			Teacher->SetBrushFromTexture(AngryTeacher);
 			TeacherText->SetText(FText::FromString(TEXT("아니다 이 녀석아")));
+			PlayAnimation(TeacherAngry, 0, 1, EUMGSequencePlayMode::PingPong);
 		}
 	}
 }

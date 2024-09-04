@@ -30,13 +30,12 @@ void ARunningGameModeBase::PlayerCrossedFinishLine(ARunnerController* PlayerCont
 {
 	if (PlayerFinishOrder.Num() == 0) // 첫 번째 플레이어가 결승선에 도착했을 때
 	{
-		//들어온 플레이어 제외한 모두의 위젯에서 카운트가 시작되어야함
-		PlayerControllers.Remove(PlayerController);
 		//10초후에 정답판 띄우기
 		GetWorld()->GetTimerManager().SetTimer(ShowAnswerTextBoxTimerHandle, this, &ARunningGameModeBase::ShowAnswerUIToPlayerInOrder, 10.0f, true);
 
 		MulticastStartCountdownTimer();
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("1111"));
+		//모두의 위젯에서 카운트가 시작되어야함
 	}
 	//들어온 순서대로 더하기
 	//들어오면 카운트하는 위젯 숨기기
@@ -61,9 +60,7 @@ void ARunningGameModeBase::MulticastStartCountdownTimer_Implementation()
 	{
 		RPC->ClientStartWidgetCountDown();  // 클라이언트의 카운트다운 UI 시작
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Start CountDown"));
-		
-		FString PCAddress = FString::Printf(TEXT("StartCountDownController: %p"), RPC);
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, PCAddress);
+
 	}
 }
 
