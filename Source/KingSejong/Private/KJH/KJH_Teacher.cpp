@@ -8,6 +8,9 @@
 #include "KJH/Widget/KJH_VoiceRecodingWidget.h"
 #include "Components/WidgetComponent.h"
 #include "KJH/Widget/KJH_SpeechBubbleWidget.h"
+#include "KJH/API/KJH_HttpHandler.h"
+#include "Kismet/GameplayStatics.h"
+#include "KJH/API/KJH_HttpManager.h"
 
 AKJH_Teacher::AKJH_Teacher()
 {
@@ -29,6 +32,9 @@ AKJH_Teacher::AKJH_Teacher()
     // WidgetComp
     StateWidgetComp = CreateDefaultSubobject<UWidgetComponent>(TEXT("StateWidgetComp"));
     StateWidgetComp->SetupAttachment(RootComponent);
+
+    //// HttpHandler
+    //HttpHandler = CreateDefaultSubobject<UKJH_HttpHandler>(TEXT("HttpHandler"));
 }
 
 // Called when the game starts or when spawned
@@ -52,7 +58,13 @@ void AKJH_Teacher::BeginPlay()
         0.05f, false
     );
 
+    // HttpManager
+    HttpManager = Cast<AKJH_HttpManager>(UGameplayStatics::GetActorOfClass(GetWorld(), AKJH_HttpManager::StaticClass()));
 
+    if ( HttpManager )
+    {
+        HttpManager->OnResponseBookAnswerDelegate.AddUObject(this, &AKJH_Teacher::OnRes_ChatbotResult);
+    }
 }
 
 // Called every frame
@@ -127,7 +139,7 @@ void AKJH_Teacher::CreateRecodingWidget()
     {
         RecodingWidget->AddToViewport(0);
         RecodingWidget->OnCloseWidgetDelegate.AddUObject(this, &AKJH_Teacher::SetTeacherStateToIdle);
-        RecodingWidget->OnResponseVoiceChatbotResultDelegate.AddUObject(this, &AKJH_Teacher::OnResChatbotResult);
+        // RecodingWidget->OnResponseQuestResultDelegate.AddUObject(this, &AKJH_Teacher::OnRes_ChatbotResult);
 
         // 서버에게 훈장님 상태를 변경 요청
         //ServerRPC_SetTeacherState(ETeacherState::Listen);
@@ -270,19 +282,17 @@ FString AKJH_Teacher::GetMessageByTeacherState(ETeacherState NewState)
 }
 
 
-void AKJH_Teacher::OnResChatbotResult(bool bResult, FString Message)
+void AKJH_Teacher::OnRes_ChatbotResult(FString Message)
 {
-    // 통신 성공
-    if ( bResult )
-    {
-        // - 음성 재생
-        // - 성공 text 로드
-
-    }
     // 통신 실패
+    if ( Message.IsEmpty() )
+    {
+        Message = FString(TEXT("훈장님과의 소통이 원활하지 않습니다."));
+    }
+    // 통신 성공
     else
     {
-        // - 실패 text 로드
+        // - 음성 재생
        
     }
 

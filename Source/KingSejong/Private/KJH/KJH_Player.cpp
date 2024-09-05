@@ -13,6 +13,8 @@
 #include "Net/UnrealNetwork.h"
 #include "KJH/KJH_VoiceRecorder.h"
 #include "KJH/KJH_CommunityGameModeBase.h"
+#include "KJH/API/KJH_HttpManager.h"
+#include "Kismet/GameplayStatics.h"
 
 
 // Sets default values
@@ -36,6 +38,7 @@ AKJH_Player::AKJH_Player()
 
 	InteractionComp = CreateDefaultSubobject<UKJH_PlayerInteraction>(TEXT("InteractionComp"));
 	VoiceRecorderComp = CreateDefaultSubobject<UKJH_VoiceRecorder>(TEXT("VoiceRecorderComp"));
+
 }
 
 // Called when the game starts or when spawned
@@ -56,6 +59,9 @@ void AKJH_Player::BeginPlay()
 
 	// Animation
 	PlayerAnim = CastChecked<UKJH_PlayerAnimInstance>(GetMesh()->GetAnimInstance());
+
+	// HttpManager
+	//HttpManager = Cast<AKJH_HttpManager>(UGameplayStatics::GetActorOfClass(GetWorld(), AKJH_HttpManager::StaticClass()));
 }
 
 // Called every frame

@@ -71,6 +71,7 @@ private:
 	UPROPERTY(EditDefaultsOnly)
 	class UKJH_VoiceRecorder* VoiceRecorderComp;
 
+
 private:
 	void OnActionMove(const FInputActionValue& value);
 	void OnActionLook(const FInputActionValue& value);

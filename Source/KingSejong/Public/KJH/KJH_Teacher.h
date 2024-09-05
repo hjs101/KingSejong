@@ -60,6 +60,12 @@ public:
 	UPROPERTY(Replicated)
 	class UKJH_SpeechBubbleWidget* SpeechBubbleWidget;
 
+	// Http
+	//UPROPERTY()
+	//class UKJH_HttpHandler* HttpHandler;
+
+	UPROPERTY()
+	class AKJH_HttpManager* HttpManager;
 
 public:
 	void SetTeacherState(ETeacherState NewState);
@@ -93,6 +99,8 @@ private:
 
 	FString GetMessageByTeacherState(ETeacherState NewState);
 
-	void OnResChatbotResult(bool bResult, FString Message);
+	void OnRes_ChatbotResult(FString Message);
+
+
 	
 };

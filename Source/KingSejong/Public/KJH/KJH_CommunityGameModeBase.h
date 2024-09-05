@@ -26,13 +26,8 @@ private:
 	TArray<class AKJH_Player*> PlayerList;
 
 public:
-	UPROPERTY()
 	FTransform PlayerStartTr;
-
-	UPROPERTY()
 	FTransform QuizStartTr;
-
-	UPROPERTY()
 	ECommunityState CommunityState;
 
 private:

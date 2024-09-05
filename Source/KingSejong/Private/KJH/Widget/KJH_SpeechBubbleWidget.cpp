@@ -8,7 +8,6 @@ void UKJH_SpeechBubbleWidget::NativeConstruct()
 {
     Super::NativeConstruct();
 
-    //SetTextMessage(FString("OOOOOOOOOOOOOOOOOOOOOOOOOOO"));
     TextMessage->SetAutoWrapText(true);
     TextMessage->SetWrapTextAt(1000);
 
@@ -17,4 +16,5 @@ void UKJH_SpeechBubbleWidget::NativeConstruct()
 void UKJH_SpeechBubbleWidget::SetTextMessage(FString Message)
 {
     TextMessage->SetText(FText::FromString(Message));
+
 }

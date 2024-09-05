@@ -21,7 +21,7 @@ public:
 
 public:
 	FCloseWidgetSignature OnCloseWidgetDelegate;
-	FResponseVoiceChatbotResultSignature OnResponseVoiceChatbotResultDelegate;
+	FResponseVoiceChatbotResultSignature OnResponseQuestResultDelegate;
 
 public:
 	// UI
@@ -32,17 +32,35 @@ public:
 	UPROPERTY(EditDefaultsOnly, meta=(BindWidget))
 	class UWidgetSwitcher* ButtonSwitcher;
 
+	UPROPERTY(EditDefaultsOnly, meta=(BindWidget))
+	class UButton* Btn_Question;
+
+
+	// Temp
+	UPROPERTY(EditDefaultsOnly, meta=(BindWidget))
+	class UEditableTextBox* EditableText_Question;
+
+
 private:
 	UPROPERTY()
-	class UKJH_VoiceRecorder* VoiceRecorder;
+	class UKJH_VoiceRecorder* PlayerVoiceRecorder;
+
+	UPROPERTY()
+	class UKJH_HttpHandler* PlayerHttpHandler;
+
+	UPROPERTY()
+	class AKJH_HttpManager* HttpManager;
 
 	bool bIsRecording = false;
-	bool bResponseResult = false;
+	bool bIsRequest = false;
 
 private:
 	UFUNCTION(BlueprintCallable)
 	void OnClickedBtnRecStart();
 	UFUNCTION(BlueprintCallable)
 	void OnClickedBtnRecStop();
+
+	UFUNCTION(BlueprintCallable)
+	void Req_Question();
 
 };
