@@ -12,6 +12,7 @@
 #include "Blueprint/UserWidget.h"
 #include "Net/UnrealNetwork.h"
 #include "KJH/KJH_VoiceRecorder.h"
+#include "KJH/KJH_CommunityGameModeBase.h"
 
 
 // Sets default values
@@ -55,7 +56,6 @@ void AKJH_Player::BeginPlay()
 
 	// Animation
 	PlayerAnim = CastChecked<UKJH_PlayerAnimInstance>(GetMesh()->GetAnimInstance());
-
 }
 
 // Called every frame
@@ -158,4 +158,14 @@ void AKJH_Player::OnEndSit()
 	//PlayerAnim->SetSitState(false);
 	//bIsSit = false;
 	SetIsSit(false);
+}
+
+void AKJH_Player::SetPlayerPosition(FTransform TargetTransform)
+{
+	bIsSit = false;
+
+	// todo: voice 녹음 중이라면 정지?
+	// UI도 다 닫혀야 함
+	SetActorLocationAndRotation(TargetTransform.GetLocation(), TargetTransform.GetRotation());
+
 }

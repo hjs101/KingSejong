@@ -84,4 +84,5 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void OnEndSit();
 
+	void SetPlayerPosition(FTransform TargetTransform);
 };
