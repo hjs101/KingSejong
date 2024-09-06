@@ -78,8 +78,8 @@ void AKJH_Teacher::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLife
     Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
     DOREPLIFETIME(AKJH_Teacher, TeacherState);
-    DOREPLIFETIME(AKJH_Teacher, StateWidgetComp);
-    DOREPLIFETIME(AKJH_Teacher, SpeechBubbleWidget);
+    //DOREPLIFETIME(AKJH_Teacher, StateWidgetComp);
+    //DOREPLIFETIME(AKJH_Teacher, SpeechBubbleWidget);
 }
 
 /// <summary>
@@ -166,13 +166,14 @@ void AKJH_Teacher::SetTeacherState(ETeacherState NewState)
     // 훈장님 상태 변경
     TeacherState = NewState;
 
-    if ( TeacherState != ETeacherState::Answer )
-    {
-        CastSpeechBubbleWidget();
+    OnReq_TeacherState();
+    //if ( TeacherState != ETeacherState::Answer )
+    //{
+    //    CastSpeechBubbleWidget();
 
-        FString message = GetMessageByTeacherState(NewState);
-        SpeechBubbleWidget->SetTextMessage(message);
-    }
+    //    FString message = GetMessageByTeacherState(NewState);
+    //    SpeechBubbleWidget->SetTextMessage(message);
+    //}
 
     //ServerRPC_SetTeacherState(NewState);
 }
@@ -263,16 +264,16 @@ FString AKJH_Teacher::GetMessageByTeacherState(ETeacherState NewState)
     switch ( NewState )
     {
     case ETeacherState::Idle:
-        message = FString("Idle..");
+        message = FString(TEXT("무엇이 궁금한고?"));
         break;
     case ETeacherState::Listen:
-        message = FString("Listen..");
+        message = FString(TEXT("음...기다려보거라"));
         break;
     case ETeacherState::Think:
-        message = FString("Think..");
+        message = FString(TEXT("Think.."));
         break;
     case ETeacherState::Answer:
-        message = FString("Answer..");
+        message = FString(TEXT("Answer.."));
         break;
     default:
         break;
@@ -313,4 +314,17 @@ void AKJH_Teacher::OnRes_ChatbotResult(FString Message)
     //    5.0f, false
     //);
 
+}
+
+void AKJH_Teacher::OnReq_TeacherState()
+{
+    // 훈장님 상태 변경
+
+    if ( TeacherState != ETeacherState::Answer )
+    {
+        CastSpeechBubbleWidget();
+
+        FString message = GetMessageByTeacherState(TeacherState);
+        SpeechBubbleWidget->SetTextMessage(message);
+    }
 }

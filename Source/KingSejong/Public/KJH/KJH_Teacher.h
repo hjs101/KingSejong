@@ -39,7 +39,7 @@ public:
 public:
 
 	// 현재 상태
-	UPROPERTY(VisibleAnywhere, Replicated)
+	UPROPERTY(ReplicatedUsing = OnReq_TeacherState)
 	ETeacherState TeacherState = ETeacherState::Idle;
 
 	UPROPERTY(EditDefaultsOnly)
@@ -54,15 +54,11 @@ public:
 	UPROPERTY()
 	class UKJH_VoiceRecodingWidget* RecodingWidget;
 
-	UPROPERTY(EditDefaultsOnly, Replicated)
+	UPROPERTY(EditDefaultsOnly)
 	class UWidgetComponent* StateWidgetComp;
 
-	UPROPERTY(Replicated)
+	UPROPERTY()
 	class UKJH_SpeechBubbleWidget* SpeechBubbleWidget;
-
-	// Http
-	//UPROPERTY()
-	//class UKJH_HttpHandler* HttpHandler;
 
 	UPROPERTY()
 	class AKJH_HttpManager* HttpManager;
@@ -70,6 +66,9 @@ public:
 public:
 	void SetTeacherState(ETeacherState NewState);
 	void SetTeacherStateToIdle();
+
+
+
 private:
 		
 	void CreateRecodingWidget();
@@ -101,6 +100,6 @@ private:
 
 	void OnRes_ChatbotResult(FString Message);
 
-
-	
+	UFUNCTION()
+	void OnReq_TeacherState();
 };

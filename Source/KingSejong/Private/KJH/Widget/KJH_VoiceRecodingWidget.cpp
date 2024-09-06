@@ -10,6 +10,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "KJH/API/KJH_HttpManager.h"
 #include "Components/EditableTextBox.h"
+#include "Components/MultiLineEditableTextBox.h"
 
 void UKJH_VoiceRecodingWidget::NativeConstruct()
 {
@@ -86,7 +87,7 @@ void UKJH_VoiceRecodingWidget::Req_Question()
     // 질문 API 호출
     if ( HttpManager )
     {
-        FText text = EditableText_Question->GetText();
+        FText text = EditTextBox_Question->GetText();
         HttpManager->Req_BookAnswer(TEXT(""), text.ToString());
 
         bIsRequest = true;

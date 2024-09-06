@@ -16,10 +16,17 @@ class KINGSEJONG_API UKJH_SpeechBubbleWidget : public UUserWidget
 
 public:
 	virtual void NativeConstruct() override;
+	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime);
 
 public:
-	UPROPERTY(meta=(BindWidget))
+	UPROPERTY(BlueprintReadWrite, meta=(BindWidget))
 	class UTextBlock* TextMessage;
+	UPROPERTY(BlueprintReadWrite, meta=(BindWidget))
+	class USizeBox* SizeBox;
+
+	UPROPERTY(EditDefaultsOnly)
+	float PaddingValue = 100;
+
 
 public:
 	void SetTextMessage(FString Message);
