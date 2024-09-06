@@ -8,7 +8,7 @@ public class KingSejong : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 	
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "UMG", "AudioMixer", "OnlineSubsystem", "OnlineSubsystemSteam", "HTTP", "Json", "JsonUtilities"});
+		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "AudioCapture", "AudioMixer", "Json", "JsonUtilities", "HTTP", "UMG", "OnlineSubsystem", "OnlineSubsystemSteam"});
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });
 

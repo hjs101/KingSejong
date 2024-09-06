@@ -12,6 +12,7 @@
 				"AudioCapture",
 				"Engine",
 				"UMG"
+				"CoreUObject"
 			]
 		}
 	],
