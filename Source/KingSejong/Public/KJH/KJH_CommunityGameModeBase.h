@@ -21,7 +21,7 @@ class KINGSEJONG_API AKJH_CommunityGameModeBase : public AGameModeBase
 protected:
 	virtual void BeginPlay() override;
 
-private:
+public:
 	UPROPERTY()
 	TArray<class AKJH_Player*> PlayerList;
 
@@ -30,10 +30,10 @@ public:
 	FTransform QuizStartTr;
 	ECommunityState CommunityState;
 
-private:
+public:
 	void GetAllPlayers();
 
-public:
+
 	UFUNCTION(BlueprintCallable)
 	void SetCommunityState(ECommunityState NewState);
 	void SetAllPlayersPosition(FTransform& TargetTransform);

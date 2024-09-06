@@ -28,7 +28,7 @@ void AKJH_CommunityGameModeBase::BeginPlay()
     }
 
     //GetAllPlayers();
-    //SetCommunityState(ECommunityState::Debate);
+    //SetCommunityState(ECommunityState::Quiz);
 
     //FTimerHandle timerHandle;
     //GetWorld()->GetTimerManager().SetTimer(timerHandle, this, &AKJH_CommunityGameModeBase::SetAllPlayersPosition, 10, false);
