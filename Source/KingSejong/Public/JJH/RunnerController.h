@@ -34,7 +34,16 @@ public:
 	void ClientStartWidgetCountDown();	
 	
 	UFUNCTION(Client , Reliable)
-	void ClientDisableInput();
+	void ClientDisableInput();	
+	
+	UFUNCTION(Client , Reliable)
+	void ClientAbleInput();
+
+	UFUNCTION(Client , Reliable)
+	void ClientShowLoading();	
+	
+	UFUNCTION(Client , Reliable)
+	void ClientSpectatePlayer(const ARunnerController* TargetPlayer);
 
 
 };

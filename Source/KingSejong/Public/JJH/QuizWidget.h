@@ -42,7 +42,7 @@ public:
 	class UCanvasPanel* Quiz;	
 	
 	UPROPERTY(meta = (BindWidget))
-	class UCanvasPanel* Loading;
+	class UCanvasPanel* TeacherSpeak;
 	
 	UPROPERTY(meta = (BindWidget))
 	class UTextBlock* TeacherText;	
@@ -58,7 +58,9 @@ public:
 	
 	UPROPERTY(meta = (BindWidgetAnim) , Transient)
 	class UWidgetAnimation* TeacherAngry;
-
+	
+	UPROPERTY(meta = (BindWidget))
+	class UCanvasPanel* QuizLoading;
 
 
 	class UTexture2D* SmileTeacher = nullptr;;
@@ -76,6 +78,8 @@ public:
 	void ShowInitials();
 	void ShowAnswerTextBox();
 
+	void HideLoading();
+	void ShowLoading();
 	FTimerHandle CountDownTimerHandle;
 	void StartCountDown();
 	void UpdateCountDown();
@@ -84,4 +88,7 @@ public:
 
 	UFUNCTION()
 	void SubmitAnswer();
+
+	FTimerHandle loadingTimer;
+
 };

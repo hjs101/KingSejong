@@ -19,8 +19,8 @@ void UQuizWidget::InitializeQuiz(const FWordsData& WordData)
 {
 	CurrentWordData = WordData;
 	
-	//로딩창 보여주기
-	Loading->SetVisibility(ESlateVisibility::Visible);
+	//선생님 멘트
+	TeacherSpeak->SetVisibility(ESlateVisibility::Visible);
 	//퀴즈창 숨기기
 	Quiz->SetVisibility(ESlateVisibility::Hidden);
 
@@ -44,7 +44,7 @@ void UQuizWidget::InitializeQuiz(const FWordsData& WordData)
 void UQuizWidget::ShowInitials()
 {
 	//로딩창 숨기기
-	Loading->SetVisibility(ESlateVisibility::Hidden);
+	TeacherSpeak->SetVisibility(ESlateVisibility::Hidden);
 	//퀴즈창 보여주기
 	Quiz->SetVisibility(ESlateVisibility::Visible);
 	//초성 보여주기
@@ -58,11 +58,20 @@ void UQuizWidget::ShowInitials()
 
 void UQuizWidget::ShowAnswerTextBox()
 {
+	QuizLoading->SetVisibility(ESlateVisibility::Hidden);
+	
 	AnswerHorizontal->SetVisibility(ESlateVisibility::Visible);
 	Meaning->SetVisibility(ESlateVisibility::Visible);
 	Initials->SetVisibility(ESlateVisibility::Visible);
 }
-
+void  UQuizWidget::HideLoading()
+{
+	QuizLoading->SetVisibility(ESlateVisibility::Hidden);
+}
+void UQuizWidget::ShowLoading()
+{
+	QuizLoading->SetVisibility(ESlateVisibility::Visible);
+}
 void UQuizWidget::StartCountDown()
 {
 	// 타이머 시작
@@ -82,8 +91,11 @@ void UQuizWidget::UpdateCountDown()
 	else
 	{
 		// 들어오면 종료텍스트 빼고 다 빼야함
+
 		GetWorld()->GetTimerManager().ClearTimer(CountDownTimerHandle);
-		CountDownText->SetText(FText::FromString(TEXT("Finish!")));
+
+		QuizLoading->SetVisibility(ESlateVisibility::Hidden);
+		CountDownText->SetText(FText::FromString(TEXT("종료")));
 		Meaning->SetVisibility(ESlateVisibility::Hidden);
 		Initials->SetVisibility(ESlateVisibility::Hidden);
 	}
@@ -100,7 +112,7 @@ void UQuizWidget::NativeConstruct()
 
 	AnswerSubmitButton->OnClicked.AddDynamic(this, &UQuizWidget::SubmitAnswer);
 
-
+	QuizLoading->SetVisibility(ESlateVisibility::Hidden);
 }
 
 void UQuizWidget::SubmitAnswer()
@@ -114,16 +126,16 @@ void UQuizWidget::SubmitAnswer()
 		{
 			//맞추면 퀴즈창 없애고 몇초 이따가 레벨 초기화
 			Quiz->SetVisibility(ESlateVisibility::Hidden);
-			Loading->SetVisibility(ESlateVisibility::Visible);
+			TeacherSpeak->SetVisibility(ESlateVisibility::Visible);
 			Teacher->SetBrushFromTexture(SmileTeacher);
 			TeacherText->SetText(FText::FromString(TEXT("대단하구나!")));
 		}
 		else
 		{
 			//틀리면 퀴즈창 유지하고 다른 사람한테 넘어가기?
-			Loading->SetVisibility(ESlateVisibility::Visible);
+			TeacherSpeak->SetVisibility(ESlateVisibility::Visible);
 			Teacher->SetBrushFromTexture(AngryTeacher);
-			TeacherText->SetText(FText::FromString(TEXT("아니다 이 녀석아")));
+			TeacherText->SetText(FText::FromString(TEXT("아니다 욘석아")));
 			PlayAnimation(TeacherAngry, 0, 1, EUMGSequencePlayMode::PingPong);
 		}
 	}
