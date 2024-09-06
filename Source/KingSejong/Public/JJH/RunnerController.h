@@ -42,7 +42,10 @@ public:
 	void ClientAbleInput();
 
 	UFUNCTION(Client , Reliable)
-	void ClientShowLoading();	
+	void ClientShowLoading();		
+	
+	UFUNCTION(Client , Reliable)
+	void ClientHideLoading();
 	
 	UFUNCTION(Client , Reliable)
 	void ClientSpectatePlayer(AActor* TargetPlayer);
@@ -53,5 +56,8 @@ public:
 
 	UFUNCTION(NetMulticast , Reliable)
 	void MulticastUpdateTextBoxContent(const FString& TextContent);
+
+	UFUNCTION(Server, Reliable)
+	void ServerMoveToNextPlayer();
 
 };

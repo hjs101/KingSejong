@@ -75,6 +75,14 @@ void ARunnerController::ClientShowLoading_Implementation()
     }
 }
 
+void ARunnerController::ClientHideLoading_Implementation()
+{
+    if ( IsLocalPlayerController() ) // 로컬 플레이어 컨트롤러에서만 위젯 생성
+    {
+        QuizWidgetInstance->HideLoading();
+    }
+
+}
 void ARunnerController::ClientSpectatePlayer_Implementation(AActor* TargetPlayer)
 {
     if ( TargetPlayer )
@@ -99,6 +107,17 @@ void ARunnerController::MulticastUpdateTextBoxContent_Implementation(const FStri
     QuizWidgetInstance->UpdateTextBoxContent(TextContent);
 
 }
+
+void ARunnerController::ServerMoveToNextPlayer_Implementation()
+{
+    ARunningGameModeBase* GameMode = Cast<ARunningGameModeBase>(GetWorld()->GetAuthGameMode());
+    if ( GameMode )
+    {
+        GameMode->MoveToNextPlayer();
+    }
+}
+
+
 void ARunnerController::MoveToNextPlayerWithDelay()
 {
     FTimerHandle NextLevelTimerHandle;
@@ -107,9 +126,9 @@ void ARunnerController::MoveToNextPlayerWithDelay()
 
 void ARunnerController::MoveToNextPlayer()
 {
-    ARunningGameModeBase* GameMode = Cast<ARunningGameModeBase>(GetWorld()->GetAuthGameMode());
-    if ( GameMode )
+    if ( !HasAuthority() )  // 클라이언트에서 실행
     {
-        GameMode->MoveToNextPlayer();
+        ServerMoveToNextPlayer();
     }
 }
+

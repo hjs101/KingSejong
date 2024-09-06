@@ -96,7 +96,6 @@ void ARunningGameModeBase::MulticastShowLoading_Implementation()
 
 void ARunningGameModeBase::MulticastStartCountdownTimer_Implementation()
 {
-
 	for (ARunnerController* RPC : FailedToFinishPlayers)
 	{
 		RPC->ClientStartWidgetCountDown();  // 클라이언트의 카운트다운 UI 시작
@@ -136,9 +135,9 @@ void ARunningGameModeBase::AbleInput()
 		RPCS->ClientAbleInput();
 	}
 }
-
 void ARunningGameModeBase::SubmitAnswer()
 {
+	if(PlayerFinishOrder.IsEmpty()) return;
 	//첫번째 플레이어가 정답입력 찬스 가져감
 	ARunnerController* CurrentController = *PlayerFinishOrder.begin();
 	if ( CurrentController )
@@ -148,21 +147,22 @@ void ARunningGameModeBase::SubmitAnswer()
 
 		for ( ARunnerController* OtherController : Players )
 		{
-			if  ( OtherController != CurrentController )
-			{
-				OtherController->ClientSpectatePlayer(CurrentController->GetPawn()); // 관전 모드 전환
-			}
+			
+			OtherController->ClientSpectatePlayer(CurrentController->GetPawn()); // 관전 모드 전환
 		}	
 	}
 }
+
 void ARunningGameModeBase::MoveToNextPlayer()
 {
+	ARunnerController* CurrentController = *PlayerFinishOrder.begin();
+	CurrentController->ClientHideLoading();
+	UE_LOG(LogTemp , Error , TEXT("%s") , *CurrentController->GetName());
 	// 현재 차례의 플레이어를 배열에서 제거하고, 다음 차례로 넘김
 	if ( PlayerFinishOrder.Num() > 0 )
 	{
 		PlayerFinishOrder.RemoveAt(0);  // 첫 번째 플레이어 제거
 	}
-
 	// 다음 플레이어에게 차례를 넘김
 	SubmitAnswer();
 }
@@ -202,7 +202,6 @@ FWordsData ARunningGameModeBase::SelectRandomQuizData()
 
 void ARunningGameModeBase::MulticastSendQuizData_Implementation(const FWordsData& QuizData)
 {
-	
 	FTimerHandle InputHandle;
 	GetWorld()->GetTimerManager().SetTimer(InputHandle , this , &ARunningGameModeBase::AbleInput , 3.f , false);
 

@@ -56,6 +56,7 @@ public:
 	TArray<class ARunnerController*> PlayerFinishOrder;
 
 	//그냥 사람들 담을 배열
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TArray<class ARunnerController*> Players;
 	
 	UFUNCTION(NetMulticast, Reliable)
