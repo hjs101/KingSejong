@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "HJS/GoogleNet.h"
@@ -7,6 +7,7 @@
 #include "HttpModule.h"
 #include "Interfaces/IHttpRequest.h"
 #include "Interfaces/IHttpResponse.h"
+#include "HJS/HJS_BattlePlayer.h"
 
 // Sets default values for this component's properties
 UGoogleNet::UGoogleNet()
@@ -19,7 +20,6 @@ UGoogleNet::UGoogleNet()
 void UGoogleNet::BeginPlay()
 {
 	Super::BeginPlay();
-
 	// ...
 }
 void UGoogleNet::AnonymousLogin()
@@ -62,39 +62,44 @@ void UGoogleNet::OnAnonymousLoginComplete(FHttpRequestPtr Request, FHttpResponse
 
 void UGoogleNet::FileUploadToFirebase(const FString& FilePath, const FString& FileName)
 {
-    {
-        // 파일 읽기
-        TArray<uint8> FileData;
-        if (!FFileHelper::LoadFileToArray(FileData, *FilePath))
-        {
-            UE_LOG(LogTemp, Error, TEXT("파일 읽기 실패!: %s"), *FilePath);
-            return;
-        }
 
-        // HTTP 요청 생성
-        TSharedRef<IHttpRequest, ESPMode::ThreadSafe> HttpRequest = FHttpModule::Get().CreateRequest();
-        HttpRequest->SetURL(FirebaseStorageUrl + FileName + "?alt=media");
-        HttpRequest->SetVerb("POST");
-        HttpRequest->SetHeader("Content-Type", "application/octet-stream");
-        HttpRequest->SetHeader("Authorization", "Bearer " + AnonymousID); // 익명 접근의 경우 필요하지 않을 수 있음
-        HttpRequest->SetContent(FileData);
+	// 파일 읽기
+	TArray<uint8> FileData;
+	if ( !FFileHelper::LoadFileToArray(FileData , *FilePath) )
+	{
+		UE_LOG(LogTemp , Error , TEXT("파일 읽기 실패!: %s") , *FilePath);
+		return;
+	}
 
-        // HTTP 응답 처리
-        HttpRequest->OnProcessRequestComplete().BindLambda([](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful)
-            {
-                if (bWasSuccessful && Response->GetResponseCode() == 200)
-                {
-                    UE_LOG(LogTemp, Log, TEXT("File uploaded successfully"));
-                }
-                else
-                {
-                    UE_LOG(LogTemp, Error, TEXT("File upload failed: %s"), *Response->GetContentAsString());
-                }
-            });
+	// HTTP 요청 생성
+	TSharedRef<IHttpRequest , ESPMode::ThreadSafe> HttpRequest = FHttpModule::Get().CreateRequest();
+	HttpRequest->SetURL(FirebaseStorageUrl + FileName + "?alt=media");
+	HttpRequest->SetVerb("POST");
+	HttpRequest->SetHeader("Content-Type" , "application/octet-stream");
+	HttpRequest->SetHeader("Authorization" , "Bearer " + AnonymousID); // 익명 접근의 경우 필요하지 않을 수 있음
+	HttpRequest->SetContent(FileData);
 
-        // 요청 전송
-        HttpRequest->ProcessRequest();
-    }
+	// HTTP 응답 처리
+	HttpRequest->OnProcessRequestComplete().BindLambda([this](FHttpRequestPtr Request , FHttpResponsePtr Response , bool bWasSuccessful)
+		{
+			if ( bWasSuccessful && Response->GetResponseCode() == 200 )
+			{
+				UE_LOG(LogTemp , Log , TEXT("File uploaded successfully")); \
+					// 이긴 쪽의 클라이언트에서 업로드가 완료되면 서버의 다운로드 함수를 부르기
+					Me->ServerDownloadSound(Me->RecordFileName);
+			}
+			else
+			{
+				UE_LOG(LogTemp , Error , TEXT("File upload failed: %s") , *Response->GetContentAsString());
+			}
+		});
+
+	// 요청 전송
+	HttpRequest->ProcessRequest();
+
+	// 업로드가 완료될 때까지 대기
+
+
 }
 
 void UGoogleNet::FileDownloadFromFirebase(const FString& SavePath, const FString& FileName)
@@ -105,7 +110,7 @@ void UGoogleNet::FileDownloadFromFirebase(const FString& SavePath, const FString
     HttpRequest->SetVerb("GET");
 
     // HTTP 응답 처리
-    HttpRequest->OnProcessRequestComplete().BindLambda([SavePath](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful)
+    HttpRequest->OnProcessRequestComplete().BindLambda([SavePath, this](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful)
         {
             if (bWasSuccessful && Response->GetResponseCode() == 200)
             {
@@ -113,6 +118,9 @@ void UGoogleNet::FileDownloadFromFirebase(const FString& SavePath, const FString
                 if (FFileHelper::SaveArrayToFile(Response->GetContent(), *SavePath))
                 {
                     UE_LOG(LogTemp, Log, TEXT("File downloaded successfully"));
+                    AHJS_BattlePlayer* You = Cast<AHJS_BattlePlayer>(Me->GetWorld()->GetFirstPlayerController()->GetCharacter());
+                    You->ClientPlaySound(SavePath);
+                    You->PlayResultAnim();
                 }
                 else
                 {
@@ -127,4 +135,6 @@ void UGoogleNet::FileDownloadFromFirebase(const FString& SavePath, const FString
 
     // 요청 전송
     HttpRequest->ProcessRequest();
+
+    // 다운로드가 완료될 때까지 대기
 }

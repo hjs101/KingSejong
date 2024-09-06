@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -40,6 +40,12 @@ public:
 	UPROPERTY()
 	APlayerController* PC1;
 
+	UPROPERTY()
+	class AHJS_BattlePlayer* Player0;
+
+	UPROPERTY()
+	class AHJS_BattlePlayer* Player1;
+
 	UFUNCTION()
 	void SettingPlayerAnswer(const FString& Result, APlayerController* PC);
 
@@ -47,6 +53,25 @@ public:
 	int32 CompareString();
 
 	UFUNCTION()
-	void BattleResult(int32 WinnerNum);
+	void BattleResult();
+
+	int32 WinnerNum = -1;
+
+	UFUNCTION()
+	void BattleAnimPlay();
+
+	UFUNCTION()
+	void JoinPlayer(APlayerController* PC);
+
+	int32 ReadyPlayer = 2;
+
+	UFUNCTION()
+	void StartTurn();
+
+	UPROPERTY(EditAnywhere, Category = "Question")
+	class UDataTable* QuestionDataTable;
+
+	UFUNCTION()
+	void QuestionSetting();
 
 };
