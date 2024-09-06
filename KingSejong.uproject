@@ -11,7 +11,7 @@
 			"AdditionalDependencies": [
 				"AudioCapture",
 				"Engine",
-				"UMG"
+				"UMG",
 				"CoreUObject"
 			]
 		}
