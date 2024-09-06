@@ -3,13 +3,16 @@
 
 #include "KJH/Widget/KJH_SpeechBubbleWidget.h"
 #include "Components/TextBlock.h"
+#include "Components/SizeBox.h"
 
 void UKJH_SpeechBubbleWidget::NativeConstruct()
 {
     Super::NativeConstruct();
+}
 
-    TextMessage->SetAutoWrapText(true);
-    TextMessage->SetWrapTextAt(1000);
+void UKJH_SpeechBubbleWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
+{
+    Super::NativeTick(MyGeometry, InDeltaTime);
 
 }
 

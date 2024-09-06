@@ -38,7 +38,7 @@ public:
 
 	// Temp
 	UPROPERTY(EditDefaultsOnly, meta=(BindWidget))
-	class UEditableTextBox* EditableText_Question;
+	class UMultiLineEditableTextBox* EditTextBox_Question;
 
 
 private:
