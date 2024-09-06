@@ -12,6 +12,8 @@
 #include "Styling/SlateBrush.h"
 #include "UObject/ConstructorHelpers.h"
 #include "Slate/SlateBrushAsset.h"
+#include "JJH/RunnerController.h"
+#include "JJH/RunningGameModeBase.h"
 
 
 
@@ -54,6 +56,8 @@ void UQuizWidget::ShowInitials()
 	Meaning->SetText(FText::FromString(CurrentWordData.Meaning));
 
 	GetWorld()->GetTimerManager().ClearTimer(ShowInitialTimerHandle);
+
+
 }
 
 void UQuizWidget::ShowAnswerTextBox()
@@ -113,6 +117,8 @@ void UQuizWidget::NativeConstruct()
 	AnswerSubmitButton->OnClicked.AddDynamic(this, &UQuizWidget::SubmitAnswer);
 
 	QuizLoading->SetVisibility(ESlateVisibility::Hidden);
+
+	AnswerTextBox->OnTextChanged.AddDynamic(this, &UQuizWidget::OnAnswerTextChanged);
 }
 
 void UQuizWidget::SubmitAnswer()
@@ -137,6 +143,34 @@ void UQuizWidget::SubmitAnswer()
 			Teacher->SetBrushFromTexture(AngryTeacher);
 			TeacherText->SetText(FText::FromString(TEXT("아니다 욘석아")));
 			PlayAnimation(TeacherAngry, 0, 1, EUMGSequencePlayMode::PingPong);
+			// 다음 플레이어로 차례 넘기기
+			// 컨트롤러에 접근하여 다음 플레이어로 넘기기
+			APlayerController* PC = GetOwningPlayer();
+			ARunnerController* RunnerController = Cast<ARunnerController>(PC);
+			if ( RunnerController )
+			{
+				RunnerController->MoveToNextPlayerWithDelay();
+			}
 		}
+	}
+}
+
+void UQuizWidget::OnAnswerTextChanged(const FText& Text)
+{
+	APlayerController* PlayerController = GetOwningPlayer();
+	if ( PlayerController )
+	{
+		ARunnerController* RunnerController = Cast<ARunnerController>(PlayerController);
+		if ( RunnerController )
+		{
+			RunnerController->ServerUpdateTextBoxContent(Text.ToString());
+		}
+	}
+}
+void UQuizWidget::UpdateTextBoxContent(const FString& TextContent)
+{
+	if ( AnswerTextBox )
+	{
+		AnswerTextBox->SetText(FText::FromString(TextContent));
 	}
 }

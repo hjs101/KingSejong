@@ -55,7 +55,7 @@ void ARunningGameModeBase::PlayerCrossedFinishLine(ARunnerController* PlayerCont
 	//MulticastShowLoading();
 
 	PlayerController->ClientDisableInput();
-	PlayerControllers.Remove(PlayerController);                                                                   
+	FailedToFinishPlayers.Remove(PlayerController);                                                                   
 }
 
 void ARunningGameModeBase::MoveToNextLevel()
@@ -77,7 +77,7 @@ void ARunningGameModeBase::MoveToNextLevel()
 
 void ARunningGameModeBase::MulticastShowLoading_Implementation()
 {
-	for ( ARunnerController* RPC : PlayerControllers )
+	for ( ARunnerController* RPC : FailedToFinishPlayers )
 	{
 		RPC->ClientShowLoading();
 	}	
@@ -97,7 +97,7 @@ void ARunningGameModeBase::MulticastShowLoading_Implementation()
 void ARunningGameModeBase::MulticastStartCountdownTimer_Implementation()
 {
 
-	for (ARunnerController* RPC : PlayerControllers)
+	for (ARunnerController* RPC : FailedToFinishPlayers)
 	{
 		RPC->ClientStartWidgetCountDown();  // 클라이언트의 카운트다운 UI 시작
 	}
@@ -112,7 +112,7 @@ void ARunningGameModeBase::ShowAnswerUIToPlayerInOrder()
 // 		RPC->ClientShowAnswerTextBox(); //정답박스 보여주기-> 이거는 다 들어오고 몇 초 이따가 보여줘야할듯?? 
 // 	}
 	//못 들어온 사람들
-	for (ARunnerController* RPCS : PlayerControllers)
+	for (ARunnerController* RPCS : FailedToFinishPlayers)
 	{
 		ARunner* Runner = Cast<ARunner>(RPCS->GetPawn());
 		if (Runner)
@@ -123,14 +123,14 @@ void ARunningGameModeBase::ShowAnswerUIToPlayerInOrder()
 		//안 들어온 사람 입력 안받기
 		RPCS->ClientDisableInput();
 	}
-	//2초 이따 로딩창
+	//3초 이따 로딩창
 	FTimerHandle AnswerSubMitTimerHandle;
 	GetWorld()->GetTimerManager().SetTimer(AnswerSubMitTimerHandle , this , &ARunningGameModeBase::MulticastShowLoading , 3 , false);
 }
 
 void ARunningGameModeBase::AbleInput()
 {
-	for ( ARunnerController* RPCS : PlayerControllers )
+	for ( ARunnerController* RPCS : FailedToFinishPlayers )
 	{
 		//입력 안받기
 		RPCS->ClientAbleInput();
@@ -139,19 +139,32 @@ void ARunningGameModeBase::AbleInput()
 
 void ARunningGameModeBase::SubmitAnswer()
 {
-	ARunnerController* RunnerController = *PlayerFinishOrder.begin();
-	if ( RunnerController )
+	//첫번째 플레이어가 정답입력 찬스 가져감
+	ARunnerController* CurrentController = *PlayerFinishOrder.begin();
+	if ( CurrentController )
 	{
 		//정답입력차례인 플레이어
-		RunnerController->ClientShowAnswerTextBox();
-	}
-	for ( ARunnerController* OtherController : PlayerControllers )
-	{
-		if  ( OtherController != RunnerController )
+		CurrentController->ClientShowAnswerTextBox();
+
+		for ( ARunnerController* OtherController : Players )
 		{
-			OtherController->ClientSpectatePlayer(RunnerController); // 관전 모드 전환
-		}
-	}	
+			if  ( OtherController != CurrentController )
+			{
+				OtherController->ClientSpectatePlayer(CurrentController->GetPawn()); // 관전 모드 전환
+			}
+		}	
+	}
+}
+void ARunningGameModeBase::MoveToNextPlayer()
+{
+	// 현재 차례의 플레이어를 배열에서 제거하고, 다음 차례로 넘김
+	if ( PlayerFinishOrder.Num() > 0 )
+	{
+		PlayerFinishOrder.RemoveAt(0);  // 첫 번째 플레이어 제거
+	}
+
+	// 다음 플레이어에게 차례를 넘김
+	SubmitAnswer();
 }
 FWordsData ARunningGameModeBase::SelectRandomQuizData()
 {
@@ -202,7 +215,8 @@ void ARunningGameModeBase::MulticastSendQuizData_Implementation(const FWordsData
 			ARunnerController* MyPC = Cast<ARunnerController>(PC);
 			if (MyPC)
 			{
-				PlayerControllers.Add(MyPC);  // 배열에 추가
+				FailedToFinishPlayers.Add(MyPC);  // 배열에 추가
+				Players.Add(MyPC);
 				if (HasAuthority())
 				{
 					MyPC->ClientDisableInput();

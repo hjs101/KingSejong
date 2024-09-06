@@ -6,6 +6,7 @@
 #include "Components/Button.h"
 #include "Components/EditableTextBox.h"
 #include "Components/CanvasPanel.h"
+#include "JJH/RunningGameModeBase.h"
 
 void ARunnerController::BeginPlay()
 {
@@ -74,13 +75,41 @@ void ARunnerController::ClientShowLoading_Implementation()
     }
 }
 
-void ARunnerController::ClientSpectatePlayer_Implementation(const ARunnerController* TargetPlayer)
+void ARunnerController::ClientSpectatePlayer_Implementation(AActor* TargetPlayer)
 {
     if ( TargetPlayer )
     {
         // 타겟 플레이어의 뷰를 따라가기 위한 관전 모드 설정
-        SetViewTargetWithBlend(TargetPlayer->GetPawn() , 1.0f);  // 타겟 플레이어의 뷰로 카메라 전환
-        QuizWidgetInstance->HideLoading();
+        SetViewTargetWithBlend(TargetPlayer , 1.0f);  // 타겟 플레이어의 뷰로 카메라 전환
+        if ( IsLocalPlayerController() ) // 로컬 플레이어 컨트롤러에서만 위젯 생성
+        {
+            QuizWidgetInstance->HideLoading();
+        }
         GEngine->AddOnScreenDebugMessage(-1 , 5.f , FColor::Red , TEXT("1111"));
+    }
+}
+
+void ARunnerController::ServerUpdateTextBoxContent_Implementation(const FString& TextContent)
+{
+    MulticastUpdateTextBoxContent(TextContent);
+}
+
+void ARunnerController::MulticastUpdateTextBoxContent_Implementation(const FString& TextContent)
+{
+    QuizWidgetInstance->UpdateTextBoxContent(TextContent);
+
+}
+void ARunnerController::MoveToNextPlayerWithDelay()
+{
+    FTimerHandle NextLevelTimerHandle;
+    GetWorld()->GetTimerManager().SetTimer(NextLevelTimerHandle , this , &ARunnerController::MoveToNextPlayer , 2.0f , false);
+}
+
+void ARunnerController::MoveToNextPlayer()
+{
+    ARunningGameModeBase* GameMode = Cast<ARunningGameModeBase>(GetWorld()->GetAuthGameMode());
+    if ( GameMode )
+    {
+        GameMode->MoveToNextPlayer();
     }
 }

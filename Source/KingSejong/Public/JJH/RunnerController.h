@@ -18,6 +18,8 @@ class KINGSEJONG_API ARunnerController : public APlayerController
 public:
 	virtual void BeginPlay() override;
 
+	void MoveToNextPlayerWithDelay();
+	void MoveToNextPlayer();
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<class UQuizWidget> QuizWidgetClass;
 
@@ -43,7 +45,13 @@ public:
 	void ClientShowLoading();	
 	
 	UFUNCTION(Client , Reliable)
-	void ClientSpectatePlayer(const ARunnerController* TargetPlayer);
+	void ClientSpectatePlayer(AActor* TargetPlayer);
 
+
+	UFUNCTION(Server , Reliable)
+	void ServerUpdateTextBoxContent(const FString& TextContent);
+
+	UFUNCTION(NetMulticast , Reliable)
+	void MulticastUpdateTextBoxContent(const FString& TextContent);
 
 };

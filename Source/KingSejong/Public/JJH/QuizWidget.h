@@ -91,4 +91,7 @@ public:
 
 	FTimerHandle loadingTimer;
 
+
+	void OnAnswerTextChanged(const FText& Text);
+	void UpdateTextBoxContent(const FString& TextContent);
 };
