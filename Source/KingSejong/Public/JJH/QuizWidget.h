@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -34,6 +34,38 @@ public:
 	
 	UPROPERTY(meta = (BindWidget))
 	class UTextBlock* CountDownText;
+	
+	UPROPERTY(meta = (BindWidget))
+	class UWidgetSwitcher* QuizLoadingSwitcher;
+
+	UPROPERTY(meta = (BindWidget))
+	class UCanvasPanel* Quiz;	
+	
+	UPROPERTY(meta = (BindWidget))
+	class UCanvasPanel* TeacherSpeak;
+	
+	UPROPERTY(meta = (BindWidget))
+	class UTextBlock* TeacherText;	
+	
+	UPROPERTY(meta = (BindWidget))
+	class UImage* Teacher;	
+	
+	UPROPERTY(meta = (BindWidget))
+	class UHorizontalBox* AnswerHorizontal;
+
+	UPROPERTY(meta = (BindWidgetAnim), Transient)
+	class UWidgetAnimation* TeacherIntro;	
+	
+	UPROPERTY(meta = (BindWidgetAnim) , Transient)
+	class UWidgetAnimation* TeacherAngry;
+	
+	UPROPERTY(meta = (BindWidget))
+	class UCanvasPanel* QuizLoading;
+
+
+	class UTexture2D* SmileTeacher = nullptr;;
+	class UTexture2D* AngryTeacher = nullptr;;
+
 
 	UPROPERTY(EditAnywhere)
 	float CountDownNum;
@@ -46,7 +78,17 @@ public:
 	void ShowInitials();
 	void ShowAnswerTextBox();
 
+	void HideLoading();
+	void ShowLoading();
 	FTimerHandle CountDownTimerHandle;
 	void StartCountDown();
 	void UpdateCountDown();
+
+	virtual void NativeConstruct() override;
+
+	UFUNCTION()
+	void SubmitAnswer();
+
+	FTimerHandle loadingTimer;
+
 };

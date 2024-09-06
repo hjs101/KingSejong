@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -31,5 +31,19 @@ public:
 	void ClientShowAnswerTextBox();
 
 	UFUNCTION(Client, Reliable)
-	void ClientStartWidgetCountDown();
+	void ClientStartWidgetCountDown();	
+	
+	UFUNCTION(Client , Reliable)
+	void ClientDisableInput();	
+	
+	UFUNCTION(Client , Reliable)
+	void ClientAbleInput();
+
+	UFUNCTION(Client , Reliable)
+	void ClientShowLoading();	
+	
+	UFUNCTION(Client , Reliable)
+	void ClientSpectatePlayer(const ARunnerController* TargetPlayer);
+
+
 };
