@@ -9,9 +9,8 @@
 			"Type": "Runtime",
 			"LoadingPhase": "Default",
 			"AdditionalDependencies": [
-				"AudioCapture",
 				"Engine",
-				"UMG"
+				"UMG",
 				"CoreUObject"
 			]
 		}
@@ -23,10 +22,6 @@
 			"TargetAllowList": [
 				"Editor"
 			]
-		},
-		{
-			"Name": "TextToSpeech",
-			"Enabled": true
 		}
 	]
 }
