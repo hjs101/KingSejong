@@ -75,4 +75,10 @@ public:
 	void SubmitAnswer();
 	//다음 플레이어로 정답 입력 기회 넘기기
 	void MoveToNextPlayer();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void MuticastUpdateAnswerTextToAll();
+
+	void UpdateTextInGameMode(const FString& AnswerText);
+	
 };

@@ -166,6 +166,24 @@ void ARunningGameModeBase::MoveToNextPlayer()
 	// 다음 플레이어에게 차례를 넘김
 	SubmitAnswer();
 }
+
+void ARunningGameModeBase::MuticastUpdateAnswerTextToAll_Implementation()
+{	
+
+}
+
+
+void ARunningGameModeBase::UpdateTextInGameMode(const FString& AnswerText)
+{
+	for ( ARunnerController* PlayerController : Players )
+	{
+		if ( PlayerController )
+		{
+			PlayerController->ClientUpdateTextBoxContent(AnswerText);  // 모든 클라이언트의 텍스트박스를 업데이트
+		}
+	}
+}
+
 FWordsData ARunningGameModeBase::SelectRandomQuizData()
 {
 	if (!WordsDataTable)
