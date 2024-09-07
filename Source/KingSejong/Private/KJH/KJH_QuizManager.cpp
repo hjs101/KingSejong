@@ -39,30 +39,32 @@ void AKJH_QuizManager::CheckAnswer()
 {
 	if(MyGameModeBase == nullptr) return;
 
-
-	MyGameModeBase->GetAllPlayers();
-	for ( auto player : MyGameModeBase->PlayerList )
+	if ( HasAuthority() )
 	{
-		if(player == nullptr) continue;
-
-		EHorizontalType type = GetPlayerHorizontalType(player);
-
-		if ( type == EHorizontalType::Left )
+		MyGameModeBase->GetAllPlayers();
+		for ( auto player : MyGameModeBase->PlayerList )
 		{
+			if ( player == nullptr ) continue;
 
+			EHorizontalState type = GetPlayerHorizontalState(player);
+
+			if ( type == EHorizontalState::Left )
+			{
+
+			}
+			else
+			{
+
+			}
+
+			const FString myState = UEnum::GetValueAsString(type);
+			DrawDebugString(GetWorld(), player->GetActorLocation(), myState, nullptr, FColor::Yellow, 0, true);
 		}
-		else
-		{
-
-		}
-
-		const FString myState = UEnum::GetValueAsString(type);
-		DrawDebugString(GetWorld(), player->GetActorLocation(), myState, nullptr, FColor::Yellow, 0, true);
 	}
 
 }
 
-EHorizontalType AKJH_QuizManager::GetPlayerHorizontalType(AActor* Target)
+EHorizontalState AKJH_QuizManager::GetPlayerHorizontalState(AActor* Target)
 {
 	FVector targetVector = Target->GetActorLocation() - GetActorLocation();
 	FVector rightVector = GetActorRightVector();
@@ -70,8 +72,8 @@ EHorizontalType AKJH_QuizManager::GetPlayerHorizontalType(AActor* Target)
 	float rightDot = FVector::DotProduct(targetVector, rightVector);
 
 	if ( rightDot > 0 )
-		return EHorizontalType::Right;
+		return EHorizontalState::Right;
 	else
-		return EHorizontalType::Left;
+		return EHorizontalState::Left;
 
 }

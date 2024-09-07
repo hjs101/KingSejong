@@ -7,7 +7,7 @@
 #include "KJH_QuizManager.generated.h"
 
 UENUM()
-enum class EHorizontalType : uint8
+enum class EHorizontalState : uint8
 {
 	Left,
 	Right
@@ -43,7 +43,7 @@ public:
 	void CheckAnswer();
 
 
-	EHorizontalType GetPlayerHorizontalType(class AActor* Target);
+	EHorizontalState GetPlayerHorizontalState(class AActor* Target);
 
 
 };
