@@ -7,14 +7,14 @@
 #include "GameFramework/PlayerController.h"
 #include "EnhancedInputSubsystems.h"
 #include "EnhancedInputComponent.h"
+#include "Kismet/GameplayStatics.h"
+#include "Net/UnrealNetwork.h"
 #include "KJH/KJH_PlayerInteraction.h"
 #include "KJH/KJH_PlayerAnimInstance.h"
-#include "Blueprint/UserWidget.h"
-#include "Net/UnrealNetwork.h"
 #include "KJH/KJH_VoiceRecorder.h"
 #include "KJH/KJH_CommunityGameModeBase.h"
 #include "KJH/API/KJH_HttpManager.h"
-#include "Kismet/GameplayStatics.h"
+#include "KJH/KJH_PlayerQuizHandler.h"
 
 
 // Sets default values
@@ -38,6 +38,7 @@ AKJH_Player::AKJH_Player()
 
 	InteractionComp = CreateDefaultSubobject<UKJH_PlayerInteraction>(TEXT("InteractionComp"));
 	VoiceRecorderComp = CreateDefaultSubobject<UKJH_VoiceRecorder>(TEXT("VoiceRecorderComp"));
+	QuizHandlerComp = CreateDefaultSubobject<UKJH_PlayerQuizHandler>(TEXT("QuizHandlerComp"));
 
 }
 

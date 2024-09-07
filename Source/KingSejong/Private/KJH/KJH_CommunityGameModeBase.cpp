@@ -48,7 +48,7 @@ void AKJH_CommunityGameModeBase::GetAllPlayers()
         }
     }
 
-    UE_LOG(LogTemp, Warning, TEXT("GetAllPlayers Call!!"));
+    //UE_LOG(LogTemp, Warning, TEXT("GetAllPlayers Call!!"));
 }
 
 void AKJH_CommunityGameModeBase::SetCommunityState(ECommunityState NewState)
