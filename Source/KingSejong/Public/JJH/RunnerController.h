@@ -52,11 +52,11 @@ public:
 
 
 	void UpdateTextBoxContent(const FString& TextContent);
-	UFUNCTION(Server , Reliable)
-	void ServerUpdateTextBoxContent(const FString& TextContent);
+	//UFUNCTION(Server , Reliable)
+	//void ServerUpdateTextBoxContent(const FString& TextContent);
 
-	UFUNCTION(NetMulticast , Reliable)
-	void MulticastUpdateTextBoxContent(const FString& TextContent);
+	//UFUNCTION(NetMulticast , Reliable)
+	//void MulticastUpdateTextBoxContent(const FString& TextContent);
 
 	void SubmitAnswerTextToServer(const FString& TextContent);
 	

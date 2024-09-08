@@ -167,10 +167,10 @@ void ARunningGameModeBase::MoveToNextPlayer()
 	SubmitAnswer();
 }
 
-void ARunningGameModeBase::MuticastUpdateAnswerTextToAll_Implementation()
-{	
-
-}
+//void ARunningGameModeBase::MuticastUpdateAnswerTextToAll_Implementation()
+//{	
+//
+//}
 
 
 void ARunningGameModeBase::UpdateTextInGameMode(const FString& AnswerText)
