@@ -149,6 +149,7 @@ void ARunningGameModeBase::SubmitAnswer()
 		{
 			
 			OtherController->ClientSpectatePlayer(CurrentController->GetPawn()); // 관전 모드 전환
+			OtherController->ClientShowInitials();
 		}	
 	}
 }

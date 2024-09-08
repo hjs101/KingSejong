@@ -54,6 +54,7 @@ void UQuizWidget::ShowInitials()
 	Initials->SetVisibility(ESlateVisibility::Visible);
 	//뜻 보여주기
 	Meaning->SetText(FText::FromString(CurrentWordData.Meaning));
+	Meaning->SetVisibility(ESlateVisibility::Visible);
 
 	GetWorld()->GetTimerManager().ClearTimer(ShowInitialTimerHandle);
 
