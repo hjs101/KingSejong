@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "JJH/Runner.h"
@@ -47,7 +47,6 @@ void ARunner::BeginPlay()
 void ARunner::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
 }
 
 // Called to bind functionality to input
@@ -75,17 +74,19 @@ void ARunner::PlayWinMontage()
 	if (HasAuthority())
 	{
 		ServerPlayWinMontage();
+		
 	}
 }
 void ARunner::ServerPlayWinMontage_Implementation()
 {
 	PlayAnimMontage(WinMontage);
-	
+	bCanInput = false;
 	MulticastPlayWinMontage();
 }
 void ARunner::MulticastPlayWinMontage_Implementation()
 {
 	PlayAnimMontage(WinMontage);	
+	bCanInput = false;
 }
 
 void ARunner::PlayLoseMontage()
