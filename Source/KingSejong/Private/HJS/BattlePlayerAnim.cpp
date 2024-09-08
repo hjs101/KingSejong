@@ -51,22 +51,34 @@ void UBattlePlayerAnim::AnimNotify_AttackPoint()
 		}
 
 		AHJS_BattlePlayer* Player = Cast<AHJS_BattlePlayer>(Actor);
-		// 그 캐릭터의 Hit 함수를 발동시키기.
-		Player->PlayerHit();
-
-		// 그리고,맞은 사람의 체력을 1 깎기.
+		// 맞은 사람의 체력을 1 깎기.
 		Player->OnMyTakeDamage(1);
 
-
+		// 그 캐릭터의 Hit 함수를 발동시키기.
+		Player->PlayerHit();
 	}
 }
 
 void UBattlePlayerAnim::AnimNotify_HitEnd()
 {
-	// Hit 애니메이션이 끝난 시점에 다음 문제 준비가 되었는 지 체크할 수 있도록 하기.
+
+	AHJS_BattlePlayer* Player = Cast<AHJS_BattlePlayer>(GetOwningActor());
 
 	AHJS_BattlePlayer* MainPlayer = Cast<AHJS_BattlePlayer>(GetWorld()->GetFirstPlayerController()->GetCharacter());
 	check(MainPlayer);
+
+	// 만약 피가 0이라면 여기서 끝내기
+	if ( Player->HP == 0 )
+	{
+		// 죽는 애니메이션
+		
+		// 게임 승리 / 패배 UI
+		
+		return;
+	}
+
+	// Hit 애니메이션이 끝난 시점에 다음 문제 준비가 되었는 지 체크할 수 있도록 하기.
+
 	MainPlayer->ServerStartTurnToGM();
 	Montage_Stop(0.1f , HitMontage);
 }

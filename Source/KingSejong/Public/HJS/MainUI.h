@@ -106,7 +106,7 @@ public:
 	FString CurrentText;
 
 	UPROPERTY(EditAnywhere)
-	float TextSpeed = 0.1f;
+	float TextSpeed = 0.04f;
 	float NextTextStartRate = 1.f;
 	FTimerHandle TextAnimTimerHandle;
 	FTimerHandle NextTextTimerHandle;

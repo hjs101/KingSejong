@@ -22,6 +22,7 @@ public:
 	void FileUploadToFirebase(const FString& FilePath, const FString& FileName);
 	UFUNCTION()
 	void FileDownloadFromFirebase(const FString& SavePath, const FString& FileName);
+	UPROPERTY()
 	class AHJS_BattlePlayer* Me;
 protected:
 	// Called when the game starts
@@ -34,6 +35,8 @@ private:
 	FString FirebaseStorageUrl = "https://firebasestorage.googleapis.com/v0/b/wavupdownload.appspot.com/o/";
 	void OnAnonymousLoginComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful);
 
+
+public:
 
 
 };

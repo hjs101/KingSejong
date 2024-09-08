@@ -5,6 +5,7 @@
 #include "HJS/HJS_BattlePlayer.h"
 #include "GameFramework/PlayerState.h"
 #include "HJS/BattleQuestionStruct.h"
+#include "HJS/LevenshteinLib.h"
 
 AHJS_BattleGameMode::AHJS_BattleGameMode()
 {
@@ -76,9 +77,25 @@ void AHJS_BattleGameMode::SettingPlayerAnswer(const FString& Result, APlayerCont
     {
         // 정확도 분석 알고리즘을 통해 분석하기
 
+        int32 Player0Score = ULevenshteinLib::CalculateLevenshteinDist(CurrentString, Player0Result);
+
+        int32 Player1Score = ULevenshteinLib::CalculateLevenshteinDist(CurrentString, Player1Result);
+
         // 분석에 따른 승자 결정
-        WinnerNum = CompareString();
-        BattleResult();
+        WinnerNum = CompareString(Player0Score, Player1Score);
+        
+        FString WinnerText;
+        
+        if ( WinnerNum == 0 )
+        {
+            WinnerText = FString::Printf(TEXT("승자 Text : %s"), *Player0Result);
+        }
+        else
+        {
+            WinnerText = FString::Printf(TEXT("승자 Text : %s"), *Player1Result);
+        }
+
+        BattleResult(WinnerText);
         // 승자의 공격 애니메이션 재생
         Player0Result = "";
         Player1Result = "";
@@ -86,28 +103,43 @@ void AHJS_BattleGameMode::SettingPlayerAnswer(const FString& Result, APlayerCont
 
 }
 
-int32 AHJS_BattleGameMode::CompareString()
+int32 AHJS_BattleGameMode::CompareString(int32 Player0Score, int32 Player1Score)
 {
+    UE_LOG(LogTemp, Warning, TEXT("Player0 Score : %d"), Player0Score);
+    UE_LOG(LogTemp, Warning, TEXT("Player1 Score : %d"), Player1Score);
 
-    // 일단 1 리턴 ( 클라이언트를 승자로 )
-    return 0;
+    
+    if ( Player0Score < Player1Score )
+    {
+        return 0;
+    }
+    else
+    {
+        return 1;
+    }
+
 }
 
-void AHJS_BattleGameMode::BattleResult()
+void AHJS_BattleGameMode::BattleResult(const FString& WinnerString)
 {
+
+    Player0->ClientMainTextSet(WinnerString);
+    Player1->ClientMainTextSet(WinnerString);
+
     if (WinnerNum == 0)
     {
-        AHJS_BattlePlayer* Player = Cast<AHJS_BattlePlayer>(PC0->GetCharacter());
-        Player->ServerWinnerSet();
-        Player->UploadWavToFirebase();
-        Player->SetWinnerNum(WinnerNum);
+        
+        Player0->ServerWinnerSet();
+        Player0->UploadWavToFirebase();
+        Player0->SetWinnerNum(WinnerNum);
+
     }
     else if(WinnerNum == 1)
     {
-        AHJS_BattlePlayer* Player = Cast<AHJS_BattlePlayer>(PC1->GetCharacter());
-        Player->ServerWinnerSet();
-        Player->UploadWavToFirebase();
-        Player->SetWinnerNum(WinnerNum);
+        
+        Player1->ServerWinnerSet();
+        Player1->UploadWavToFirebase();
+        Player1->SetWinnerNum(WinnerNum);
     }
     
 }
@@ -192,5 +224,6 @@ void AHJS_BattleGameMode::QuestionSetting()
 		FBattleQuestionData* QuestionData = QuestionDataTable->FindRow<FBattleQuestionData>(FName(FString::FromInt(RandomNum)) , ContextString);
         Player0->ClientQuestionSetting(*QuestionData);
         Player1->ClientQuestionSetting(*QuestionData);
+        CurrentString = QuestionData->Answer;
     }
 }

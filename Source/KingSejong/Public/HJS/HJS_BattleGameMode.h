@@ -50,10 +50,10 @@ public:
 	void SettingPlayerAnswer(const FString& Result, APlayerController* PC);
 
 	UFUNCTION()
-	int32 CompareString();
+	int32 CompareString(int32 Player0Score, int32 Player1Score);
 
 	UFUNCTION()
-	void BattleResult();
+	void BattleResult(const FString& WinnerText);
 
 	int32 WinnerNum = -1;
 
@@ -73,5 +73,7 @@ public:
 
 	UFUNCTION()
 	void QuestionSetting();
+
+	FString CurrentString = TEXT("");
 
 };
