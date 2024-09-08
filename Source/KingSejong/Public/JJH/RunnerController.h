@@ -18,6 +18,11 @@ class KINGSEJONG_API ARunnerController : public APlayerController
 public:
 	virtual void BeginPlay() override;
 
+	void MoveToNextPlayerWithDelay();
+	void MoveToNextPlayer();
+
+	UFUNCTION(Server , Reliable)
+	void ServerSubmitAnswer(const FString& UserAnswer);
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<class UQuizWidget> QuizWidgetClass;
 
@@ -40,10 +45,35 @@ public:
 	void ClientAbleInput();
 
 	UFUNCTION(Client , Reliable)
-	void ClientShowLoading();	
+	void ClientShowLoading();		
 	
 	UFUNCTION(Client , Reliable)
-	void ClientSpectatePlayer(const ARunnerController* TargetPlayer);
+	void ClientHideLoading();
+	
+	UFUNCTION(Client , Reliable)
+	void ClientSpectatePlayer(AActor* TargetPlayer);
+	
+	UFUNCTION(Client , Reliable)
+	void ClientHideAnswerText();
 
+	void UpdateTextBoxContent(const FString& TextContent);
+	//UFUNCTION(Server , Reliable)
+	//void ServerUpdateTextBoxContent(const FString& TextContent);
 
+	//UFUNCTION(NetMulticast , Reliable)
+	//void MulticastUpdateTextBoxContent(const FString& TextContent);
+
+	void SubmitAnswerTextToServer(const FString& TextContent);
+	
+	UFUNCTION(Server , Reliable)
+	void ServerSubmitAnswerTextToServer(const FString& TextContent);
+
+	UFUNCTION(Client , Reliable)
+	void ClientUpdateTextBoxContent(const FString& TextContent);
+
+	UFUNCTION(Server, Reliable)
+	void ServerMoveToNextPlayer();
+
+	UFUNCTION(Client , Reliable)
+	void ClientShowTeacherSpeak(bool bIsCorrect);
 };

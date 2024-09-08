@@ -74,7 +74,6 @@ void ARunner::PlayWinMontage()
 	if (HasAuthority())
 	{
 		ServerPlayWinMontage();
-		
 	}
 }
 void ARunner::ServerPlayWinMontage_Implementation()

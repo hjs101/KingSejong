@@ -12,6 +12,8 @@
 #include "Styling/SlateBrush.h"
 #include "UObject/ConstructorHelpers.h"
 #include "Slate/SlateBrushAsset.h"
+#include "JJH/RunnerController.h"
+#include "JJH/RunningGameModeBase.h"
 
 
 
@@ -54,6 +56,7 @@ void UQuizWidget::ShowInitials()
 	Meaning->SetText(FText::FromString(CurrentWordData.Meaning));
 
 	GetWorld()->GetTimerManager().ClearTimer(ShowInitialTimerHandle);
+
 }
 
 void UQuizWidget::ShowAnswerTextBox()
@@ -67,6 +70,7 @@ void UQuizWidget::ShowAnswerTextBox()
 void  UQuizWidget::HideLoading()
 {
 	QuizLoading->SetVisibility(ESlateVisibility::Hidden);
+	TeacherSpeak->SetVisibility(ESlateVisibility::Hidden);
 }
 void UQuizWidget::ShowLoading()
 {
@@ -113,30 +117,96 @@ void UQuizWidget::NativeConstruct()
 	AnswerSubmitButton->OnClicked.AddDynamic(this, &UQuizWidget::SubmitAnswer);
 
 	QuizLoading->SetVisibility(ESlateVisibility::Hidden);
+
+	AnswerTextBox->OnTextChanged.AddDynamic(this, &UQuizWidget::OnAnswerTextChanged);
+	//입력받을때마다 컨트롤러 불러서 입력한 텍스트 받아와서 게임모드 전달하기?
+	//게임모드는 그거 받아오면 컨트롤러 일렬 불러서 UpdateTextBoxContent부르기.
 }
 
 void UQuizWidget::SubmitAnswer()
 {
-	if (AnswerTextBox )
+	if (AnswerTextBox)
 	{
 		FString UserAnswer = AnswerTextBox->GetText().ToString();
-		FString Answer = CurrentWordData.Word;
-		AnswerHorizontal->SetVisibility(ESlateVisibility::Hidden);
-		if ( UserAnswer.Equals(Answer) )
+		APlayerController* PC = GetOwningPlayer();
+		ARunnerController* RunnerController = Cast<ARunnerController>(PC);
+
+		if ( RunnerController )
 		{
-			//맞추면 퀴즈창 없애고 몇초 이따가 레벨 초기화
-			Quiz->SetVisibility(ESlateVisibility::Hidden);
-			TeacherSpeak->SetVisibility(ESlateVisibility::Visible);
-			Teacher->SetBrushFromTexture(SmileTeacher);
-			TeacherText->SetText(FText::FromString(TEXT("대단하구나!")));
+			RunnerController->ServerSubmitAnswer(UserAnswer);
 		}
-		else
-		{
-			//틀리면 퀴즈창 유지하고 다른 사람한테 넘어가기?
-			TeacherSpeak->SetVisibility(ESlateVisibility::Visible);
-			Teacher->SetBrushFromTexture(AngryTeacher);
-			TeacherText->SetText(FText::FromString(TEXT("아니다 욘석아")));
-			PlayAnimation(TeacherAngry, 0, 1, EUMGSequencePlayMode::PingPong);
-		}
+		
+		//AnswerHorizontal->SetVisibility(ESlateVisibility::Hidden);
+		//if ( UserAnswer.Equals(Answer) )
+		//{
+		//	//맞추면 퀴즈창 없애고 몇초 이따가 레벨 초기화
+		//	Quiz->SetVisibility(ESlateVisibility::Hidden);
+		//	TeacherSpeak->SetVisibility(ESlateVisibility::Visible);
+		//	//선생님 텍스처 바꾸기
+		//	Teacher->SetBrushFromTexture(SmileTeacher);
+		//	TeacherText->SetText(FText::FromString(TEXT("대단하구나!")));
+		//}
+		//else
+		//{
+		//	//틀리면 퀴즈창 유지하고 다른 사람한테 넘어가기?
+		//	TeacherSpeak->SetVisibility(ESlateVisibility::Visible);
+		//	Teacher->SetBrushFromTexture(AngryTeacher);
+		//	TeacherText->SetText(FText::FromString(TEXT("아니다 욘석아")));
+		//	PlayAnimation(TeacherAngry, 0, 1, EUMGSequencePlayMode::PingPong);
+		//	
+		//	// 다음 플레이어로 차례 넘기기
+		//	// 컨트롤러에 접근하여 다음 플레이어로 넘기기
+		//	APlayerController* PC = GetOwningPlayer();
+		//	ARunnerController* RunnerController = Cast<ARunnerController>(PC);
+		//	if ( RunnerController )
+		//	{
+		//		RunnerController->MoveToNextPlayerWithDelay();
+		//	}
+		//}
 	}
+}
+
+void UQuizWidget::OnAnswerTextChanged(const FText& Text)
+{
+	ARunnerController* MyController = Cast<ARunnerController>(GetOwningPlayer());
+	if ( MyController )
+	{
+		MyController->SubmitAnswerTextToServer(Text.ToString());  // 서버로 텍스트 전달
+	}
+}
+void UQuizWidget::UpdateTextBoxContent(const FString& TextContent)
+{
+	CountDownText->SetText(FText::FromString(TextContent));
+}
+
+void UQuizWidget::ShowTeacherSpeak(bool bIsCorrect)
+{
+	TeacherSpeak->SetVisibility(ESlateVisibility::Visible);
+	FTimerHandle TeacherSpeakTimer;
+
+	if ( bIsCorrect )
+	{
+		Teacher->SetBrushFromTexture(SmileTeacher);
+		TeacherText->SetText(FText::FromString(TEXT("대단하구나!")));
+		
+		GetWorld()->GetTimerManager().SetTimer(TeacherSpeakTimer, this , &UQuizWidget::HideTeacherSpeak , 2.0f , false);
+	}
+	else
+	{
+		Teacher->SetBrushFromTexture(AngryTeacher);
+		TeacherText->SetText(FText::FromString(TEXT("아니다 욘석아")));
+		PlayAnimation(TeacherAngry , 0 , 1 , EUMGSequencePlayMode::PingPong);
+		GetWorld()->GetTimerManager().SetTimer(TeacherSpeakTimer , this , &UQuizWidget::HideTeacherSpeak , 2.0f , false);
+		GEngine->AddOnScreenDebugMessage(-1 , 5.f , FColor::Blue , FString::Printf(TEXT("false")));
+	}
+}
+
+void UQuizWidget::HideTeacherSpeak()
+{
+	TeacherSpeak->SetVisibility(ESlateVisibility::Hidden);
+}
+
+void UQuizWidget::HideAnswerText()
+{
+	AnswerHorizontal->SetVisibility(ESlateVisibility::Hidden);
 }
