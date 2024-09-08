@@ -155,6 +155,14 @@ void ARunnerController::ClientShowTeacherSpeak_Implementation(bool bIsCorrect)
     }
 }
 
+void ARunnerController::ClientShowInitials_Implementation()
+{
+    if ( QuizWidgetInstance )
+    {
+        QuizWidgetInstance->ShowInitials();  // UI에서 패널 표시
+    }
+}
+
 //void ARunnerController::UpdateTextBoxContent(const FString& TextContent)
 //{
 //    위젯에서 컨트롤러 소환해서 컨트롤러에서 게임모드 불러서 서버 -> 멀티캐스트해달라해 

@@ -37,7 +37,7 @@ protected:
 	virtual void BeginPlay() override;
 
 public:		
-	bool bCanInput = true;
+	bool bCanDance = false;
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 

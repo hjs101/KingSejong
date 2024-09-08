@@ -76,4 +76,7 @@ public:
 
 	UFUNCTION(Client , Reliable)
 	void ClientShowTeacherSpeak(bool bIsCorrect);
+
+	UFUNCTION(Client , Reliable)
+	void ClientShowInitials();
 };
