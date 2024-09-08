@@ -58,7 +58,6 @@ bool AKJH_Chair::IsInteractable()
 void AKJH_Chair::ServerSitDown_Implementation(AActor* OtherActor)
 {
 	
-
 	DebugLog(TEXT("ServerSitDown_Implementation!!!!"));
 
 	MulticastSitDown(OtherActor);
@@ -68,7 +67,6 @@ void AKJH_Chair::ServerSitDown_Implementation(AActor* OtherActor)
 void AKJH_Chair::MulticastSitDown_Implementation(AActor* OtherActor)
 {
 	DebugLog(TEXT("MulticastSitDown_Implementation!!!"));
-
 
 	if ( TargetPlayer )
 	{
@@ -82,7 +80,7 @@ void AKJH_Chair::MulticastSitDown_Implementation(AActor* OtherActor)
 	{
 		TargetPlayer->SetActorLocationAndRotation(SitArrowComp->GetComponentLocation(), SitArrowComp->GetComponentRotation());
 		TargetPlayer->OnStartSit();
-		TargetPlayer->OnEndSitDelegate.AddDynamic(this, &AKJH_Chair::OnEndInteraction);
+		TargetPlayer->OnEndSitDelegate.AddUObject(this, &AKJH_Chair::OnEndInteraction);
 
 		FString msg = FString::Printf(TEXT("%s에 %d가 앉았습니다."), *this->GetName(), TargetPlayer->GetUniqueID());
 		DebugLog(msg);
@@ -106,7 +104,8 @@ void AKJH_Chair::MulticastStandUp_Implementation()
 		return;
 	}
 
-	
+	TargetPlayer->OnEndSitDelegate.RemoveAll(this);
+
 	FString msg = FString::Printf(TEXT("%s가 %s에서 일어났습니다."), *TargetPlayer->GetName(), *this->GetName());
 	DebugLog(msg);
 

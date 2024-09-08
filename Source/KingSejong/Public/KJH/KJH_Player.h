@@ -8,7 +8,7 @@
 #include "KJH_Player.generated.h"
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FInputBindingSignature, class UEnhancedInputComponent*);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FEndedSitSignature);
+DECLARE_MULTICAST_DELEGATE(FEndedSitSignature);
 
 UCLASS()
 class KINGSEJONG_API AKJH_Player : public ACharacter
@@ -34,7 +34,7 @@ public:
 
 public: 
 	FInputBindingSignature OnInputBindingDelegate;
-	UPROPERTY(BlueprintAssignable)
+	//UPROPERTY(BlueprintAssignable)
 	FEndedSitSignature OnEndSitDelegate;
 
 public:

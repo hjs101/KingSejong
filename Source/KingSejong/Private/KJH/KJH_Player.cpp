@@ -69,13 +69,6 @@ void AKJH_Player::BeginPlay()
 void AKJH_Player::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
-	//FTransform t = FTransform(GetControlRotation());
-	//Direction = t.TransformVector(Direction);
-	//Direction.Z = 0;
-
-	//AddMovementInput(Direction);
-	//Direction = FVector::ZeroVector;
 }
 
 // Called to bind functionality to input
@@ -135,15 +128,13 @@ void AKJH_Player::OnActionJump(const FInputActionValue& value)
 	Jump();
 
 	OnEndSitDelegate.Broadcast();
+	
 	//OnEndSit();
 }
 
 void AKJH_Player::SetIsSit(bool bValue)
 {
-	//if ( HasAuthority() )
-	//{
-		bIsSit = bValue;
-	//}
+	bIsSit = bValue;
 }
 
 void AKJH_Player::OnStartSit()
@@ -151,9 +142,7 @@ void AKJH_Player::OnStartSit()
 	if (PlayerAnim == nullptr) return;
 	if (bIsSit) return;
 
-	//PlayerAnim->SetSitState(true);
 	SetIsSit(true);
-
 }
 
 void AKJH_Player::OnEndSit()
@@ -161,9 +150,6 @@ void AKJH_Player::OnEndSit()
 	if (PlayerAnim == nullptr) return;
 	if (bIsSit == false) return;
 
-	
-	//PlayerAnim->SetSitState(false);
-	//bIsSit = false;
 	SetIsSit(false);
 }
 

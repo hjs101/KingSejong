@@ -7,6 +7,8 @@
 #include "Camera/CameraComponent.h"
 #include "Blueprint/UserWidget.h"
 #include "KJH/KJH_InteractiveActor.h"
+#include "KJH/KJH_PlayerController.h"
+
 
 // Sets default values for this component's properties
 UKJH_PlayerInteraction::UKJH_PlayerInteraction()
@@ -28,6 +30,9 @@ void UKJH_PlayerInteraction::InitializeComponent()
 	{
 		MyActor->OnInputBindingDelegate.AddUObject(this, &UKJH_PlayerInteraction::SetupInputBinding);
 	}
+
+	//MyPlayerController = Cast<AKJH_PlayerController>(GetWorld()->GetFirstPlayerController());
+
 }
 
 // Called when the game starts
@@ -92,7 +97,9 @@ void UKJH_PlayerInteraction::OnActionInteraction(const FInputActionValue& value)
 	if(HitActor == nullptr) return;
 	if(HitActor->IsInteractable() == false) return;
 
-	
+
+
+	//ServerRPC_InteractiveActor(HitActor, MyPlayerController);
 	ServerRPCInteractiveActor(HitActor, MyActor);
 
 
@@ -134,4 +141,10 @@ void UKJH_PlayerInteraction::ServerRPCInteractiveActor_Implementation(AKJH_Inter
 {
 	TargetActor->SetOwner(PlayerActor);
 	TargetActor->OnBeginInteraction(PlayerActor);
+}
+
+void UKJH_PlayerInteraction::ServerRPC_InteractiveActor_Implementation(AKJH_InteractiveActor* TargetActor, AKJH_PlayerController* PC)
+{
+	TargetActor->SetOwner(PC);
+	TargetActor->OnBeginInteraction(PC->GetPawn());
 }
