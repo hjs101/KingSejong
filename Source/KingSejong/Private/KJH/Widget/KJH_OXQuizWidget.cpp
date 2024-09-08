@@ -7,51 +7,34 @@
 #include "Components/MultiLineEditableTextBox.h"
 #include "Components/WidgetSwitcher.h"
 
-/*
-퀴즈 시간이 시작되면 UI가 나타난다.
-
-퀴즈 문제를 가져온다.
-
-
-퀴즈를 설정한다.
-타이머가 실행된다.
-
-타이머 시간이 지나면 정답이 공개된다.
-
-정답이 공개되고 일정 시간 이후 다음 퀴즈 문제가 설정된다.
-
-모든 문제가 제출되고 나면 타이머가 종료되고 UI를 닫는다.
-
-
-*/
-
 
 void UKJH_OXQuizWidget::NativeConstruct()
 {
     Super::NativeConstruct();
 
-    SetQuizState(EQuizState::Idle);
+
+    SetQuizState(EQuizWidgetState::Idle);
 }
 
-void UKJH_OXQuizWidget::SetQuizState(EQuizState State)
+void UKJH_OXQuizWidget::SetQuizState(EQuizWidgetState State)
 {
     QuizState = State;
 
     switch ( QuizState )
     {
-        case EQuizState::Idle:
+        case EQuizWidgetState::Idle:
             IdleState();
             break;
-        case EQuizState::Question:
+        case EQuizWidgetState::Question:
             QuestionState();
             break;
-        case EQuizState::Waiting:
+        case EQuizWidgetState::Waiting:
             WaitingState();
             break;
-        case EQuizState::Answer:
+        case EQuizWidgetState::Answer:
             AnswerState();
             break;
-        case EQuizState::End:
+        case EQuizWidgetState::End:
             EndState();
             break;
         default:
@@ -61,7 +44,7 @@ void UKJH_OXQuizWidget::SetQuizState(EQuizState State)
 
     UE_LOG(LogTemp, Warning, TEXT("%s"), *UEnum::GetValueAsString(QuizState));
 
-    if ( QuizState == EQuizState::Answer || QuizState == EQuizState::End ) return;
+    if ( QuizState == EQuizWidgetState::Answer || QuizState == EQuizWidgetState::End ) return;
 
     WidgetSwitcher_QA->SetActiveWidgetIndex(( int32 ) QuizState);
 }
@@ -73,14 +56,14 @@ void UKJH_OXQuizWidget::IdleState()
     FTimerHandle timerHandle;
     GetWorld()->GetTimerManager().SetTimer(timerHandle, FTimerDelegate::CreateLambda([ this ] ()
         {
-            SetQuizState(EQuizState::Question);
+            SetQuizState(EQuizWidgetState::Question);
         }),
         IdleTime, false);
 }
 
 void UKJH_OXQuizWidget::QuestionState()
 {
-    SetQuizAndAnswer(TEXT("정답은 true일것이야!"), true);
+    SetQuizAndAnswer(TEXT("인어공주는 6번째 공주이다"), true);
 
     ShowTimer(true);
 
@@ -94,7 +77,7 @@ void UKJH_OXQuizWidget::WaitingState()
     FTimerHandle timerHandle;
     GetWorld()->GetTimerManager().SetTimer(timerHandle, FTimerDelegate::CreateLambda([ this ] ()
         {
-            SetQuizState(EQuizState::Answer);
+            SetQuizState(EQuizWidgetState::Answer);
 
         }),
         WaitingTime, false);
@@ -118,12 +101,12 @@ void UKJH_OXQuizWidget::AnswerState()
             // 다음 퀴즈
             if ( QuizCount < MaxQuizCount )
             {
-                SetQuizState(EQuizState::Question);
+                SetQuizState(EQuizWidgetState::Question);
             }
             // 퀴즈 종료
             else
             {
-                SetQuizState(EQuizState::End);
+                SetQuizState(EQuizWidgetState::End);
             }
         }),
         AnwserTime, false);
@@ -181,7 +164,7 @@ void UKJH_OXQuizWidget::UpdateTimer()
         Text_Timer->SetText(FText::AsNumber(0));
         GetWorld()->GetTimerManager().ClearTimer(TimerHandle);
 
-        SetQuizState(EQuizState::Waiting);
+        SetQuizState(EQuizWidgetState::Waiting);
 
     }
 }

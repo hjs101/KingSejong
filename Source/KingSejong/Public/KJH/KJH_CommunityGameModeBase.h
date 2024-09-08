@@ -6,12 +6,12 @@
 #include "GameFramework/GameModeBase.h"
 #include "KJH_CommunityGameModeBase.generated.h"
 
-UENUM()
-enum class ECommunityState :uint8
-{
-	Debate,
-	Quiz
-};
+//UENUM()
+//enum class ECommunityState :uint8
+//{
+//	Debate,
+//	Quiz
+//};
 
 UCLASS()
 class KINGSEJONG_API AKJH_CommunityGameModeBase : public AGameModeBase
@@ -28,14 +28,13 @@ public:
 public:
 	FTransform PlayerStartTr;
 	FTransform QuizStartTr;
-	ECommunityState CommunityState;
+	// ECommunityState CommunityState;
 
 public:
 	void GetAllPlayers();
 
-
-	UFUNCTION(BlueprintCallable)
-	void SetCommunityState(ECommunityState NewState);
+	//UFUNCTION(BlueprintCallable)
+	//void SetCommunityState(ECommunityState NewState);
 	void SetAllPlayersPosition(FTransform& TargetTransform);
 	
 };

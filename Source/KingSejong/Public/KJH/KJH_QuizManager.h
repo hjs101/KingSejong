@@ -1,49 +1,95 @@
-ï»¿// Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/Actor.h"
+#include "Components/ActorComponent.h"
 #include "KJH_QuizManager.generated.h"
 
+
 UENUM()
-enum class EHorizontalState : uint8
+enum class EQuizState : uint8
 {
-	Left,
-	Right
+	Idle,
+	Question,
+	Waiting,
+	Answer,
+	End
 };
 
-
-UCLASS()
-class KINGSEJONG_API AKJH_QuizManager : public AActor
+USTRUCT(BlueprintType)
+struct FQuizInfo
 {
 	GENERATED_BODY()
-	
+
+public:
+	UPROPERTY(EditAnywhere, Category = "QuizInfo")
+	FString Quistion;
+
+	UPROPERTY(EditAnywhere, Category = "QuizInfo")
+	bool Answer;
+};
+
+UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
+class KINGSEJONG_API UKJH_QuizManager : public UActorComponent
+{
+	GENERATED_BODY()
+
 public:	
-	// Sets default values for this actor's properties
-	AKJH_QuizManager();
+	// Sets default values for this component's properties
+	UKJH_QuizManager();
 
 protected:
-	// Called when the game starts or when spawned
+	// Called when the game starts
 	virtual void BeginPlay() override;
 
 public:	
 	// Called every frame
-	virtual void Tick(float DeltaTime) override;
+	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-public:
-	UPROPERTY(BlueprintReadOnly)
-	class AKJH_CommunityGameModeBase* MyGameModeBase;
-
-
-
-public:
+private:
+	UPROPERTY()
+	class AKJH_CommunityGameMode* CommunityGameMode;
 	
+	EQuizState QuizState;
+
+	UPROPERTY()
+	class AActor* OXLine;
+
+
+
+public:
+	// ÄûÁî »óÅÂº° ½Ã°£
+	UPROPERTY(EditDefaultsOnly)
+	int32 IdleTime = 15;
+	UPROPERTY(EditDefaultsOnly)
+	int32 QuizTime = 30;
+	UPROPERTY(EditDefaultsOnly)
+	int32 WaitingTime = 5;
+	UPROPERTY(EditDefaultsOnly)
+	int32 AnwserTime = 10;
+
+	// ÄûÁî °³¼ö
+	UPROPERTY(EditDefaultsOnly)
+	int32 MaxQuizCount = 3;
+	int32 QuizCount = 0;
+
+	UPROPERTY(EditAnywhere)
+	TArray<FQuizInfo> QuizInfos;
+
+public:
 	UFUNCTION(BlueprintCallable)
-	void CheckAnswer();
+	void StartQuiz();
+
+	void SetQuizState(EQuizState State);
 
 
-	EHorizontalState GetPlayerHorizontalState(class AActor* Target);
+	// Quiz »óÅÂ
+	void IdleState();
+	void QuestionState();
+	void WaitingState();
+	void AnswerState();
+	void EndState();
 
-
+	bool GetPlayerQuizAnswer(class AKJH_PlayerController* TargetPC);
 };

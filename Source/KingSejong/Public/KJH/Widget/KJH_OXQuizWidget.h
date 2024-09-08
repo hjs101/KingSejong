@@ -7,7 +7,7 @@
 #include "KJH_OXQuizWidget.generated.h"
 
 UENUM()
-enum class EQuizState : uint8
+enum class EQuizWidgetState : uint8
 {
 	Idle,
 	Question,
@@ -60,17 +60,17 @@ private:
 	int32 MaxQuizCount = 3;
 	int32 QuizCount = 0;
 public:
-	EQuizState QuizState = EQuizState::Idle;
+	EQuizWidgetState QuizState = EQuizWidgetState::Idle;
 
 
 public:
+	void SetQuizState(EQuizWidgetState State);
+
 	UFUNCTION(BlueprintImplementableEvent)
 	void EndState();
 
 private:
 	// Quiz 상태
-	void SetQuizState(EQuizState State);
-
 	void IdleState();
 	void QuestionState();
 	void WaitingState();
