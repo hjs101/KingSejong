@@ -12,116 +12,47 @@ void UKJH_OXQuizWidget::NativeConstruct()
 {
     Super::NativeConstruct();
 
-
-    SetQuizState(EQuizWidgetState::Idle);
+    SetActiveAnswerStatus(false);
 }
 
-void UKJH_OXQuizWidget::SetQuizState(EQuizWidgetState State)
+void UKJH_OXQuizWidget::IdleState(int32 QuizTime)
 {
-    QuizState = State;
+    MaxQuizTime = QuizTime;
+    CurrScore = 0;
 
-    switch ( QuizState )
-    {
-        case EQuizWidgetState::Idle:
-            IdleState();
-            break;
-        case EQuizWidgetState::Question:
-            QuestionState();
-            break;
-        case EQuizWidgetState::Waiting:
-            WaitingState();
-            break;
-        case EQuizWidgetState::Answer:
-            AnswerState();
-            break;
-        case EQuizWidgetState::End:
-            EndState();
-            break;
-        default:
-            break;
-    }
-
-
-    UE_LOG(LogTemp, Warning, TEXT("%s"), *UEnum::GetValueAsString(QuizState));
-
-    if ( QuizState == EQuizWidgetState::Answer || QuizState == EQuizWidgetState::End ) return;
-
-    WidgetSwitcher_QA->SetActiveWidgetIndex(( int32 ) QuizState);
-}
-
-void UKJH_OXQuizWidget::IdleState()
-{
+    SetQuizWidgetState(EQuizWidgetState::Idle);
     ShowTimer(false);
-
-    FTimerHandle timerHandle;
-    GetWorld()->GetTimerManager().SetTimer(timerHandle, FTimerDelegate::CreateLambda([ this ] ()
-        {
-            SetQuizState(EQuizWidgetState::Question);
-        }),
-        IdleTime, false);
 }
 
-void UKJH_OXQuizWidget::QuestionState()
+void UKJH_OXQuizWidget::QuestionState(FString Quistion)
 {
-    SetQuizAndAnswer(TEXT("인어공주는 6번째 공주이다"), true);
+    SetActiveAnswerStatus(false);
+
+    Text_Question->SetText(FText::FromString(Quistion));
+
+    SetQuizWidgetState(EQuizWidgetState::Question);
 
     ShowTimer(true);
-
 }
 
 void UKJH_OXQuizWidget::WaitingState()
 {
     ShowTimer(false);
-
-    // 정답 공개
-    FTimerHandle timerHandle;
-    GetWorld()->GetTimerManager().SetTimer(timerHandle, FTimerDelegate::CreateLambda([ this ] ()
-        {
-            SetQuizState(EQuizWidgetState::Answer);
-
-        }),
-        WaitingTime, false);
+    SetQuizWidgetState(EQuizWidgetState::Waiting);
 }
 
-void UKJH_OXQuizWidget::AnswerState()
+void UKJH_OXQuizWidget::AnswerState(bool bCorrectAnswer, bool bSelectedAnswer)
 {
-    // 정답에 따라 OX 이미지 보여주기
-    int32 index = ( int32 ) QuizState;
-    if ( bCurrAnswer == false )
-        index++;
+    // 정답 표시
+    EQuizWidgetState state = bCorrectAnswer ? EQuizWidgetState::AnswerTrue : EQuizWidgetState::AnswerFalse;
+    SetQuizWidgetState(state);
 
-    WidgetSwitcher_QA->SetActiveWidgetIndex(index);
+    // 정답 여부
+    bool bIsCorrect = bCorrectAnswer == bSelectedAnswer;
+    SetActiveAnswerStatus(true, bIsCorrect);
 
-    // 퀴즈 카운드 증가
-    QuizCount++;
-
-    FTimerHandle timerHandle;
-    GetWorld()->GetTimerManager().SetTimer(timerHandle, FTimerDelegate::CreateLambda([ this ] ()
-        {
-            // 다음 퀴즈
-            if ( QuizCount < MaxQuizCount )
-            {
-                SetQuizState(EQuizWidgetState::Question);
-            }
-            // 퀴즈 종료
-            else
-            {
-                SetQuizState(EQuizWidgetState::End);
-            }
-        }),
-        AnwserTime, false);
-}
-
-void UKJH_OXQuizWidget::GetQuiz()
-{
-}
-
-
-void UKJH_OXQuizWidget::SetQuizAndAnswer(FString Quistion, bool bAnswer)
-{
-    Text_Quiz->SetText(FText::FromString(Quistion));
-
-    bCurrAnswer = bAnswer;
+    if ( bIsCorrect )
+        CurrScore++;
 }
 
 void UKJH_OXQuizWidget::ShowTimer(bool bValue)
@@ -135,13 +66,12 @@ void UKJH_OXQuizWidget::ShowTimer(bool bValue)
     {
         Overlay_Timer->SetVisibility(ESlateVisibility::Hidden);
     }
-
 }
 
 void UKJH_OXQuizWidget::StartTimer()
 {
     // 남은 시간 초기화
-    RemainingTime = QuizTime;
+    RemainingTime = MaxQuizTime;
 
     // 타이머 텍스트 초기화
     Text_Timer->SetText(FText::AsNumber(RemainingTime));
@@ -164,7 +94,27 @@ void UKJH_OXQuizWidget::UpdateTimer()
         Text_Timer->SetText(FText::AsNumber(0));
         GetWorld()->GetTimerManager().ClearTimer(TimerHandle);
 
-        SetQuizState(EQuizWidgetState::Waiting);
+        //SetQuizState(EQuizWidgetState::Waiting);
+    }
+}
+
+void UKJH_OXQuizWidget::SetQuizWidgetState(EQuizWidgetState State)
+{
+    WidgetSwitcher_Quiz->SetActiveWidgetIndex((int32)State);
+}
+
+void UKJH_OXQuizWidget::SetActiveAnswerStatus(bool bActive, bool bIsCorrect)
+{
+    if ( bActive )
+    {
+        Overlay_Answer->SetVisibility(ESlateVisibility::Visible);
+
+        int32 index = bIsCorrect ? 0 : 1;
+        WidgetSwitcher_Answer->SetActiveWidgetIndex(index);
+    }
+    else
+    {
+        Overlay_Answer->SetVisibility(ESlateVisibility::Hidden);
 
     }
 }

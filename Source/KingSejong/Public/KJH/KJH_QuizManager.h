@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -10,6 +10,7 @@
 UENUM()
 enum class EQuizState : uint8
 {
+	NotStarted,
 	Idle,
 	Question,
 	Waiting,
@@ -24,7 +25,7 @@ struct FQuizInfo
 
 public:
 	UPROPERTY(EditAnywhere, Category = "QuizInfo")
-	FString Quistion;
+	FString Question;
 
 	UPROPERTY(EditAnywhere, Category = "QuizInfo")
 	bool Answer;
@@ -51,25 +52,24 @@ private:
 	UPROPERTY()
 	class AKJH_CommunityGameMode* CommunityGameMode;
 	
-	EQuizState QuizState;
+	EQuizState QuizState = EQuizState::NotStarted;
 
 	UPROPERTY()
 	class AActor* OXLine;
 
 
-
 public:
-	// ÄûÁî »óÅÂº° ½Ã°£
+	// í€´ì¦ˆ ìƒíƒœë³„ ì‹œê°„
 	UPROPERTY(EditDefaultsOnly)
-	int32 IdleTime = 15;
+	int32 IdleTime = 5;
 	UPROPERTY(EditDefaultsOnly)
-	int32 QuizTime = 30;
+	int32 QuizTime = 15;
 	UPROPERTY(EditDefaultsOnly)
 	int32 WaitingTime = 5;
 	UPROPERTY(EditDefaultsOnly)
 	int32 AnwserTime = 10;
 
-	// ÄûÁî °³¼ö
+	// í€´ì¦ˆ ê°œìˆ˜
 	UPROPERTY(EditDefaultsOnly)
 	int32 MaxQuizCount = 3;
 	int32 QuizCount = 0;
@@ -81,10 +81,10 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void StartQuiz();
 
+private:
 	void SetQuizState(EQuizState State);
 
-
-	// Quiz »óÅÂ
+	// Quiz ìƒíƒœ
 	void IdleState();
 	void QuestionState();
 	void WaitingState();

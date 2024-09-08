@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "KJH/KJH_QuizManager.h"
@@ -13,7 +13,7 @@ UKJH_QuizManager::UKJH_QuizManager()
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
 
-	// ...
+
 }
 
 
@@ -25,7 +25,7 @@ void UKJH_QuizManager::BeginPlay()
 	// GameMode
 	CommunityGameMode = Cast<AKJH_CommunityGameMode>(GetOwner());
 
-	// OX ±âÁØ Ã£±â
+	// OX ê¸°ì¤€ ì°¾ê¸°
  	TArray<AActor*> FoundActors;
 
 	UGameplayStatics::GetAllActorsWithTag(GetWorld(), FName("OXLine"), FoundActors);
@@ -33,7 +33,6 @@ void UKJH_QuizManager::BeginPlay()
 	{
 		OXLine = FoundActors[0];
 	}
-
 
 	// StartQuiz();
 }
@@ -52,16 +51,17 @@ void UKJH_QuizManager::StartQuiz()
 	if (CommunityGameMode == nullptr) return;
 	if (OXLine == nullptr) return;
 
+	//  í”Œë ˆì´ì–´ ì»¨íŠ¸ë¡¤ëŸ¬ ë¦¬ìŠ¤íŠ¸ ê°±ì‹ 
 	CommunityGameMode->GetAllPlayerControllers();
-
-	if (CommunityGameMode->PlayerControllers.Num() <= 0) return;
-
-	SetQuizState(EQuizState::Idle);
+	if ( CommunityGameMode->PlayerControllers.Num() > 0 )
+	{
+		SetQuizState(EQuizState::Idle);
+	}
 }
 
 void UKJH_QuizManager::SetQuizState(EQuizState State)
 {
-	// if (QuizState == State) return;
+	 if (QuizState == State) return;
 
 	QuizState = State;
 
@@ -85,14 +85,22 @@ void UKJH_QuizManager::SetQuizState(EQuizState State)
 	default:
 		break;
 	}
-
+	
+	UE_LOG(LogTemp, Warning, TEXT("QuizManager State: %s"), *UEnum::GetValueAsString(QuizState));
 }
 
 void UKJH_QuizManager::IdleState()
 {
-	// todo:  API·Î ¹®Á¦ °¡Á®¿Ô°í, idletimeÀÌ Áö³µÀ¸¸é ÄûÁî »óÅÂ·Î ÀüÈ¯
-	
+	// todo:  APIë¡œ ë¬¸ì œ ê°€ì ¸ì™”ê³ , idletimeì´ ì§€ë‚¬ìœ¼ë©´ í€´ì¦ˆ ìƒíƒœë¡œ ì „í™˜
 	QuizCount = 0;
+
+	// ëª¨ë“  í”Œë ˆì´ì–´ì—ê²Œ ë¬¸ì œ, ì •ë‹µ ì„¤ì •
+	for ( auto pc : CommunityGameMode->PlayerControllers )
+	{
+		if ( pc == nullptr ) continue;
+
+		pc->ClientRPC_InitializeQuiz(QuizTime);
+	}
 
 	FTimerHandle timerHandle;
 	GetWorld()->GetTimerManager().SetTimer(timerHandle, FTimerDelegate::CreateLambda([this]()
@@ -104,33 +112,37 @@ void UKJH_QuizManager::IdleState()
 
 void UKJH_QuizManager::QuestionState()
 {
-	// ¸ðµç ÇÃ·¹ÀÌ¾î¿¡°Ô ¹®Á¦, Á¤´ä ¼³Á¤
+	// ëª¨ë“  í”Œë ˆì´ì–´ì—ê²Œ ë¬¸ì œ ì„¤ì •
 	for (auto pc : CommunityGameMode->PlayerControllers)
 	{
 		if (pc == nullptr) continue;
+		if (QuizInfos.IsValidIndex(QuizCount) == false) continue;
 
-		pc->SetQuizInfo();
+		FString Question = QuizInfos[QuizCount].Question;
+
+		pc->ClientRPC_ShowQuestionWidget(Question);
 	}
 
+	// ì¼ì • ì‹œê°„ì´ ì§€ë‚œ í›„ ì •ë‹µ ê³µê°œ ëŒ€ê¸° ìƒíƒœë¡œ ì „í™˜
 	FTimerHandle timerHandle;
 	GetWorld()->GetTimerManager().SetTimer(timerHandle, FTimerDelegate::CreateLambda([this]()
 		{
 			SetQuizState(EQuizState::Waiting);
 		}),
 		QuizTime, false);
-
 }
 
 void UKJH_QuizManager::WaitingState()
 {
+	// ëª¨ë“  í”Œë ˆì´ì–´ì—ê²Œ ì •ë‹µ ëŒ€ê¸° ìƒíƒœë¡œ ì „í™˜
 	for (auto pc : CommunityGameMode->PlayerControllers)
 	{
 		if (pc == nullptr) continue;
 
-		pc->ShowWidgetWaiting();
+		pc->ClientRPC_ShowWaitingWidget();
 	}
 
-	// Á¤´ä °ø°³
+	// ì¼ì • ì‹œê°„ ë’¤ ì •ë‹µ ê³µê°œ ìƒíƒœë¡œ ì „í™˜
 	FTimerHandle timerHandle;
 	GetWorld()->GetTimerManager().SetTimer(timerHandle, FTimerDelegate::CreateLambda([this]()
 		{
@@ -142,29 +154,32 @@ void UKJH_QuizManager::WaitingState()
 
 void UKJH_QuizManager::AnswerState()
 {
-	// ÄûÁî Á¤´ä ÆÇº°
+	// í€´ì¦ˆ ì •ë‹µ íŒë³„
 	for (auto pc : CommunityGameMode->PlayerControllers)
 	{
 		if (pc == nullptr || pc->GetPawn() == nullptr) continue;
 
+		// ì‹¤ì œ ë¬¸ì œì˜ ì •ë‹µ
 		bool bCorrectAnswer = QuizInfos[QuizCount].Answer;
+		// í”Œë ˆì´ì–´ê°€ ì„ íƒí•œ ì •ë‹µ
 		bool bSelectedAnswer = GetPlayerQuizAnswer(pc);
 
-		pc->ShowWidgetAnswer(bCorrectAnswer, bSelectedAnswer);
+		pc->ClientRPC_ShowWidgetAnswer(bCorrectAnswer, bSelectedAnswer);
 	}
 
-	// ÄûÁî Ä«¿îµå Áõ°¡
+	// í€´ì¦ˆ ì¹´ìš´ë“œ ì¦ê°€
 	QuizCount++;
 
+	// ì¼ì • ì‹œê°„ì´ ì§€ë‚œ í›„
 	FTimerHandle timerHandle;
 	GetWorld()->GetTimerManager().SetTimer(timerHandle, FTimerDelegate::CreateLambda([this]()
 		{
-			// ´ÙÀ½ ÄûÁî
-			if (QuizCount < MaxQuizCount)
+			//  í’€ ë¬¸ì œê°€ ë‚¨ì•˜ë‹¤ë©´ ë‹¤ìŒ í€´ì¦ˆë¡œ ì „í™˜
+			if (QuizCount < QuizInfos.Num())
 			{
 				SetQuizState(EQuizState::Question);
 			}
-			// ÄûÁî Á¾·á
+			// ëª¨ë“  ë¬¸ì œë¥¼ í’€ì—ˆë‹¤ë©´ í€´ì¦ˆ ì¢…ë£Œ
 			else
 			{
 				QuizCount = 0;
@@ -176,13 +191,14 @@ void UKJH_QuizManager::AnswerState()
 
 void UKJH_QuizManager::EndState()
 {
-	// ÄûÁî Á¾·á
+	// ëª¨ë“  í”Œë ˆì´ì–´ë“¤ì—ê²Œ í€´ì¦ˆ ì¢…ë£Œ
 	for (auto pc : CommunityGameMode->PlayerControllers)
 	{
-		pc->EndQuiz();
+		pc->ClientRPC_EndQuiz();
 	}
-}
 
+	SetQuizState(EQuizState::NotStarted);
+}
 
 bool UKJH_QuizManager::GetPlayerQuizAnswer(AKJH_PlayerController* TargetPC)
 {
@@ -193,10 +209,10 @@ bool UKJH_QuizManager::GetPlayerQuizAnswer(AKJH_PlayerController* TargetPC)
 
 	float rightDot = FVector::DotProduct(targetVector, rightVector);
 
-	// ¿À¸¥ÂÊ
+	// ì˜¤ë¥¸ìª½
 	if (rightDot > 0)
 		return false;
-	// ¿ÞÂÊ
+	// ì™¼ìª½
 	else
 		return true;
 }

@@ -12,7 +12,8 @@ enum class EQuizWidgetState : uint8
 	Idle,
 	Question,
 	Waiting,
-	Answer,
+	AnswerTrue,
+	AnswerFalse,
 	End
 };
 
@@ -26,13 +27,17 @@ public:
 
 public:
 	// Quiz
-	UPROPERTY(meta=(BindWidget))
-	class UMultiLineEditableTextBox* Text_Quiz;
+	UPROPERTY(meta = (BindWidget))
+	class UWidgetSwitcher* WidgetSwitcher_Quiz;
+	UPROPERTY(meta = (BindWidget))
+	class UMultiLineEditableTextBox* Text_Question;
+
 
 	// Answer
-	UPROPERTY(meta=(BindWidget))
-	class UWidgetSwitcher* WidgetSwitcher_QA;
-	
+	UPROPERTY(meta = (BindWidget))
+	class UWidgetSwitcher* WidgetSwitcher_Answer;
+	UPROPERTY(meta = (BindWidget))
+	class UOverlay* Overlay_Answer;
 
 	// Timer
 	UPROPERTY(meta = (BindWidget))
@@ -40,46 +45,41 @@ public:
 	UPROPERTY(meta = (BindWidget))
 	class UEditableTextBox* Text_Timer;
 
-	UPROPERTY(EditDefaultsOnly)
-	int32 IdleTime = 15;
-	UPROPERTY(EditDefaultsOnly)
-	int32 QuizTime = 30;
-	UPROPERTY(EditDefaultsOnly)
-	int32 WaitingTime = 5;
-	UPROPERTY(EditDefaultsOnly)
-	int32 AnwserTime = 10;
+	UPROPERTY(BlueprintReadOnly)
+	int32 CurrScore = 0;
 
 private:
+	// 타이머 핸들
+	FTimerHandle TimerHandle;
+	// 남은 시간을 저장할 변수
+	int32 RemainingTime;
+	int32 MaxQuizTime;
 
-	FTimerHandle TimerHandle;  // 타이머 핸들
-	int32 RemainingTime;   // 남은 시간을 저장할 변수
+	//// 현재 문제 정답
+	//bool bCurrAnswer;
 
-	bool bCurrAnswer;
-
-	UPROPERTY(EditDefaultsOnly)
-	int32 MaxQuizCount = 3;
-	int32 QuizCount = 0;
 public:
 	EQuizWidgetState QuizState = EQuizWidgetState::Idle;
 
-
 public:
-	void SetQuizState(EQuizWidgetState State);
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void EndState();
 
-private:
 	// Quiz 상태
-	void IdleState();
-	void QuestionState();
+	UFUNCTION(BlueprintCallable)
+	void SetQuizWidgetState(EQuizWidgetState State);
+
+	void IdleState(int32 QuizTime);
+	void QuestionState(FString Quistion);
 	void WaitingState();
-	void AnswerState();
+	void AnswerState(bool bCorrectAnswer, bool bSelectedAnswer);
 
-	// 문제
-	void SetQuizAndAnswer(FString Quistion, bool bAnswer);
-	void GetQuiz();
+	// 정답 여부
+	UFUNCTION(BlueprintCallable)
+	void SetActiveAnswerStatus(bool bActive, bool bIsCorrect = false);
 
+private:
 	// 타이머
 	void ShowTimer(bool bValue);
 	void StartTimer();

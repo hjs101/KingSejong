@@ -133,5 +133,5 @@ void AKJH_Chair::DebugLog(FString Message)
 
 	}
 
-	GEngine->AddOnScreenDebugMessage(-1, 100, color, message);
+	// GEngine->AddOnScreenDebugMessage(-1, 100, color, message);
 }
