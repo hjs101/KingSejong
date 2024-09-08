@@ -39,6 +39,7 @@ public:
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastSendQuizData(const FWordsData& QuizData);
 
+	FWordsData SelectedQuiz;
 
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastMoveToNextLevel();
@@ -81,4 +82,9 @@ public:
 
 	void UpdateTextInGameMode(const FString& AnswerText);
 	
+
+	void CheckAnswer(const FString& UserAnswer, ARunnerController* AnsweringPlayer);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastShowTeachSpeak(bool bIsCorrect);
 };

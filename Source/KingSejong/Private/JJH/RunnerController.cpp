@@ -98,6 +98,14 @@ void ARunnerController::ClientSpectatePlayer_Implementation(AActor* TargetPlayer
 }
 
 
+void ARunnerController::ClientHideAnswerText_Implementation()
+{
+    if ( IsLocalPlayerController() ) // 로컬 플레이어 컨트롤러에서만 위젯 생성
+    {
+        QuizWidgetInstance->HideAnswerText();
+    }
+}
+
 void ARunnerController::MoveToNextPlayerWithDelay()
 {
     FTimerHandle NextLevelTimerHandle;
@@ -120,12 +128,30 @@ void ARunnerController::MoveToNextPlayer()
     }
 }
 
+void ARunnerController::ServerSubmitAnswer_Implementation(const FString& UserAnswer)
+{
+    ARunningGameModeBase* GameMode = Cast<ARunningGameModeBase>(GetWorld()->GetAuthGameMode());
+    if ( GameMode )
+    {
+        GameMode->CheckAnswer(UserAnswer, this);
+    }
+
+}
+
 void ARunnerController::ServerMoveToNextPlayer_Implementation()
 {
     ARunningGameModeBase* GameMode = Cast<ARunningGameModeBase>(GetWorld()->GetAuthGameMode());
     if ( GameMode )
     {
         GameMode->MoveToNextPlayer();
+    }
+}
+
+void ARunnerController::ClientShowTeacherSpeak_Implementation(bool bIsCorrect)
+{
+    if ( QuizWidgetInstance )
+    {
+        QuizWidgetInstance->ShowTeacherSpeak(bIsCorrect);  // UI에서 패널 표시
     }
 }
 

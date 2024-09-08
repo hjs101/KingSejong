@@ -20,6 +20,9 @@ public:
 
 	void MoveToNextPlayerWithDelay();
 	void MoveToNextPlayer();
+
+	UFUNCTION(Server , Reliable)
+	void ServerSubmitAnswer(const FString& UserAnswer);
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<class UQuizWidget> QuizWidgetClass;
 
@@ -49,7 +52,9 @@ public:
 	
 	UFUNCTION(Client , Reliable)
 	void ClientSpectatePlayer(AActor* TargetPlayer);
-
+	
+	UFUNCTION(Client , Reliable)
+	void ClientHideAnswerText();
 
 	void UpdateTextBoxContent(const FString& TextContent);
 	//UFUNCTION(Server , Reliable)
@@ -69,4 +74,6 @@ public:
 	UFUNCTION(Server, Reliable)
 	void ServerMoveToNextPlayer();
 
+	UFUNCTION(Client , Reliable)
+	void ClientShowTeacherSpeak(bool bIsCorrect);
 };

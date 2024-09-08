@@ -94,4 +94,9 @@ public:
 	UFUNCTION()
 	void OnAnswerTextChanged(const FText& Text);
 	void UpdateTextBoxContent(const FString& TextContent);
+
+	void ShowTeacherSpeak(bool bIsCorrect);
+
+	void HideTeacherSpeak();
+	void HideAnswerText();
 };

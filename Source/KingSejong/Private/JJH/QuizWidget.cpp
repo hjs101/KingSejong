@@ -128,34 +128,41 @@ void UQuizWidget::SubmitAnswer()
 	if (AnswerTextBox)
 	{
 		FString UserAnswer = AnswerTextBox->GetText().ToString();
-		FString Answer = CurrentWordData.Word;
-		AnswerHorizontal->SetVisibility(ESlateVisibility::Hidden);
-		if ( UserAnswer.Equals(Answer) )
+		APlayerController* PC = GetOwningPlayer();
+		ARunnerController* RunnerController = Cast<ARunnerController>(PC);
+
+		if ( RunnerController )
 		{
-			//맞추면 퀴즈창 없애고 몇초 이따가 레벨 초기화
-			Quiz->SetVisibility(ESlateVisibility::Hidden);
-			TeacherSpeak->SetVisibility(ESlateVisibility::Visible);
-			//선생님 텍스처 바꾸기
-			Teacher->SetBrushFromTexture(SmileTeacher);
-			TeacherText->SetText(FText::FromString(TEXT("대단하구나!")));
+			RunnerController->ServerSubmitAnswer(UserAnswer);
 		}
-		else
-		{
-			//틀리면 퀴즈창 유지하고 다른 사람한테 넘어가기?
-			TeacherSpeak->SetVisibility(ESlateVisibility::Visible);
-			Teacher->SetBrushFromTexture(AngryTeacher);
-			TeacherText->SetText(FText::FromString(TEXT("아니다 욘석아")));
-			PlayAnimation(TeacherAngry, 0, 1, EUMGSequencePlayMode::PingPong);
-			
-			// 다음 플레이어로 차례 넘기기
-			// 컨트롤러에 접근하여 다음 플레이어로 넘기기
-			APlayerController* PC = GetOwningPlayer();
-			ARunnerController* RunnerController = Cast<ARunnerController>(PC);
-			if ( RunnerController )
-			{
-				RunnerController->MoveToNextPlayerWithDelay();
-			}
-		}
+		
+		//AnswerHorizontal->SetVisibility(ESlateVisibility::Hidden);
+		//if ( UserAnswer.Equals(Answer) )
+		//{
+		//	//맞추면 퀴즈창 없애고 몇초 이따가 레벨 초기화
+		//	Quiz->SetVisibility(ESlateVisibility::Hidden);
+		//	TeacherSpeak->SetVisibility(ESlateVisibility::Visible);
+		//	//선생님 텍스처 바꾸기
+		//	Teacher->SetBrushFromTexture(SmileTeacher);
+		//	TeacherText->SetText(FText::FromString(TEXT("대단하구나!")));
+		//}
+		//else
+		//{
+		//	//틀리면 퀴즈창 유지하고 다른 사람한테 넘어가기?
+		//	TeacherSpeak->SetVisibility(ESlateVisibility::Visible);
+		//	Teacher->SetBrushFromTexture(AngryTeacher);
+		//	TeacherText->SetText(FText::FromString(TEXT("아니다 욘석아")));
+		//	PlayAnimation(TeacherAngry, 0, 1, EUMGSequencePlayMode::PingPong);
+		//	
+		//	// 다음 플레이어로 차례 넘기기
+		//	// 컨트롤러에 접근하여 다음 플레이어로 넘기기
+		//	APlayerController* PC = GetOwningPlayer();
+		//	ARunnerController* RunnerController = Cast<ARunnerController>(PC);
+		//	if ( RunnerController )
+		//	{
+		//		RunnerController->MoveToNextPlayerWithDelay();
+		//	}
+		//}
 	}
 }
 
@@ -170,4 +177,36 @@ void UQuizWidget::OnAnswerTextChanged(const FText& Text)
 void UQuizWidget::UpdateTextBoxContent(const FString& TextContent)
 {
 	CountDownText->SetText(FText::FromString(TextContent));
+}
+
+void UQuizWidget::ShowTeacherSpeak(bool bIsCorrect)
+{
+	TeacherSpeak->SetVisibility(ESlateVisibility::Visible);
+	FTimerHandle TeacherSpeakTimer;
+
+	if ( bIsCorrect )
+	{
+		Teacher->SetBrushFromTexture(SmileTeacher);
+		TeacherText->SetText(FText::FromString(TEXT("대단하구나!")));
+		
+		GetWorld()->GetTimerManager().SetTimer(TeacherSpeakTimer, this , &UQuizWidget::HideTeacherSpeak , 2.0f , false);
+	}
+	else
+	{
+		Teacher->SetBrushFromTexture(AngryTeacher);
+		TeacherText->SetText(FText::FromString(TEXT("아니다 욘석아")));
+		PlayAnimation(TeacherAngry , 0 , 1 , EUMGSequencePlayMode::PingPong);
+		GetWorld()->GetTimerManager().SetTimer(TeacherSpeakTimer , this , &UQuizWidget::HideTeacherSpeak , 2.0f , false);
+		GEngine->AddOnScreenDebugMessage(-1 , 5.f , FColor::Blue , FString::Printf(TEXT("false")));
+	}
+}
+
+void UQuizWidget::HideTeacherSpeak()
+{
+	TeacherSpeak->SetVisibility(ESlateVisibility::Hidden);
+}
+
+void UQuizWidget::HideAnswerText()
+{
+	AnswerHorizontal->SetVisibility(ESlateVisibility::Hidden);
 }

@@ -25,7 +25,7 @@ void ARunningGameModeBase::BeginPlay()
 void ARunningGameModeBase::StartQuiz()
 {
 	//랜덤 데이터 가져오기
-	FWordsData SelectedQuiz = SelectRandomQuizData();
+	SelectedQuiz = SelectRandomQuizData();
 
 	//가져온데이터로 퀴즈뿌리기
 	MulticastSendQuizData(SelectedQuiz);
@@ -156,7 +156,8 @@ void ARunningGameModeBase::SubmitAnswer()
 void ARunningGameModeBase::MoveToNextPlayer()
 {
 	ARunnerController* CurrentController = *PlayerFinishOrder.begin();
-	CurrentController->ClientHideLoading();
+	//CurrentController->ClientHideLoading();
+	CurrentController->ClientHideAnswerText();
 	UE_LOG(LogTemp , Error , TEXT("%s") , *CurrentController->GetName());
 	// 현재 차례의 플레이어를 배열에서 제거하고, 다음 차례로 넘김
 	if ( PlayerFinishOrder.Num() > 0 )
@@ -182,6 +183,33 @@ void ARunningGameModeBase::UpdateTextInGameMode(const FString& AnswerText)
 			PlayerController->ClientUpdateTextBoxContent(AnswerText);  // 모든 클라이언트의 텍스트박스를 업데이트
 		}
 	}
+}
+
+void ARunningGameModeBase::CheckAnswer(const FString& UserAnswer , ARunnerController* AnsweringPlayer)
+{
+	FString CorrectAnswer = SelectedQuiz.Word;
+	if ( UserAnswer.Equals(CorrectAnswer) )
+	{
+		MulticastShowTeachSpeak(true);
+	}
+	else
+	{
+		MulticastShowTeachSpeak(false);
+		FTimerHandle MovePlayerTimerHandle;
+		GetWorld()->GetTimerManager().SetTimer(MovePlayerTimerHandle, this, &ARunningGameModeBase::MoveToNextPlayer, 2.0f, false);
+	}
+}
+
+void ARunningGameModeBase::MulticastShowTeachSpeak_Implementation(bool bIsCorrect)
+{
+	for ( ARunnerController* PlayerController : Players )
+	{
+		if ( PlayerController )
+		{
+			PlayerController->ClientShowTeacherSpeak(bIsCorrect);
+		}
+	}
+
 }
 
 FWordsData ARunningGameModeBase::SelectRandomQuizData()
