@@ -15,6 +15,7 @@
 #include "KJH/KJH_CommunityGameModeBase.h"
 #include "KJH/API/KJH_HttpManager.h"
 #include "KJH/KJH_PlayerQuizHandler.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 
 // Sets default values
@@ -127,9 +128,14 @@ void AKJH_Player::OnActionJump(const FInputActionValue& value)
 {
 	Jump();
 
-	OnEndSitDelegate.Broadcast();
+	UE_LOG(LogTemp, Warning, TEXT("Jump!!"));
+	if ( OnEndSitDelegate.IsBound() )
+	{
+		OnEndSitDelegate.Broadcast();
+		// OnEndSit();
+		UE_LOG(LogTemp, Warning, TEXT("OnEndSitDelegate!!"));
+	}
 	
-	//OnEndSit();
 }
 
 void AKJH_Player::SetIsSit(bool bValue)
@@ -137,10 +143,13 @@ void AKJH_Player::SetIsSit(bool bValue)
 	bIsSit = bValue;
 }
 
-void AKJH_Player::OnStartSit()
+void AKJH_Player::OnStartSit(FVector TargetLoc, FRotator TargetRot)
 {
 	if (PlayerAnim == nullptr) return;
 	if (bIsSit) return;
+
+	GetCharacterMovement()->bOrientRotationToMovement = false;
+	SetActorLocationAndRotation(TargetLoc, TargetRot);
 
 	SetIsSit(true);
 }
@@ -149,6 +158,8 @@ void AKJH_Player::OnEndSit()
 {
 	if (PlayerAnim == nullptr) return;
 	if (bIsSit == false) return;
+
+	GetCharacterMovement()->bOrientRotationToMovement = true;
 
 	SetIsSit(false);
 }
