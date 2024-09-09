@@ -18,6 +18,7 @@
 #include "Net/UnrealNetwork.h"
 #include "HJS/MainUI.h"
 #include "HJS/BattleQuestionStruct.h"
+#include "HJS/AINet.h"
 // Sets default values
 AHJS_BattlePlayer::AHJS_BattlePlayer()
 {
@@ -38,6 +39,8 @@ AHJS_BattlePlayer::AHJS_BattlePlayer()
 
 	GoogleNetComp = CreateDefaultSubobject<UGoogleNet>(TEXT("GoogleNetComp"));
 
+	AINetComp = CreateDefaultSubobject<UAINet>(TEXT("AINetComp"));
+
 }
 
 // Called when the game starts or when spawned
@@ -46,6 +49,7 @@ void AHJS_BattlePlayer::BeginPlay()
 	Super::BeginPlay();
 	RecordFilePath = FPaths::Combine(FPaths::ProjectDir(), TEXT("RecordData/"));
 	GoogleNetComp->Me = this;
+	AINetComp->Me = this;
 	if ( HasAuthority() )
 	{
 		GetWorldTimerManager().SetTimer(JoinTimerHandle,this, &AHJS_BattlePlayer::LoginSignal,0.05f,false);
@@ -144,7 +148,6 @@ void AHJS_BattlePlayer::Punch()
 		Anim->JumpMontageToAttack();
 	}
 }
-
 void AHJS_BattlePlayer::AddMainUI_Implementation()
 {
 
@@ -199,9 +202,9 @@ void AHJS_BattlePlayer::FirebaseLogin_Implementation()
 	GoogleNetComp->AnonymousLogin();
 }
 // 각각의 클라이언트에서 Wav 파일을 AI 서버에 전송 후, STT 결과를 내려받고, 그 결과를 Server에 전송
-void AHJS_BattlePlayer::SendRecordToAIServer()
+void AHJS_BattlePlayer::SendRecordToAIServer(const FString& Result)
 {
-	STTResult = "Hello Unreal";
+	STTResult = Result;
 	SendSTTResultToGameMode(STTResult);
 }
 
@@ -249,7 +252,7 @@ void AHJS_BattlePlayer::ServerDownloadSound_Implementation(const FString& Client
 
 void AHJS_BattlePlayer::MulticastDownloadSound_Implementation(const FString& ClientName)
 {	
-	// WinnerNum이 1인데 서버가 아니면면
+	// WinnerNum이 1인데 서버가 아니면
 	if ( WinnerNum == 1 && !HasAuthority() )
 	{
 		return;
@@ -315,14 +318,32 @@ void AHJS_BattlePlayer::MulticastPlaySound_Implementation(const FString& WinnerF
 			return;
 		}
 	}
+	TArray<AActor*> OutActors;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AHJS_BattlePlayer::StaticClass(), OutActors);
 
+	for ( AActor* Actor : OutActors )
+	{
+		AHJS_BattlePlayer* Player = Cast<AHJS_BattlePlayer>(Actor);
+		Player->WinnerNum = -1;
+	}
+
+	// WAV 헤더에서 필요한 정보 추출 (예: 샘플 속도, 채널 수, 등)
+	int32 SampleRate = *( int32* ) &SoundData[ 24 ]; // WAV 파일의 샘플 속도
+	int16 NumChannels = *( int16* ) &SoundData[ 22 ]; // WAV 파일의 채널 수
+	int32 DataSize = *( int32* ) &SoundData[ 40 ]; // 데이터 크기
+
+	// USoundWaveProcedural로 동적 사운드 웨이브 생성
 	USoundWaveProcedural* SoundWave = NewObject<USoundWaveProcedural>();
-	SoundWave->SetSampleRate(88200); // 샘플 레이트 설정
-	SoundWave->NumChannels = 1; // 채널 수 설정 (모노)
-	SoundWave->Duration = 5.0f; // 재생 시간 설정
-	SoundWave->QueueAudio(SoundData.GetData() , SoundData.Num());
+	SoundWave->SetSampleRate(SampleRate);
+	SoundWave->NumChannels = NumChannels;
+	SoundWave->Duration = static_cast< float >(DataSize) / (SampleRate * NumChannels * sizeof(int16));
+
+	// 오디오 데이터를 SoundWave에 할당
+	TArray<uint8> PCMData(SoundData.GetData() + 44, DataSize); // 44바이트 이후가 오디오 데이터
+	SoundWave->QueueAudio(PCMData.GetData(), PCMData.Num());
+
 	UGameplayStatics::PlaySound2D(GetWorld() , SoundWave);
-	
+
 }
 
 void AHJS_BattlePlayer::ServerAttack_Implementation()
@@ -341,7 +362,7 @@ void AHJS_BattlePlayer::MulticastAttack_Implementation()
 	bAttack = true;
 	Alpha = 0.f;
 
-	GetWorldTimerManager().SetTimer(PunchHandle, this, &AHJS_BattlePlayer::Punch, 3.f, false);
+	GetWorldTimerManager().SetTimer(PunchHandle, this, &AHJS_BattlePlayer::Punch, 10.f, false);
 }
 
 void AHJS_BattlePlayer::StartRecording_Implementation(const FString& PlayerID)
@@ -359,7 +380,7 @@ void AHJS_BattlePlayer::StartRecording_Implementation(const FString& PlayerID)
 		bIsRecording = true;
 		AudioCapture->Start();  // 오디오 캡처 시작
 		UAudioMixerBlueprintLibrary::StartRecordingOutput(GetWorld(), 0.f, RecordSound);
-		GetWorldTimerManager().SetTimer(RecordHandle, this, &AHJS_BattlePlayer::StopRecording, 5.f, false);
+		GetWorldTimerManager().SetTimer(RecordHandle, this, &AHJS_BattlePlayer::StopRecording, 10.f, false);
 	}
 }
 
@@ -373,9 +394,21 @@ void AHJS_BattlePlayer::StopRecording_Implementation()
 		AudioCapture->Stop();  // 오디오 캡처 중지
 		RecordFileName = FString::Printf(TEXT("%s_Record"), *PlayerRecordID);
 		MyRecord = UAudioMixerBlueprintLibrary::StopRecordingOutput(GetWorld(), EAudioRecordingExportType::WavFile, RecordFileName, RecordFilePath, RecordSound);
-		SendRecordToAIServer();
+		// AI 서버에 보내는 함수
+		//SendRecordToAIServer(TEXT("0000"));
+		GetWorldTimerManager().SetTimer(AINetTimerHandle,this,&AHJS_BattlePlayer::AINetReq, 0.3f,false);
+		check(MainUI);
+		MainUI->LineText = TEXT("판독중...");
 	}
 }
+
+void AHJS_BattlePlayer::AINetReq()
+{
+	FString FileName = RecordFileName + TEXT(".wav");
+	FString FilePath = RecordFilePath + FileName;
+	AINetComp->FileSendToAIServer(FilePath);
+}
+
 
 void AHJS_BattlePlayer::PlayerHit()
 {
@@ -395,9 +428,6 @@ void AHJS_BattlePlayer::MulticastPlayerHit_Implementation()
 void AHJS_BattlePlayer::OnMyTakeDamage(int32 Damage)
 {
 	HP--;
-
-	// HP를 깎는 게 내가 관리하고 있는 객체가 아니라면 Player2의 체력을 깎고
-
 	// HP를 깎는 게 내가 관리하고 있는 객체라면 Player1의 체력을 깎기
 	if ( IsLocallyControlled() )
 	{	
@@ -411,8 +441,21 @@ void AHJS_BattlePlayer::OnMyTakeDamage(int32 Damage)
 		MainPlayer->MainUI->SetHP(2,HP);
 	}
 
+	// HP를 깎는 게 내가 관리하고 있는 객체가 아니라면 Player2의 체력을 깎고
 	if ( HP <= 0 )
 	{
 		// 죽음.
+		return;
 	}
+}
+
+void AHJS_BattlePlayer::ShowGameEndUI()
+{
+	
+}
+
+void AHJS_BattlePlayer::ClientMainTextSet_Implementation(const FString& Text)
+{
+	check(MainUI);
+	MainUI->LineText = Text;
 }
