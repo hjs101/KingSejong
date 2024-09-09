@@ -33,12 +33,13 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void StartQuiz();
 
-	TArray<class ARunnerController*> PlayerControllers;  // 플레이어 컨트롤러를 저장할 배열
+	TArray<class ARunnerController*> FailedToFinishPlayers;  // 플레이어 컨트롤러를 저장할 배열
 
 	//퀴즈 데이타 뽑기
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastSendQuizData(const FWordsData& QuizData);
 
+	FWordsData SelectedQuiz;
 
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastMoveToNextLevel();
@@ -54,6 +55,10 @@ public:
 
 	//결승선 통과한 사람들 담을 배열
 	TArray<class ARunnerController*> PlayerFinishOrder;
+
+	//그냥 사람들 담을 배열
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TArray<class ARunnerController*> Players;
 	
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastStartCountdownTimer();
@@ -65,8 +70,21 @@ public:
 	UPROPERTY(EditAnywhere)
 	float CountDownNum = 5;
 
+	//입력 허가
 	void AbleInput();
-
+	//정답 입력 허가
 	void SubmitAnswer();
+	//다음 플레이어로 정답 입력 기회 넘기기
+	void MoveToNextPlayer();
 
+	//UFUNCTION(NetMulticast, Reliable)
+	//void MuticastUpdateAnswerTextToAll();
+
+	void UpdateTextInGameMode(const FString& AnswerText);
+	
+
+	void CheckAnswer(const FString& UserAnswer, ARunnerController* AnsweringPlayer);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastShowTeachSpeak(bool bIsCorrect);
 };
