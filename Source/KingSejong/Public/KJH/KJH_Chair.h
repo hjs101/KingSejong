@@ -23,7 +23,6 @@ protected:
 	virtual void BeginPlay() override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
-
 private:
 	UPROPERTY(Replicated)
 	class AKJH_Player* TargetPlayer;
@@ -38,9 +37,6 @@ public:
 
 	UPROPERTY(EditDefaultsOnly)
 	class UArrowComponent* SitArrowComp;
-	
-	// todo: 상태 연동
-	// 플레이어, 의자 상태
 
 
 public:
@@ -52,17 +48,17 @@ public:
 public:
 
 	// 앉기
-	UFUNCTION(Server, Unreliable)
+	UFUNCTION(Server, Reliable)
 	void ServerSitDown(class AActor* OtherActor);
 
-	UFUNCTION(NetMulticast, Unreliable)
+	UFUNCTION(NetMulticast, Reliable)
 	void MulticastSitDown(class AActor* OtherActor);
 
 
 	// 일어나기
-	UFUNCTION(Server, Unreliable)
+	UFUNCTION(Server, Reliable)
 	void ServerStandUp();
-	UFUNCTION(NetMulticast, Unreliable)
+	UFUNCTION(NetMulticast, Reliable)
 	void MulticastStandUp();
 
 

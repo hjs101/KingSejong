@@ -17,8 +17,6 @@ UKJH_PlayerInteraction::UKJH_PlayerInteraction()
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
 	bWantsInitializeComponent = true;
-
-	//SetIsReplicatedByDefault(true);
 }
 
 void UKJH_PlayerInteraction::InitializeComponent()
@@ -31,7 +29,7 @@ void UKJH_PlayerInteraction::InitializeComponent()
 		MyActor->OnInputBindingDelegate.AddUObject(this, &UKJH_PlayerInteraction::SetupInputBinding);
 	}
 
-	//MyPlayerController = Cast<AKJH_PlayerController>(GetWorld()->GetFirstPlayerController());
+	MyPlayerController = Cast<AKJH_PlayerController>(GetWorld()->GetFirstPlayerController());
 
 }
 
@@ -97,11 +95,7 @@ void UKJH_PlayerInteraction::OnActionInteraction(const FInputActionValue& value)
 	if(HitActor == nullptr) return;
 	if(HitActor->IsInteractable() == false) return;
 
-
-
-	//ServerRPC_InteractiveActor(HitActor, MyPlayerController);
-	ServerRPCInteractiveActor(HitActor, MyActor);
-
+	ServerRPC_InteractiveActor(HitActor, MyPlayerController);
 
 	UE_LOG(LogTemp, Warning, TEXT("OnActionInteraction!!"));
 }
@@ -135,12 +129,6 @@ void UKJH_PlayerInteraction::SetActiveKeyGuide(bool bValue)
 bool UKJH_PlayerInteraction::IsInteractableActor(AKJH_InteractiveActor* OtherActor)
 {
 	return OtherActor && OtherActor->IsInteractable();
-}
-
-void UKJH_PlayerInteraction::ServerRPCInteractiveActor_Implementation(AKJH_InteractiveActor* TargetActor, AKJH_Player* PlayerActor)
-{
-	TargetActor->SetOwner(PlayerActor);
-	TargetActor->OnBeginInteraction(PlayerActor);
 }
 
 void UKJH_PlayerInteraction::ServerRPC_InteractiveActor_Implementation(AKJH_InteractiveActor* TargetActor, AKJH_PlayerController* PC)

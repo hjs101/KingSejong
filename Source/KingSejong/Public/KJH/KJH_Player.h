@@ -83,7 +83,7 @@ private:
 
 public:
 	UFUNCTION(BlueprintCallable)
-	void OnStartSit();
+	void OnStartSit(FVector TargetLoc, FRotator TargetRot);
 	UFUNCTION(BlueprintCallable)
 	void OnEndSit();
 
