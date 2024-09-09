@@ -70,9 +70,9 @@ void ARunningGameModeBase::MoveToNextLevel()
 		FString NextLevelName = TEXT("/Game/JJH/ResultMap?listen");
 		GetWorld()->ServerTravel(NextLevelName , true , false);
 		
-		GEngine->AddOnScreenDebugMessage(-1 , 5.f , FColor::Red , TEXT("S"));
+		//GEngine->AddOnScreenDebugMessage(-1 , 5.f , FColor::Red , TEXT("S"));
 	}
-	GEngine->AddOnScreenDebugMessage(-1 , 5.f , FColor::Red , TEXT("u"));
+	//GEngine->AddOnScreenDebugMessage(-1 , 5.f , FColor::Red , TEXT("u"));
 }
 
 void ARunningGameModeBase::MulticastShowLoading_Implementation()
@@ -269,13 +269,13 @@ void ARunningGameModeBase::MulticastSendQuizData_Implementation(const FWordsData
 					// 클라이언트가 자신의 로컬 플레이어 컨트롤러에서만 위젯을 생성하도록 명령
 					MyPC->ClientCreateQuizWidget(QuizData);
 					FString PCAddress = FString::Printf(TEXT("PlayerController Address: %p"), MyPC);
-					GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, PCAddress);
+					//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, PCAddress);
 
 					// OpenLevel 호출 후 레벨 이름 확인
 					GetWorld()->GetTimerManager().SetTimerForNextTick([this]() {
 						FString CurrentLevelAfterTravel = GetWorld()->GetMapName();
 						FString ShortLevelAfterTravel = FPackageName::GetShortName(CurrentLevelAfterTravel);
-						GEngine->AddOnScreenDebugMessage(-1 , 5.f , FColor::Blue , FString::Printf(TEXT("Current Level After Travel: %s") , *ShortLevelAfterTravel));
+						//GEngine->AddOnScreenDebugMessage(-1 , 5.f , FColor::Blue , FString::Printf(TEXT("Current Level After Travel: %s") , *ShortLevelAfterTravel));
 						});
 				}
 			}

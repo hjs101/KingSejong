@@ -73,18 +73,18 @@ void ARunner::PlayWinMontage()
 {
 	if (HasAuthority())
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, FString::Printf(TEXT("playwin")));
+		//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, FString::Printf(TEXT("playwin")));
 		MulticastPlayWinMontage();
 	}
 	else
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, FString::Printf(TEXT("playwinelse")));
+		//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, FString::Printf(TEXT("playwinelse")));
 		ServerPlayWinMontage();
 	}
 }
 void ARunner::ServerPlayWinMontage_Implementation()
 {
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, FString::Printf(TEXT("serveerplaywin")));
+	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, FString::Printf(TEXT("serveerplaywin")));
 	MulticastPlayWinMontage();
 }
 
@@ -93,13 +93,13 @@ void ARunner::MulticastPlayWinMontage_Implementation()
 	if ( WinMontage )
 	{
 		//GetMesh()->GetAnimInstance()->Montage_Stop(0,RunMontage);
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, TEXT("Montage is playing"));
+		//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, TEXT("Montage is playing"));
 		//PlayAnimMontage(WinMontage);
 		GetMesh()->GetAnimInstance()->Montage_Play(WinMontage);
 	}
 	else
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("WinMontage is nullptr"));
+		//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("WinMontage is nullptr"));
 	}
 	bCanDance = true;
 }

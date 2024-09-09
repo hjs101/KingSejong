@@ -198,7 +198,7 @@ void UQuizWidget::ShowTeacherSpeak(bool bIsCorrect)
 		TeacherText->SetText(FText::FromString(TEXT("아니다 욘석아")));
 		PlayAnimation(TeacherAngry , 0 , 1 , EUMGSequencePlayMode::PingPong);
 		GetWorld()->GetTimerManager().SetTimer(TeacherSpeakTimer , this , &UQuizWidget::HideTeacherSpeak , 2.0f , false);
-		GEngine->AddOnScreenDebugMessage(-1 , 5.f , FColor::Blue , FString::Printf(TEXT("false")));
+		//GEngine->AddOnScreenDebugMessage(-1 , 5.f , FColor::Blue , FString::Printf(TEXT("false")));
 	}
 }
 
