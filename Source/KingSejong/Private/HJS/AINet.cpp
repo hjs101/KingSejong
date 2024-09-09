@@ -71,7 +71,7 @@ void UAINet::FileSendToAIServer(const FString& FilePath)
 			}
 			else
 			{
-				UE_LOG(LogTemp, Error, TEXT("Get STTText failed: %s"), *Response->GetContentAsString());
+				UE_LOG(LogTemp, Error, TEXT("Get STTText failed!!!"));
 			}
 		});
 

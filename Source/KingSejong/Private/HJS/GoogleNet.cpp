@@ -129,7 +129,7 @@ void UGoogleNet::FileDownloadFromFirebase(const FString& SavePath, const FString
             }
             else
             {
-                UE_LOG(LogTemp, Error, TEXT("File download failed: %s"), *Response->GetContentAsString());
+                UE_LOG(LogTemp, Error, TEXT("File download failed!!"));
             }
         });
 
