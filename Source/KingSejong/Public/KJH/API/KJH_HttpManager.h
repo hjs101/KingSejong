@@ -9,6 +9,7 @@
 #include "KJH_HttpManager.generated.h"
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnResponseBookAnswerSignature, FString);
+DECLARE_MULTICAST_DELEGATE_ThreeParams(FOnResponseAskChatbotAnswerSignature, bool, FString, FString);
 
 
 UCLASS()
@@ -25,19 +26,22 @@ protected:
 	virtual void BeginPlay() override;
 
 public:
-	FOnResponseBookAnswerSignature OnResponseBookAnswerDelegate;
+	FOnResponseBookAnswerSignature OnResponseAskByTextDelegate;
+	FOnResponseAskChatbotAnswerSignature FOnResponseAskChatbotAnswerDelegate;
 
 private:
 	// 서버 URL
 	const FString ServerURL = "http://meta-ai.iptime.org:61457/janghoon";
+	const FString WavServerURL = "http://meta-ai.iptime.org:61457/hoonjang_wav";
 
 
 public:	
-
-	void Req_BookAnswer(FString BookName, FString Question);
+	void Req_AskByText(FString BookName, FString Question);
+	void Req_AskByFileToChatbot(const FString& BookName, const FString& FilePath);
 
 private:
 	
-	void OnRes_BookAnswer(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bConnectedSuccessfully);
+	void OnRes_AskByText(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bConnectedSuccessfully);
+	void OnRes_AskByFileToChatbot(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bConnectedSuccessfully);
 
 };

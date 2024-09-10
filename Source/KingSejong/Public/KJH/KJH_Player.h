@@ -69,8 +69,6 @@ private:
 	class UKJH_PlayerInteraction* InteractionComp;
 	UPROPERTY(EditDefaultsOnly)
 	class UKJH_VoiceRecorder* VoiceRecorderComp;
-	UPROPERTY(EditDefaultsOnly)
-	class UKJH_PlayerQuizHandler* QuizHandlerComp;
 	
 
 

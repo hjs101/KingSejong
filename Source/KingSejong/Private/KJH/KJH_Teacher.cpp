@@ -63,7 +63,8 @@ void AKJH_Teacher::BeginPlay()
 
     if ( HttpManager )
     {
-        HttpManager->OnResponseBookAnswerDelegate.AddUObject(this, &AKJH_Teacher::OnRes_ChatbotResult);
+        //HttpManager->OnResponseAskByTextDelegate.AddUObject(this, &AKJH_Teacher::OnRes_ChatbotResult);
+        HttpManager->OnResponseAskByTextDelegate.AddUObject(this, &AKJH_Teacher::OnRes_ChatbotResult);
     }
 }
 

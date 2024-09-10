@@ -35,3 +35,18 @@ FString UKJH_JsonParseLib::JsonParseBookAnwser(const FString& json)
 	}
 	return result;
 }
+
+TMap<FString, FString> UKJH_JsonParseLib::JsonParseChatbotAnswer(const FString& json)
+{
+	TSharedRef<TJsonReader<TCHAR>> reader = TJsonReaderFactory<TCHAR>::Create(json);
+	TSharedPtr<FJsonObject> response = MakeShareable(new FJsonObject());
+
+	TMap<FString, FString> result;
+	if ( FJsonSerializer::Deserialize(reader, response) )
+	{
+		result.Add(response->GetStringField(TEXT("hoonjang_audio")));
+		result.Add(response->GetStringField(TEXT("hoonjang_text")));
+	}
+
+	return result;
+}

@@ -4,7 +4,6 @@
 #include "KJH/Widget/KJH_VoiceRecodingWidget.h"
 #include "KJH/KJH_Player.h"
 #include "KJH/KJH_VoiceRecorder.h"
-#include "KJH/API/KJH_HttpHandler.h"
 #include "Components/Button.h"
 #include "Components/WidgetSwitcher.h"
 #include "Kismet/GameplayStatics.h"
@@ -27,16 +26,21 @@ void UKJH_VoiceRecodingWidget::NativeConstruct()
             BtnRecStart->OnClicked.AddDynamic(this, &UKJH_VoiceRecodingWidget::OnClickedBtnRecStart);
             BtnRecStop->OnClicked.AddDynamic(this, &UKJH_VoiceRecodingWidget::OnClickedBtnRecStop);
 
+
+            RecordingFilePath = fpath
+
+
             UE_LOG(LogTemp, Warning, TEXT("VoiceRecorder 를 바인딩!!!"));
         }
 
-        PlayerHttpHandler = player->GetComponentByClass<UKJH_HttpHandler>();
     }
 
     // HttpManager
     HttpManager = Cast<AKJH_HttpManager>(UGameplayStatics::GetActorOfClass(GetWorld(), AKJH_HttpManager::StaticClass()));
 
-    Btn_Question->OnClicked.AddDynamic(this, &UKJH_VoiceRecodingWidget::Req_Question);
+
+
+    //Btn_Question->OnClicked.AddDynamic(this, &UKJH_VoiceRecodingWidget::Req_Question);
     
 }
 
@@ -87,8 +91,14 @@ void UKJH_VoiceRecodingWidget::Req_Question()
     // 질문 API 호출
     if ( HttpManager )
     {
-        FText text = EditTextBox_Question->GetText();
-        HttpManager->Req_BookAnswer(TEXT(""), text.ToString());
+        // 텍스트 소통
+        //FText text = EditTextBox_Question->GetText();
+        //HttpManager->Req_BookAnswer(TEXT(""), text.ToString());
+
+        
+
+        // 파일 전송
+        HttpManager->Req_AskByFileToChatbot(TEXT(""), TEXT(""));
 
         bIsRequest = true;
     }

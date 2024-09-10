@@ -25,6 +25,11 @@ void UKJH_VoiceRecorder::BeginPlay()
 	
 }
 
+FString UKJH_VoiceRecorder::GetRecodeFilePath()
+{
+	return FString();
+}
+
 bool UKJH_VoiceRecorder::OnStartRecord()
 {
 	if(AudioCaptureComp == nullptr)

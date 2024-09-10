@@ -20,6 +20,10 @@ protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
+public:
+	const FString SaveFileName = "RecordVoiceFile_Question";
+	const FString SaveFilePath = "KJH";
+
 private:
 	UPROPERTY()
 	class UAudioCaptureComponent* AudioCaptureComp;
@@ -27,9 +31,11 @@ private:
 	UPROPERTY(EditDefaultsOnly)
 	class USoundSubmix* SoundSubmix;
 
-	const FString SaveFileName = "RecordVoiceFile_Question";
 
 public:
+
+	FString GetRecodeFilePath();
+
 	UFUNCTION(BlueprintCallable)
 	bool OnStartRecord();
 	UFUNCTION(BlueprintCallable)

@@ -18,6 +18,6 @@ public:
 	static FString MakeJson(const TMap<FString, FString> source);
 
 	static FString JsonParseBookAnwser(const FString& json);
-
+	static TMap<FString, FString> JsonParseChatbotAnswer(const FString& json);
 
 };

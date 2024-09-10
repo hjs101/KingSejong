@@ -14,7 +14,6 @@
 #include "KJH/KJH_VoiceRecorder.h"
 #include "KJH/KJH_CommunityGameModeBase.h"
 #include "KJH/API/KJH_HttpManager.h"
-#include "KJH/KJH_PlayerQuizHandler.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
 
@@ -39,7 +38,6 @@ AKJH_Player::AKJH_Player()
 
 	InteractionComp = CreateDefaultSubobject<UKJH_PlayerInteraction>(TEXT("InteractionComp"));
 	VoiceRecorderComp = CreateDefaultSubobject<UKJH_VoiceRecorder>(TEXT("VoiceRecorderComp"));
-	QuizHandlerComp = CreateDefaultSubobject<UKJH_PlayerQuizHandler>(TEXT("QuizHandlerComp"));
 
 }
 
