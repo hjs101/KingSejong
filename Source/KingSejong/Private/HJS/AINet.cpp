@@ -72,6 +72,8 @@ void UAINet::FileSendToAIServer(const FString& FilePath)
 			else
 			{
 				UE_LOG(LogTemp, Error, TEXT("Get STTText failed!!!"));
+				Me->SendRecordToAIServer(TEXT("이런, 통신이 원활하지 않습니다."));
+
 			}
 		});
 

@@ -184,6 +184,11 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category="Net")
 	class UAINet* AINetComp;
 
+	UPROPERTY(EditAnywhere, Category="VFX")
+	class UNiagaraComponent* ChargingRightHandComp;
+	UPROPERTY(EditAnywhere, Category="VFX")
+	class UNiagaraComponent* ChargingLeftHandComp;
+
 	FTimerHandle RecordHandle;
 
 	int32 MyNum;
@@ -216,7 +221,8 @@ private:
 	bool bAttack = false;
 
 	FVector OriginVector = FVector(0.f,0.f,-90.f);
-	FVector AttackVector = FVector(70.f,-80.f,-90.f);
+	UPROPERTY(EditAnywhere)
+	FVector AttackVector = FVector(25.f,-50.f,-90.f);
 
 	UFUNCTION(Server, Reliable)
 	void LoginSignal();
@@ -233,7 +239,10 @@ private:
 	class AHJS_BattleGameMode* GM;
 
 	FTimerHandle AINetTimerHandle;
-
+	
 	UFUNCTION()
 	void AINetReq();
+
+	UFUNCTION()
+	void MoveToChargingVFX();
 };

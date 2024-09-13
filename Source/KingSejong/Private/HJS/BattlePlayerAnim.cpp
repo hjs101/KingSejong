@@ -18,13 +18,15 @@ void UBattlePlayerAnim::PlayChargingMontage()
 
 void UBattlePlayerAnim::JumpMontageToAttack()
 {
+	bCharging = false;
+	Montage_Play(AttackMontage);
 	Montage_JumpToSection(TEXT("Attack"),AttackMontage);
 }
 
 void UBattlePlayerAnim::AnimNotify_ToCharging()
 {
 	bAttack = false;
-	Montage_Play(AttackMontage);
+	bCharging = true;
 }
 
 void UBattlePlayerAnim::AnimNotify_AttackEnd()
