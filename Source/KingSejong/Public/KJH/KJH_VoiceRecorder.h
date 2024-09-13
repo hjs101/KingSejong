@@ -21,8 +21,8 @@ protected:
 	virtual void BeginPlay() override;
 
 public:
-	const FString SaveFileName = "RecordVoiceFile_Question";
-	const FString SaveFilePath = "KJH";
+	const FString SaveFileName = FString(TEXT("Request_Chatbot"));
+	//const FString SaveFileDir = "Recording";
 
 private:
 	UPROPERTY()
@@ -31,14 +31,15 @@ private:
 	UPROPERTY(EditDefaultsOnly)
 	class USoundSubmix* SoundSubmix;
 
+	UPROPERTY()
+	class AKJH_HttpManager* HttpManager;
 
 public:
-
-	FString GetRecodeFilePath();
 
 	UFUNCTION(BlueprintCallable)
 	bool OnStartRecord();
 	UFUNCTION(BlueprintCallable)
 	bool OnStopRecord();
 
+	void SendToChatbot();
 };

@@ -4,6 +4,7 @@
 #include "KJH/API/KJH_HttpManager.h"
 #include "KJH/API/KJH_JsonParseLib.h"
 #include "HttpModule.h"
+#include "KJH/API/KJH_FileDataLib.h"
 
 // Sets default values
 AKJH_HttpManager::AKJH_HttpManager()
@@ -72,7 +73,7 @@ void AKJH_HttpManager::OnRes_AskByText(FHttpRequestPtr Request, FHttpResponsePtr
 /// </summary>
 /// <param name="BookName"> 책 이름</param>
 /// <param name="FilePath"> 보이스 파일 경로 </param>
-void AKJH_HttpManager::Req_AskByFileToChatbot(const FString& BookName, const FString& FilePath)
+void AKJH_HttpManager::Req_AskToChatbot(const FString& BookName, const FString& FilePath)
 {
 	FHttpModule& httpModule = FHttpModule::Get();
 	TSharedRef<IHttpRequest> req = httpModule.CreateRequest();
@@ -91,6 +92,8 @@ void AKJH_HttpManager::Req_AskByFileToChatbot(const FString& BookName, const FSt
 	TMap<FString, FString> data;
 	data.Add(TEXT("audio"), EncodingFileData);
 
+	UE_LOG(LogTemp, Warning, TEXT("파일 읽기 성공: %s"), *FilePath);
+
 	//UE_LOG(LogTemp, Warning, TEXT("Req_AskChatbotByWavFile Call!!: %s"), *Question);
 
 	// 요청 정보
@@ -100,30 +103,36 @@ void AKJH_HttpManager::Req_AskByFileToChatbot(const FString& BookName, const FSt
 	req->SetContentAsString(UKJH_JsonParseLib::MakeJson(data));
 
 	// 응답 처리
-	req->OnProcessRequestComplete().BindLambda([ this ] (FHttpRequestPtr Request, FHttpResponsePtr Response, bool bConnectedSuccessfully)
-	{
-		TMap<FString, FString> result;
-		if ( bConnectedSuccessfully )
-		{
-			FString res = Response->GetContentAsString();
-			result = UKJH_JsonParseLib::JsonParseChatbotAnswer(res);
-			UE_LOG(LogTemp, Warning, TEXT("OnRes_AskChatbotByFile Succeed!! : %s"), *result[ FString("hoonjang_text") ]);
-			
-			FString audio = result[FString("hoonjang_audio")];
-			FString text = result[FString("hoonjang_text")];
-
-			// 통신 성공
-			FOnResponseAskChatbotAnswerDelegate.Broadcast(true, audio, text);
-		}
-		else
-		{
-			// 통신 실패
-			FOnResponseAskChatbotAnswerDelegate.Broadcast(false, TEXT(""), TEXT(""));
-
-			UE_LOG(LogTemp, Warning, TEXT("Req_AskByFileToChatbot Failed!!"));
-		}
-	});
+	req->OnProcessRequestComplete().BindUObject(this, &AKJH_HttpManager::OnRes_AskToChatbot);
 
 	// 서버에 요청
 	req->ProcessRequest();
+}
+
+void AKJH_HttpManager::OnRes_AskToChatbot(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bConnectedSuccessfully)
+{
+	TMap<FString, FString> result;
+	if ( bConnectedSuccessfully )
+	{
+		FString res = Response->GetContentAsString();
+		result = UKJH_JsonParseLib::JsonParseChatbotAnswer(res);
+
+		FString audioData = result[TEXT("hoonjang_audio")];
+		FString text = result[TEXT("hoonjang_text")];
+
+		// 챗봇 wav 응답 저장
+		UKJH_FileDataLib::SaveBase64ToWavFile(audioData, ChatbotFileName);
+
+		// 통신 성공 호출
+		OnResponseAskChatbotAnswerDelegate.ExecuteIfBound(true, audioData, text);
+
+		UE_LOG(LogTemp, Warning, TEXT("OnRes_AskChatbotByFile Succeed!! : %s"), *text);
+	}
+	else
+	{
+		// 통신 실패
+		OnResponseAskChatbotAnswerDelegate.ExecuteIfBound(false, TEXT(""), TEXT(""));
+
+		UE_LOG(LogTemp, Warning, TEXT("Req_AskByFileToChatbot Failed!!"));
+	}
 }

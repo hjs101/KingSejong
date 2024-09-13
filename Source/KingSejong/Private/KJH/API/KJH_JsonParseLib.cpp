@@ -44,8 +44,11 @@ TMap<FString, FString> UKJH_JsonParseLib::JsonParseChatbotAnswer(const FString& 
 	TMap<FString, FString> result;
 	if ( FJsonSerializer::Deserialize(reader, response) )
 	{
-		result.Add(response->GetStringField(TEXT("hoonjang_audio")));
-		result.Add(response->GetStringField(TEXT("hoonjang_text")));
+		FString audio = response->GetStringField(TEXT("hoonjang_audio"));
+		FString text = response->GetStringField(TEXT("hoonjang_text"));
+
+		result.Add("hoonjang_audio", audio);
+		result.Add("hoonjang_text", text);
 	}
 
 	return result;

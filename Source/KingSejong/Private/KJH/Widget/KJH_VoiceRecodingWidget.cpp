@@ -27,7 +27,7 @@ void UKJH_VoiceRecodingWidget::NativeConstruct()
             BtnRecStop->OnClicked.AddDynamic(this, &UKJH_VoiceRecodingWidget::OnClickedBtnRecStop);
 
 
-            RecordingFilePath = fpath
+            //RecordingFilePath = fpath
 
 
             UE_LOG(LogTemp, Warning, TEXT("VoiceRecorder 를 바인딩!!!"));
@@ -35,8 +35,8 @@ void UKJH_VoiceRecodingWidget::NativeConstruct()
 
     }
 
-    // HttpManager
-    HttpManager = Cast<AKJH_HttpManager>(UGameplayStatics::GetActorOfClass(GetWorld(), AKJH_HttpManager::StaticClass()));
+    //// HttpManager
+    //HttpManager = Cast<AKJH_HttpManager>(UGameplayStatics::GetActorOfClass(GetWorld(), AKJH_HttpManager::StaticClass()));
 
 
 
@@ -73,35 +73,36 @@ void UKJH_VoiceRecodingWidget::OnClickedBtnRecStop()
 {
     if ( PlayerVoiceRecorder == nullptr ) return;
 
-    // 녹음 종료    
+    // 녹음 종료 및 저장
     bool bResult = PlayerVoiceRecorder->OnStopRecord();
 
     if ( bResult )
     {
         bIsRecording = false;
-
-        Req_Question();
-
-        //RemoveFromParent();
-    }
-}
-
-void UKJH_VoiceRecodingWidget::Req_Question()
-{
-    // 질문 API 호출
-    if ( HttpManager )
-    {
-        // 텍스트 소통
-        //FText text = EditTextBox_Question->GetText();
-        //HttpManager->Req_BookAnswer(TEXT(""), text.ToString());
-
-        
-
-        // 파일 전송
-        HttpManager->Req_AskByFileToChatbot(TEXT(""), TEXT(""));
-
         bIsRequest = true;
-    }
+        
+        PlayerVoiceRecorder->SendToChatbot();
+        // Req_Question();
 
-    RemoveFromParent();
+
+        RemoveFromParent();
+    }
 }
+
+//void UKJH_VoiceRecodingWidget::Req_Question()
+//{
+//    // 질문 API 호출
+//    if ( HttpManager )
+//    {
+//        // 텍스트 소통
+//        //FText text = EditTextBox_Question->GetText();
+//        //HttpManager->Req_BookAnswer(TEXT(""), text.ToString());
+//
+//        // 파일 전송
+//        HttpManager->Req_AskByFileToChatbot(TEXT(""), TEXT(""));
+//
+//        bIsRequest = true;
+//    }
+//
+//    RemoveFromParent();
+//}

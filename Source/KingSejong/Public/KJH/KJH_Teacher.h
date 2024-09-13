@@ -72,9 +72,10 @@ public:
 private:
 		
 	void CreateRecodingWidget();
+
 	void SetVisiblityStateWidget(bool bValue);
 
-	/**/
+	/* 질문하기 */
     UFUNCTION(Client, Reliable)
     void ClientRPC_CreateRecodingWidget();
 
@@ -84,7 +85,9 @@ private:
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastRPC_SetTeacherState(ETeacherState NewState);
 
-	/**/
+	/* 말풍선 */
+	void CastSpeechBubbleWidget();
+	
 	void SetSpeechBubbleText(FString Message);
 
 	UFUNCTION(Server, Reliable)
@@ -94,11 +97,11 @@ private:
 	void MulticastRPC_SetSpeechBubbleText(const FString& Message);
 
 	
-	void CastSpeechBubbleWidget();
 
 	FString GetMessageByTeacherState(ETeacherState NewState);
 
-	void OnRes_ChatbotResult(FString Message);
+	void OnRes_ChatbotResult(bool bResult, const FString& Audio, const FString& Text);
+
 
 	UFUNCTION()
 	void OnReq_TeacherState();

@@ -9,7 +9,7 @@
 #include "KJH_HttpManager.generated.h"
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnResponseBookAnswerSignature, FString);
-DECLARE_MULTICAST_DELEGATE_ThreeParams(FOnResponseAskChatbotAnswerSignature, bool, FString, FString);
+DECLARE_DELEGATE_ThreeParams(FOnResponseAskChatbotAnswerSignature, bool, const FString&, const FString&);
 
 
 UCLASS()
@@ -27,21 +27,22 @@ protected:
 
 public:
 	FOnResponseBookAnswerSignature OnResponseAskByTextDelegate;
-	FOnResponseAskChatbotAnswerSignature FOnResponseAskChatbotAnswerDelegate;
+	FOnResponseAskChatbotAnswerSignature OnResponseAskChatbotAnswerDelegate;
 
 private:
 	// 서버 URL
 	const FString ServerURL = "http://meta-ai.iptime.org:61457/janghoon";
-	const FString WavServerURL = "http://meta-ai.iptime.org:61457/hoonjang_wav";
+	const FString WavServerURL = "http://metaai.iptime.org:61457/hoonjang_wav";
 
+	const FString ChatbotFileName = FString(TEXT("Response_Chatbot"));
 
 public:	
 	void Req_AskByText(FString BookName, FString Question);
-	void Req_AskByFileToChatbot(const FString& BookName, const FString& FilePath);
+	void Req_AskToChatbot(const FString& BookName, const FString& FilePath);
 
 private:
 	
 	void OnRes_AskByText(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bConnectedSuccessfully);
-	void OnRes_AskByFileToChatbot(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bConnectedSuccessfully);
+	void OnRes_AskToChatbot(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bConnectedSuccessfully);
 
 };

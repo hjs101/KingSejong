@@ -59,7 +59,4 @@ private:
 	UFUNCTION(BlueprintCallable)
 	void OnClickedBtnRecStop();
 
-	UFUNCTION(BlueprintCallable)
-	void Req_Question();
-
 };

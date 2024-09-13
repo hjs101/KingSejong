@@ -4,6 +4,9 @@
 #include "KJH/KJH_VoiceRecorder.h"
 #include "AudioCaptureComponent.h"
 #include "AudioMixerBlueprintLibrary.h"
+#include "Kismet/GameplayStatics.h"
+#include "KJH/API/KJH_HttpManager.h"
+#include "KJH/API/KJH_FileDataLib.h"
 
 // Sets default values for this component's properties
 UKJH_VoiceRecorder::UKJH_VoiceRecorder()
@@ -22,13 +25,20 @@ void UKJH_VoiceRecorder::BeginPlay()
 	Super::BeginPlay();
 
 	AudioCaptureComp = GetOwner()->GetComponentByClass<UAudioCaptureComponent>();
+
+	// HttpManager
+	HttpManager = Cast<AKJH_HttpManager>(UGameplayStatics::GetActorOfClass(GetWorld(), AKJH_HttpManager::StaticClass()));
+
+
 	
 }
 
-FString UKJH_VoiceRecorder::GetRecodeFilePath()
-{
-	return FString();
-}
+//FString UKJH_VoiceRecorder::GetLocalRecodingFilePath()
+//{
+//	FString FilePath = FPaths::Combine(FPaths::ProjectSavedDir(), SaveFileDir, SaveFileName);
+//	
+//	return FilePath + FString(TEXT(".wav"));
+//}
 
 bool UKJH_VoiceRecorder::OnStartRecord()
 {
@@ -71,9 +81,28 @@ bool UKJH_VoiceRecorder::OnStopRecord()
 
 	AudioCaptureComp->Stop();
 
-	UAudioMixerBlueprintLibrary::StopRecordingOutput(GetWorld(), EAudioRecordingExportType::WavFile, SaveFileName, FString("KJH"), SoundSubmix);
+	FString FileDir = UKJH_FileDataLib::GetSaveWavFileDirectory();
+
+	UAudioMixerBlueprintLibrary::StopRecordingOutput(GetWorld(), EAudioRecordingExportType::WavFile, SaveFileName, FileDir, SoundSubmix);
 
 	UE_LOG(LogTemp, Warning, TEXT("OnStopRecord!!"));
 
 	return true;
+}
+
+void UKJH_VoiceRecorder::SendToChatbot()
+{
+	// 질문 API 호출
+	if ( HttpManager )
+	{
+		// 텍스트 소통
+		//FText text = EditTextBox_Question->GetText();
+		//HttpManager->Req_BookAnswer(TEXT(""), text.ToString());
+
+		FString filePath = UKJH_FileDataLib::GetSaveWavFilePath(SaveFileName);
+
+		// 파일 전송
+		HttpManager->Req_AskToChatbot(TEXT(""), filePath);
+	}
+
 }
