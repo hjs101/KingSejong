@@ -60,20 +60,28 @@ public:
 	UPROPERTY()
 	class UKJH_SpeechBubbleWidget* SpeechBubbleWidget;
 
+	// API
 	UPROPERTY()
 	class AKJH_HttpManager* HttpManager;
+
+	// Audio
+	UPROPERTY(EditDefaultsOnly)
+	class UAudioComponent* AudioComp;
+
 
 public:
 	void SetTeacherState(ETeacherState NewState);
 	void SetTeacherStateToIdle();
 
 
-
 private:
 		
 	void CreateRecodingWidget();
 
-	void SetVisiblityStateWidget(bool bValue);
+
+		// 훈장님 상태 변경 이벤트 함수
+	UFUNCTION()
+	void OnReq_TeacherState();
 
 	/* 질문하기 */
     UFUNCTION(Client, Reliable)
@@ -97,12 +105,13 @@ private:
 	void MulticastRPC_SetSpeechBubbleText(const FString& Message);
 
 	
-
 	FString GetMessageByTeacherState(ETeacherState NewState);
 
-	void OnRes_ChatbotResult(bool bResult, const FString& Audio, const FString& Text);
+	// 훈장님 음성
+	void OnRes_ChatbotResult(bool bResult, const FString& AudioData, const FString& Text);
 
+	void OnFinishedTeacherVoiceAnswer();
 
-	UFUNCTION()
-	void OnReq_TeacherState();
+	void PlayTeacherVoiceAnswer();
+
 };

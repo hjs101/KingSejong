@@ -121,17 +121,24 @@ void AKJH_HttpManager::OnRes_AskToChatbot(FHttpRequestPtr Request, FHttpResponse
 		FString text = result[TEXT("hoonjang_text")];
 
 		// 챗봇 wav 응답 저장
-		UKJH_FileDataLib::SaveBase64ToWavFile(audioData, ChatbotFileName);
+		bool bIsSaveAudio = UKJH_FileDataLib::SaveBase64ToWavFile(audioData, ChatbotFileName);
 
 		// 통신 성공 호출
-		OnResponseAskChatbotAnswerDelegate.ExecuteIfBound(true, audioData, text);
+		if ( bIsSaveAudio )
+		{
+			OnResponseAskChatbotAnswerDelegate.ExecuteIfBound(true, audioData, text);
+			UE_LOG(LogTemp, Warning, TEXT("OnRes_AskChatbotByFile Succeed!! : %s"), *text);
 
-		UE_LOG(LogTemp, Warning, TEXT("OnRes_AskChatbotByFile Succeed!! : %s"), *text);
+		}
+		else
+		{
+			OnResponseAskChatbotAnswerDelegate.ExecuteIfBound(false, TEXT(""), TEXT(""));
+
+		}
 	}
 	else
 	{
 		// 통신 실패
-		OnResponseAskChatbotAnswerDelegate.ExecuteIfBound(false, TEXT(""), TEXT(""));
 
 		UE_LOG(LogTemp, Warning, TEXT("Req_AskByFileToChatbot Failed!!"));
 	}
