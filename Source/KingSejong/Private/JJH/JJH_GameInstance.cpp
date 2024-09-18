@@ -5,10 +5,12 @@
 #include "OnlineSubSystem.h"
 #include "../../../../Plugins/Online/OnlineSubsystem/Source/Public/Interfaces/OnlineSessionInterface.h"
 #include "OnlineSessionSettings.h"
-
+#include "../../../../Plugins/Online/OnlineBase/Source/Public/Online/OnlineSessionNames.h"
+#include "Online/CoreOnline.h"
 #include "JJH/LobbyWidget.h"
 
 const static FName SESSION_NAME = TEXT("My Session Game");
+const static FName SESSION_CATEGORY = TEXT("RUN");
 
 UJJH_GameInstance::UJJH_GameInstance()
 {
@@ -21,23 +23,16 @@ void UJJH_GameInstance::Init()
 	if (Subsystem)
 	{
 		SessionInterface = Subsystem->GetSessionInterface();
-		if ( SessionInterface )
-		{
-			SessionInterface->OnCreateSessionCompleteDelegates.AddUObject(this, &UJJH_GameInstance::OnCreateSessionComplete);
-			SessionInterface->OnDestroySessionCompleteDelegates.AddUObject(this, &UJJH_GameInstance::OnDestroySessionComplete);
-			SessionInterface->OnFindSessionsCompleteDelegates.AddUObject(this, &UJJH_GameInstance::OnFindSessionComplete);
-		}
 	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Found no Subsystem"));
-	}
+		
+	SessionInterface->OnCreateSessionCompleteDelegates.AddUObject(this, &UJJH_GameInstance::OnMyCreateSessionComplete);
+	SessionInterface->OnFindSessionsCompleteDelegates.AddUObject(this, &UJJH_GameInstance::OnMyFindSessionComplete);
 
 }
 
 void UJJH_GameInstance::LoadMenu()
 {
-	Lobby = CreateWidget<ULobbyWidget>(GetWorld(), MenuClass);
+	ULobbyWidget* Lobby = CreateWidget<ULobbyWidget>(GetWorld(), MenuClass);
 	
 	if(Lobby == nullptr) return;
 
@@ -54,38 +49,31 @@ void UJJH_GameInstance::LoadMenu()
 	PlayerController->bShowMouseCursor = true;
 
 	Lobby->SetMenuInterface(this);
-
-	
 }
 
-void UJJH_GameInstance::Host()
+//void UJJH_GameInstance::Host()
+//{
+//	if ( SessionInterface.IsValid() )
+//	{
+//		auto ExistingSession = SessionInterface->GetNamedSession(SESSION_NAME);
+//		if ( ExistingSession != nullptr )
+//		{
+//			SessionInterface->DestroySession(SESSION_NAME);
+//		}
+//		else
+//		{
+//			//CreateSession();
+//		}
+//	}
+//}
+
+void UJJH_GameInstance::JoinToSession(int32 Index)
 {
-	if ( SessionInterface.IsValid() )
-	{
-		auto ExistingSession = SessionInterface->GetNamedSession(SESSION_NAME);
-		if ( ExistingSession != nullptr )
-		{
-			SessionInterface->DestroySession(SESSION_NAME);
-		}
-		else
-		{
-			CreateSession();
-		}
-	}
+	auto result = SessionSearch->SearchResults[Index];
+	SessionInterface->JoinSession(0, FName(MySessionName), result);
 }
 
-void UJJH_GameInstance::Join(const FString& Address)
-{
-	UEngine* Engine = GetEngine();
-	if ( !ensure(Engine != nullptr) ) return;
-	Engine->AddOnScreenDebugMessage(0, 5, FColor::Green, FString::Printf(TEXT("Joining %s"), *Address));
-	APlayerController* PlayerController = GetFirstLocalPlayerController();
-	if ( !ensure(PlayerController != nullptr) ) return;
-
-	PlayerController->ClientTravel(Address, ETravelType::TRAVEL_Absolute);
-}
-
-void UJJH_GameInstance::CreateSession()
+void UJJH_GameInstance::CreateSession(const FString& RoomName, int32 PlayerCount)
 {
 	if ( SessionInterface )
 	{
@@ -113,18 +101,18 @@ void UJJH_GameInstance::CreateSession()
 		//6. 몇명이 접속할래?
 		SessionSettings.NumPublicConnections = PlayerCount;
 
-
 		// 세션 설정 시 카테고리 지정 -> 추후에 
-		//settings.Set(FName("Category"), FName("달리기"), EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
-		//settings.Set(FName("Room_Name"), roomName, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
-		//settings.Set(FName("Host_Name"), MySessionName, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
+		SessionSettings.Set<FString>(FName("Category"), SESSION_CATEGORY.ToString(), EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
+		SessionSettings.Set<FString>(FName("Room_Name"), RoomName, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
+		SessionSettings.Set<FString>(FName("Host_Name"), SESSION_NAME.ToString(), EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
 
 		FUniqueNetIdPtr netID = GetWorld()->GetFirstLocalPlayerFromController()->GetUniqueNetIdForPlatformUser().GetUniqueNetId();
 		SessionInterface->CreateSession(*netID, SESSION_NAME, SessionSettings);
+		UE_LOG(LogTemp, Warning, TEXT("123"));
 	}
 }
 
-void UJJH_GameInstance::OnCreateSessionComplete(FName SessionName, bool Success)
+void UJJH_GameInstance::OnMyCreateSessionComplete(FName SessionName, bool Success)
 {
 	if ( !Success )
 	{
@@ -136,23 +124,67 @@ void UJJH_GameInstance::OnCreateSessionComplete(FName SessionName, bool Success)
 	GetWorld()->ServerTravel("/Game/JJH/ProtoRunningMap?listen");
 }
 
-void UJJH_GameInstance::OnDestroySessionComplete(FName SessionName, bool Success)
+void UJJH_GameInstance::OnMyDestroySessionComplete(FName SessionName, bool Success)
 {
-	//파괴에 성공하면 다시 만들기
-	if ( Success )
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Session Destroyed"));
-		CreateSession();
-	}
+	////파괴에 성공하면 다시 만들기
+	//if ( Success )
+	//{
+	//	UE_LOG(LogTemp, Warning, TEXT("Session Destroyed"));
+	//	CreateSession(SessionName, PlayerCount);
+	//}
 }
 
-void UJJH_GameInstance::OnFindSessionComplete(bool Success)
+void UJJH_GameInstance::OnMyFindSessionComplete(bool Success)
 {
-	
+	if ( Success )
+	{
+		//방 만든 결과들 배열에 담아서
+		TArray<FOnlineSessionSearchResult> results = SessionSearch->SearchResults;
+		for ( int32 i = 0; i < results.Num(); i++ )
+		{
+			if ( false == results[ i ].IsValid() )
+			{
+				continue;
+			}
+			//방 정보
+			FRoomInfo roomInfo;
+			//카테고리
+			FString categoryString;
+			if ( results[ i ].Session.SessionSettings.Get<FString>(FName("Category"), categoryString) )
+			{
+				if ( categoryString == "Run" )
+					roomInfo.RoomCategory = ERoomCategory::Run;
+				else if ( categoryString == "Battle" )
+					roomInfo.RoomCategory = ERoomCategory::Battle;
+				else if ( categoryString == "Talk" )
+					roomInfo.RoomCategory = ERoomCategory::Talk;
+			}
+			roomInfo.index = i;
+
+			FString roomNameString;
+			results[ i ].Session.SessionSettings.Get<FString>(FName("Room_Name"), roomNameString);
+			roomInfo.roomName = roomNameString;
+
+			FString hostNameString;
+			results[ i ].Session.SessionSettings.Get<FString>(FName("Host_Name"), hostNameString);
+			roomInfo.hostName = hostNameString;
+			//최대 플레이어 수
+			roomInfo.MaxPlayerCount = results[ i ].Session.SessionSettings.NumPublicConnections;
+			//입장 가능한 플레이어 최대 - 지금
+			roomInfo.CurrentPlayerCount = roomInfo.MaxPlayerCount - results[ i ].Session.NumOpenPublicConnections;
+			//핑 정보
+			roomInfo.pingMS = results[ i ].PingInMs;
+
+
+			//델리게이트 룸 생성
+			if(OnSearchSignatureCompleteDelegate.IsBound()) OnSearchSignatureCompleteDelegate.Broadcast(roomInfo);
+		}
+	}
 }
 
 //void UJJH_GameInstance::OnJoinSessionComplete(FName SessionName, EOnJoinSessionCompleteResult::Type Result)
 //{
-
+//
 //}
+
 
