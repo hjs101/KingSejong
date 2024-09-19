@@ -59,6 +59,7 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void LoadMenu();
+
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<class ULobbyWidget> MenuClass;
 
@@ -69,7 +70,9 @@ public:
 	IOnlineSessionPtr SessionInterface;
 
 	//방생성
-	void CreateSession(const FString& RoomName, int32 PlayerCount) override;
+	void CreateSession(const FString& RoomName, int32 PlayerCount, const FString& Category) override;
+	
+	void FindOtherSessions();
 	//방찾기
 	void FindSession();
 
@@ -82,6 +85,8 @@ public:
 	//방 조인하기
 	virtual void JoinToSession(int32 Index) override;
 
+	//방 부수기
+	void DestroySession();
 	//델리게이트
 	void OnMyCreateSessionComplete(FName SessionName, bool Success);
 	void OnMyDestroySessionComplete(FName SessionName, bool Success);
@@ -90,6 +95,8 @@ public:
 	
 	//델리게이트 걸기
 	FSearchSignature OnSearchSignatureCompleteDelegate;
-	//방 조인 델리게이트
-	//void OnJoinSessionComplete(FName SessionName, EOnJoinSessionCompleteResult::Type Result);
+
+	FString CategoryValue;
+	FString RoomNameValue;
+	FString HostNameValue;
 };

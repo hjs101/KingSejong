@@ -9,6 +9,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/Actor.h"
 #include "Engine/World.h"
+#include "JJH/JJH_GameInstance.h"
 
 void ARunningGameModeBase::BeginPlay()
 {
@@ -16,9 +17,9 @@ void ARunningGameModeBase::BeginPlay()
 
 	bUseSeamlessTravel = true;
 
-	FTimerHandle QuizTimer;
-	//3초이따 퀴즈띄우기
-	GetWorld()->GetTimerManager().SetTimer(QuizTimer, this, &ARunningGameModeBase::StartQuiz, 3.f, false);
+	//FTimerHandle QuizTimer;
+	////3초이따 퀴즈띄우기
+	//GetWorld()->GetTimerManager().SetTimer(QuizTimer, this, &ARunningGameModeBase::StartQuiz, 3.f, false);
 
 }
 
@@ -192,12 +193,61 @@ void ARunningGameModeBase::CheckAnswer(const FString& UserAnswer , ARunnerContro
 	if ( UserAnswer.Equals(CorrectAnswer) )
 	{
 		MulticastShowTeachSpeak(true);
+
 	}
 	else
 	{
 		MulticastShowTeachSpeak(false);
 		FTimerHandle MovePlayerTimerHandle;
 		GetWorld()->GetTimerManager().SetTimer(MovePlayerTimerHandle, this, &ARunningGameModeBase::MoveToNextPlayer, 2.0f, false);
+	}
+}
+
+void ARunningGameModeBase::EndGameAndReturnToLobby(ARunnerController* WinningPlayer)
+{
+	// 게임 인스턴스를 통해 세션 파괴
+	UJJH_GameInstance* GameInstance = Cast<UJJH_GameInstance>(GetGameInstance());
+	if ( GameInstance )
+	{
+		UE_LOG(LogTemp, Error, TEXT("ㅁㄴㅇㅁㄴㅇ1"));
+		GameInstance->DestroySession();
+	}
+	UE_LOG(LogTemp, Error, TEXT("ㅁㄴㅇㅁㄴㅇ2"));
+	// 모든 플레이어에게 게임 종료를 알림
+	//MulticastEndGame(WinningPlayer);
+
+	// 일정 시간 후 로비로 돌아가기(5초)
+	FTimerHandle ReturnToLobbyTimerHandle;
+	GetWorld()->GetTimerManager().SetTimer(ReturnToLobbyTimerHandle, [ this ] ()
+	{
+		for ( FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It )
+		{
+			ARunnerController* PlayerController = Cast<ARunnerController>(It->Get());
+			if ( PlayerController )
+			{
+				PlayerController->ClientReturnToLobby();
+			}
+		}
+	}, 5.0f, false);  // 5초 후 로비로 돌아감
+}
+
+
+void ARunningGameModeBase::PostLogin(APlayerController* NewPlayer)
+{
+	Super::PostLogin(NewPlayer);
+
+	CurrentPlayerCount++;
+	CheckAndStartQuiz();
+}
+
+void ARunningGameModeBase::CheckAndStartQuiz()
+{
+	if ( !bQuizStarted && CurrentPlayerCount >= RequiredPlayerCount )
+	{
+		bQuizStarted = true;
+
+		FTimerHandle QuizTimer;
+		GetWorld()->GetTimerManager().SetTimer(QuizTimer, this, &ARunningGameModeBase::StartQuiz, 3.f, false);
 	}
 }
 

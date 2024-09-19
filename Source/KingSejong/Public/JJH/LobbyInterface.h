@@ -22,7 +22,7 @@ class KINGSEJONG_API ILobbyInterface
 
 public:
     // Add interface functions to this class. This is the class that will be inherited to implement this interface.
-    virtual void CreateSession(const FString& RoomName, int32 PlayerCount) = 0;
+    virtual void CreateSession(const FString& RoomName, int32 PlayerCount, const FString& Category) = 0;
 
     virtual void JoinToSession(int32 Index) = 0;
 };

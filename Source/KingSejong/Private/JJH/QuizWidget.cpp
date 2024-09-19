@@ -189,17 +189,17 @@ void UQuizWidget::ShowTeacherSpeak(bool bIsCorrect)
 	{
 		Teacher->SetBrushFromTexture(SmileTeacher);
 		TeacherText->SetText(FText::FromString(TEXT("대단하구나!")));
-		
-		GetWorld()->GetTimerManager().SetTimer(TeacherSpeakTimer, this , &UQuizWidget::HideTeacherSpeak , 2.0f , false);
+
 	}
 	else
 	{
 		Teacher->SetBrushFromTexture(AngryTeacher);
 		TeacherText->SetText(FText::FromString(TEXT("아니다 욘석아")));
 		PlayAnimation(TeacherAngry , 0 , 1 , EUMGSequencePlayMode::PingPong);
-		GetWorld()->GetTimerManager().SetTimer(TeacherSpeakTimer , this , &UQuizWidget::HideTeacherSpeak , 2.0f , false);
 		GEngine->AddOnScreenDebugMessage(-1 , 5.f , FColor::Blue , FString::Printf(TEXT("false")));
 	}
+
+	GetWorld()->GetTimerManager().SetTimer(TeacherSpeakTimer, this, &UQuizWidget::HideTeacherSpeak, 2.0f, false);
 }
 
 void UQuizWidget::HideTeacherSpeak()
