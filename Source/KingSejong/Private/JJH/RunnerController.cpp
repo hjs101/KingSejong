@@ -7,6 +7,7 @@
 #include "Components/EditableTextBox.h"
 #include "Components/CanvasPanel.h"
 #include "JJH/RunningGameModeBase.h"
+#include "Kismet/GameplayStatics.h"
 
 void ARunnerController::BeginPlay()
 {
@@ -210,4 +211,9 @@ void ARunnerController::ClientUpdateTextBoxContent_Implementation(const FString&
         QuizWidgetInstance->UpdateTextBoxContent(TextContent);  // 위젯의 텍스트박스 내용 업데이트
     }
 
+}
+void ARunnerController::ClientReturnToLobby_Implementation()
+{
+    // 로비 레벨로 이동
+    UGameplayStatics::OpenLevel(this, FName("TestLobby"));
 }

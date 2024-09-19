@@ -79,4 +79,7 @@ public:
 
 	UFUNCTION(Client , Reliable)
 	void ClientShowInitials();
+
+	UFUNCTION(Client, Reliable)
+	void ClientReturnToLobby();
 };
