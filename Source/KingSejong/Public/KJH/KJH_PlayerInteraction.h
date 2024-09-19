@@ -29,6 +29,9 @@ public:
 
 private:
 	UPROPERTY()
+	class AKJH_PlayerController* MyPlayerController;
+
+	UPROPERTY()
 	class AKJH_Player* MyActor;
 
 	UPROPERTY()
@@ -64,8 +67,9 @@ private:
 	bool IsInteractableActor(class AKJH_InteractiveActor* OtherActor);
 
 public:
+
 	UFUNCTION(Server, Reliable)
-	void ServerRPCInteractiveActor(class AKJH_InteractiveActor* TargetActor , class AKJH_Player* PlayerActor);
+	void ServerRPC_InteractiveActor(class AKJH_InteractiveActor* TargetActor , class AKJH_PlayerController* PC);
 
 
 };

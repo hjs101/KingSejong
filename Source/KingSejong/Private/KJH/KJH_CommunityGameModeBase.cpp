@@ -28,7 +28,7 @@ void AKJH_CommunityGameModeBase::BeginPlay()
     }
 
     //GetAllPlayers();
-    //SetCommunityState(ECommunityState::Debate);
+    //SetCommunityState(ECommunityState::Quiz);
 
     //FTimerHandle timerHandle;
     //GetWorld()->GetTimerManager().SetTimer(timerHandle, this, &AKJH_CommunityGameModeBase::SetAllPlayersPosition, 10, false);
@@ -36,8 +36,12 @@ void AKJH_CommunityGameModeBase::BeginPlay()
 
 void AKJH_CommunityGameModeBase::GetAllPlayers()
 {
+    // 모든 플레이어 컨트롤러 정보 가져오기
+
+
     TArray<AActor*> players;
     UGameplayStatics::GetAllActorsOfClass(GetWorld(), AKJH_Player::StaticClass(), players);
+
 
     for(auto player : players)
     {
@@ -48,21 +52,21 @@ void AKJH_CommunityGameModeBase::GetAllPlayers()
         }
     }
 
-    UE_LOG(LogTemp, Warning, TEXT("GetAllPlayers Call!!"));
+    //UE_LOG(LogTemp, Warning, TEXT("GetAllPlayers Call!!"));
 }
-
-void AKJH_CommunityGameModeBase::SetCommunityState(ECommunityState NewState)
-{
-    if(CommunityState == NewState) return;
-
-    CommunityState = NewState;
-
-    FTransform TargetTr = CommunityState == ECommunityState::Debate ? PlayerStartTr : QuizStartTr;
-
-    SetAllPlayersPosition(TargetTr);
-
-    UE_LOG(LogTemp, Warning, TEXT("CommunityState : %d"), CommunityState);
-}
+//
+//void AKJH_CommunityGameModeBase::SetCommunityState(ECommunityState NewState)
+//{
+//    if(CommunityState == NewState) return;
+//
+//    CommunityState = NewState;
+//
+//    FTransform TargetTr = CommunityState == ECommunityState::Debate ? PlayerStartTr : QuizStartTr;
+//
+//    SetAllPlayersPosition(TargetTr);
+//
+//    UE_LOG(LogTemp, Warning, TEXT("CommunityState : %d"), CommunityState);
+//}
 
 void AKJH_CommunityGameModeBase::SetAllPlayersPosition(FTransform& TargetTransform)
 {

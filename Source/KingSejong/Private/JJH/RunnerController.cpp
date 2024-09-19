@@ -94,7 +94,7 @@ void ARunnerController::ClientSpectatePlayer_Implementation(AActor* TargetPlayer
         {
             QuizWidgetInstance->HideLoading();
         }
-        GEngine->AddOnScreenDebugMessage(-1 , 5.f , FColor::Red , TEXT("1111"));
+        //GEngine->AddOnScreenDebugMessage(-1 , 5.f , FColor::Red , TEXT("1111"));
     }
 }
 

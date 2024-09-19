@@ -7,14 +7,15 @@
 #include "GameFramework/PlayerController.h"
 #include "EnhancedInputSubsystems.h"
 #include "EnhancedInputComponent.h"
+#include "Kismet/GameplayStatics.h"
+#include "Net/UnrealNetwork.h"
 #include "KJH/KJH_PlayerInteraction.h"
 #include "KJH/KJH_PlayerAnimInstance.h"
-#include "Blueprint/UserWidget.h"
-#include "Net/UnrealNetwork.h"
 #include "KJH/KJH_VoiceRecorder.h"
 #include "KJH/KJH_CommunityGameModeBase.h"
 #include "KJH/API/KJH_HttpManager.h"
-#include "Kismet/GameplayStatics.h"
+#include "KJH/KJH_PlayerQuizHandler.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 
 // Sets default values
@@ -38,6 +39,7 @@ AKJH_Player::AKJH_Player()
 
 	InteractionComp = CreateDefaultSubobject<UKJH_PlayerInteraction>(TEXT("InteractionComp"));
 	VoiceRecorderComp = CreateDefaultSubobject<UKJH_VoiceRecorder>(TEXT("VoiceRecorderComp"));
+	QuizHandlerComp = CreateDefaultSubobject<UKJH_PlayerQuizHandler>(TEXT("QuizHandlerComp"));
 
 }
 
@@ -68,13 +70,6 @@ void AKJH_Player::BeginPlay()
 void AKJH_Player::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
-	//FTransform t = FTransform(GetControlRotation());
-	//Direction = t.TransformVector(Direction);
-	//Direction.Z = 0;
-
-	//AddMovementInput(Direction);
-	//Direction = FVector::ZeroVector;
 }
 
 // Called to bind functionality to input
@@ -133,26 +128,30 @@ void AKJH_Player::OnActionJump(const FInputActionValue& value)
 {
 	Jump();
 
-	OnEndSitDelegate.Broadcast();
-	//OnEndSit();
+	UE_LOG(LogTemp, Warning, TEXT("Jump!!"));
+	if ( OnEndSitDelegate.IsBound() )
+	{
+		OnEndSitDelegate.Broadcast();
+		// OnEndSit();
+		UE_LOG(LogTemp, Warning, TEXT("OnEndSitDelegate!!"));
+	}
+	
 }
 
 void AKJH_Player::SetIsSit(bool bValue)
 {
-	//if ( HasAuthority() )
-	//{
-		bIsSit = bValue;
-	//}
+	bIsSit = bValue;
 }
 
-void AKJH_Player::OnStartSit()
+void AKJH_Player::OnStartSit(FVector TargetLoc, FRotator TargetRot)
 {
 	if (PlayerAnim == nullptr) return;
 	if (bIsSit) return;
 
-	//PlayerAnim->SetSitState(true);
-	SetIsSit(true);
+	GetCharacterMovement()->bOrientRotationToMovement = false;
+	SetActorLocationAndRotation(TargetLoc, TargetRot);
 
+	SetIsSit(true);
 }
 
 void AKJH_Player::OnEndSit()
@@ -160,9 +159,8 @@ void AKJH_Player::OnEndSit()
 	if (PlayerAnim == nullptr) return;
 	if (bIsSit == false) return;
 
-	
-	//PlayerAnim->SetSitState(false);
-	//bIsSit = false;
+	GetCharacterMovement()->bOrientRotationToMovement = true;
+
 	SetIsSit(false);
 }
 

@@ -22,6 +22,7 @@ public:
 	void FileUploadToFirebase(const FString& FilePath, const FString& FileName);
 	UFUNCTION()
 	void FileDownloadFromFirebase(const FString& SavePath, const FString& FileName);
+	UPROPERTY()
 	class AHJS_BattlePlayer* Me;
 protected:
 	// Called when the game starts
@@ -35,5 +36,8 @@ private:
 	void OnAnonymousLoginComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful);
 
 
+public:
+
 
 };
+ 

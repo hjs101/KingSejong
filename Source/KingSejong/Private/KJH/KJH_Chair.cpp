@@ -25,6 +25,7 @@ AKJH_Chair::AKJH_Chair()
 void AKJH_Chair::BeginPlay()
 {
 	Super::BeginPlay();
+;
 }
 
 void AKJH_Chair::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -34,11 +35,12 @@ void AKJH_Chair::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifeti
 	DOREPLIFETIME(AKJH_Chair, TargetPlayer);
 }
 
+
 void AKJH_Chair::OnBeginInteraction(AActor* OtherActor)
 {
 	Super::OnBeginInteraction(OtherActor);
 
-	SetOwner(OtherActor);
+	// SetOwner(OtherActor);
 	ServerSitDown(OtherActor);
 
 }
@@ -58,7 +60,6 @@ bool AKJH_Chair::IsInteractable()
 void AKJH_Chair::ServerSitDown_Implementation(AActor* OtherActor)
 {
 	
-
 	DebugLog(TEXT("ServerSitDown_Implementation!!!!"));
 
 	MulticastSitDown(OtherActor);
@@ -68,7 +69,6 @@ void AKJH_Chair::ServerSitDown_Implementation(AActor* OtherActor)
 void AKJH_Chair::MulticastSitDown_Implementation(AActor* OtherActor)
 {
 	DebugLog(TEXT("MulticastSitDown_Implementation!!!"));
-
 
 	if ( TargetPlayer )
 	{
@@ -80,16 +80,13 @@ void AKJH_Chair::MulticastSitDown_Implementation(AActor* OtherActor)
 
 	if ( TargetPlayer )
 	{
-		TargetPlayer->SetActorLocationAndRotation(SitArrowComp->GetComponentLocation(), SitArrowComp->GetComponentRotation());
-		TargetPlayer->OnStartSit();
-		TargetPlayer->OnEndSitDelegate.AddDynamic(this, &AKJH_Chair::OnEndInteraction);
+		TargetPlayer->OnStartSit(SitArrowComp->GetComponentLocation(), SitArrowComp->GetComponentRotation());
+
+		TargetPlayer->OnEndSitDelegate.AddUObject(this, &AKJH_Chair::OnEndInteraction);
 
 		FString msg = FString::Printf(TEXT("%s에 %d가 앉았습니다."), *this->GetName(), TargetPlayer->GetUniqueID());
 		DebugLog(msg);
 	}
-	//UE_LOG(LogTemp, Warning, TEXT("%s에 %s가 앉았습니다."), *this->GetName(), *TargetPlayer->GetName());
-
-	//SetOwner(OtherActor);
 }
 
 
@@ -106,11 +103,12 @@ void AKJH_Chair::MulticastStandUp_Implementation()
 		return;
 	}
 
-	
+
 	FString msg = FString::Printf(TEXT("%s가 %s에서 일어났습니다."), *TargetPlayer->GetName(), *this->GetName());
 	DebugLog(msg);
 
 	TargetPlayer->OnEndSit();
+	TargetPlayer->OnEndSitDelegate.RemoveAll(this);
     TargetPlayer = nullptr;
 
 	SetOwner(nullptr);
@@ -133,5 +131,7 @@ void AKJH_Chair::DebugLog(FString Message)
 
 	}
 
-	GEngine->AddOnScreenDebugMessage(-1, 100, color, message);
+	UE_LOG(LogTemp, Warning, TEXT("%s"), *message);
+
+	 //GEngine->AddOnScreenDebugMessage(-1, 100, color, message);
 }

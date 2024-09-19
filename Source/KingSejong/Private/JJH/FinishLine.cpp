@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "JJH/FinishLine.h"
@@ -23,7 +23,7 @@ AFinishLine::AFinishLine()
 
 void AFinishLine::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-    GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("Overlapped"));
+    //GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("Overlapped"));
     // 플레이어가 오버랩 되었는지 확인
     if (OtherActor && OtherActor != this)
     {
