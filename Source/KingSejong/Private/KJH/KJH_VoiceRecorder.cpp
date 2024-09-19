@@ -104,5 +104,4 @@ void UKJH_VoiceRecorder::SendToChatbot()
 		// 파일 전송
 		HttpManager->Req_AskToChatbot(TEXT(""), filePath);
 	}
-
 }

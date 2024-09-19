@@ -42,21 +42,29 @@ public:
 	UPROPERTY(ReplicatedUsing = OnReq_TeacherState)
 	ETeacherState TeacherState = ETeacherState::Idle;
 
+	//UPROPERTY(Replicated)
+	//FString TeacherMessage;
+	//UPROPERTY(Replicated)
+	//FString TeacherAudioId;
+	
+	UPROPERTY(EditDefaultsOnly)
+	float AnswerDelayTime = 5;
+
+	// Component
 	UPROPERTY(EditDefaultsOnly)
 	class UCapsuleComponent* CapsuleComp;
 	UPROPERTY(EditDefaultsOnly)
 	class USkeletalMeshComponent* SkeletalMeshComp;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	class UAudioComponent* AudioComp;
 
 	// UI
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<UUserWidget> RecodingWidgetFactory;
-
 	UPROPERTY()
 	class UKJH_VoiceRecodingWidget* RecodingWidget;
-
 	UPROPERTY(EditDefaultsOnly)
 	class UWidgetComponent* StateWidgetComp;
-
 	UPROPERTY()
 	class UKJH_SpeechBubbleWidget* SpeechBubbleWidget;
 
@@ -64,12 +72,14 @@ public:
 	UPROPERTY()
 	class AKJH_HttpManager* HttpManager;
 
-	// Audio
-	UPROPERTY(EditDefaultsOnly)
-	class UAudioComponent* AudioComp;
 
+
+private:
+	class AKJH_CommunityGameState* MyGameState;
 
 public:
+
+	UFUNCTION(BlueprintCallable)
 	void SetTeacherState(ETeacherState NewState);
 	void SetTeacherStateToIdle();
 
@@ -104,14 +114,22 @@ private:
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastRPC_SetSpeechBubbleText(const FString& Message);
 
+	/* 음성 데이터 가져오기*/
+	void GetChatbotAudioData();
+
+	UFUNCTION(Server, Reliable)
+	void ServerRPC_GetChatbotAudioData();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastRPC_GetChatbotAudioData();
 	
 	FString GetMessageByTeacherState(ETeacherState NewState);
 
 	// 훈장님 음성
-	void OnRes_ChatbotResult(bool bResult, const FString& AudioData, const FString& Text);
+	void OnRes_ChatbotResult(bool bResult, const FString& AudioId, const FString& Text);
+	void OnRes_ChatbotAudioData(const FString& AudioData);
 
-	void OnFinishedTeacherVoiceAnswer();
-
-	void PlayTeacherVoiceAnswer();
+	void OnSuccessedChatbotResponse();
+	void OnFailedChatbotResponse();
 
 };

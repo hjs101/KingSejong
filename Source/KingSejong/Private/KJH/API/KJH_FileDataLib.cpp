@@ -2,6 +2,7 @@
 
 
 #include "KJH/API/KJH_FileDataLib.h"
+
 #include "string"
 
 bool UKJH_FileDataLib::SaveBase64ToWavFile(const FString& Base64Data, const FString& FileName)
@@ -42,6 +43,34 @@ FString UKJH_FileDataLib::GetSaveWavFilePath(const FString& FileName)
 }
 
 
+USoundWaveProcedural* UKJH_FileDataLib::CreateSoundWaveToAudioData(const FString& AudioData)
+{
+	// Base64 디코딩
+	TArray<uint8> DecodedData;
+	if ( !FBase64::Decode(AudioData, DecodedData) )
+	{
+		UE_LOG(LogTemp, Error, TEXT("Base64 디코딩에 실패했습니다."));
+		return nullptr;
+	}
+	// 새로운 SoundWave 객체 생성
+	USoundWaveProcedural* SoundWaveProcedural = NewObject<USoundWaveProcedural>(USoundWaveProcedural::StaticClass());
+
+	if ( !SoundWaveProcedural )
+	{
+		UE_LOG(LogTemp, Error, TEXT("SoundWave 객체 생성에 실패했습니다."));
+		return nullptr;
+	}
+	// 샘플레이트와 채널 설정
+	SoundWaveProcedural->SetSampleRate(44100);  // 예시 샘플레이트
+	SoundWaveProcedural->NumChannels = 2;       // 스테레오
+
+	// 오디오 데이터를 SoundWaveProcedural로 전달
+	SoundWaveProcedural->QueueAudio(DecodedData.GetData(), DecodedData.Num());
+
+	return SoundWaveProcedural;
+}
+
+
 FString UKJH_FileDataLib::StringBase64Encode(const FString& str)
 {
 	// Set 할 때 : FString -> UTF8 (std::string) -> TArray<uint8> -> base64 로 Encode
@@ -59,4 +88,3 @@ FString UKJH_FileDataLib::StringBase64Decode(const FString& str)
 	std::string ut8String(( char* ) (arrayData.GetData()), arrayData.Num());
 	return UTF8_TO_TCHAR(ut8String.c_str());
 }
-

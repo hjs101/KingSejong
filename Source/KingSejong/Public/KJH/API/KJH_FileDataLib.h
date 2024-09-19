@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
+#include "Sound/SoundWaveProcedural.h"
 #include "KJH_FileDataLib.generated.h"
 
 /**
@@ -24,4 +25,6 @@ public:
 
 	static FString GetSaveWavFileDirectory();
 	static FString GetSaveWavFilePath(const FString& FileName);
+
+	static USoundWaveProcedural* CreateSoundWaveToAudioData(const FString& AudioData);
 };

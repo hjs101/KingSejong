@@ -26,29 +26,17 @@ void UKJH_VoiceRecodingWidget::NativeConstruct()
             BtnRecStart->OnClicked.AddDynamic(this, &UKJH_VoiceRecodingWidget::OnClickedBtnRecStart);
             BtnRecStop->OnClicked.AddDynamic(this, &UKJH_VoiceRecodingWidget::OnClickedBtnRecStop);
 
-
-            //RecordingFilePath = fpath
-
-
             UE_LOG(LogTemp, Warning, TEXT("VoiceRecorder 를 바인딩!!!"));
         }
 
     }
-
-    //// HttpManager
-    //HttpManager = Cast<AKJH_HttpManager>(UGameplayStatics::GetActorOfClass(GetWorld(), AKJH_HttpManager::StaticClass()));
-
-
-
-    //Btn_Question->OnClicked.AddDynamic(this, &UKJH_VoiceRecodingWidget::Req_Question);
-    
 }
 
 void UKJH_VoiceRecodingWidget::NativeDestruct()
 {
     Super::NativeDestruct();
 
-    if( OnCloseWidgetDelegate.IsBound()&& bIsRequest == false)
+    if( OnCloseWidgetDelegate.IsBound())
         OnCloseWidgetDelegate.Broadcast();
 
     if( bIsRecording && PlayerVoiceRecorder )
@@ -79,30 +67,9 @@ void UKJH_VoiceRecodingWidget::OnClickedBtnRecStop()
     if ( bResult )
     {
         bIsRecording = false;
-        bIsRequest = true;
         
         PlayerVoiceRecorder->SendToChatbot();
-        // Req_Question();
-
 
         RemoveFromParent();
     }
 }
-
-//void UKJH_VoiceRecodingWidget::Req_Question()
-//{
-//    // 질문 API 호출
-//    if ( HttpManager )
-//    {
-//        // 텍스트 소통
-//        //FText text = EditTextBox_Question->GetText();
-//        //HttpManager->Req_BookAnswer(TEXT(""), text.ToString());
-//
-//        // 파일 전송
-//        HttpManager->Req_AskByFileToChatbot(TEXT(""), TEXT(""));
-//
-//        bIsRequest = true;
-//    }
-//
-//    RemoveFromParent();
-//}

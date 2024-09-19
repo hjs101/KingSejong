@@ -2,8 +2,8 @@
 
 
 #include "KJH/API/KJH_HttpManager.h"
-#include "KJH/API/KJH_JsonParseLib.h"
 #include "HttpModule.h"
+#include "KJH/API/KJH_JsonParseLib.h"
 #include "KJH/API/KJH_FileDataLib.h"
 
 // Sets default values
@@ -22,6 +22,8 @@ void AKJH_HttpManager::BeginPlay()
 	//FString question = TEXT("인어공주는 마녀에게 뭘 주고 다리를 얻었어?");
 
 	//Req_BookAnswer(TEXT(""), question);
+
+	//MyGameState = Cast<AKJH_CommunityGameState>(GetWorld()->GetGameState());
 }
 
 /// <summary>
@@ -94,10 +96,9 @@ void AKJH_HttpManager::Req_AskToChatbot(const FString& BookName, const FString& 
 
 	UE_LOG(LogTemp, Warning, TEXT("파일 읽기 성공: %s"), *FilePath);
 
-	//UE_LOG(LogTemp, Warning, TEXT("Req_AskChatbotByWavFile Call!!: %s"), *Question);
-
 	// 요청 정보
-	req->SetURL(WavServerURL);
+	//req->SetURL(WavServerURL);
+	req->SetURL(TempChatbotTextServerURL);
 	req->SetVerb(TEXT("POST"));
 	req->SetHeader(TEXT("content-type"), TEXT("application/json"));
 	req->SetContentAsString(UKJH_JsonParseLib::MakeJson(data));
@@ -117,29 +118,94 @@ void AKJH_HttpManager::OnRes_AskToChatbot(FHttpRequestPtr Request, FHttpResponse
 		FString res = Response->GetContentAsString();
 		result = UKJH_JsonParseLib::JsonParseChatbotAnswer(res);
 
-		FString audioData = result[TEXT("hoonjang_audio")];
-		FString text = result[TEXT("hoonjang_text")];
+		if ( result.Contains(UKJH_JsonParseLib::TEXT_KEY) && result.Contains(UKJH_JsonParseLib::AUDIO_ID_KEY) )
+		{
+			FString text = result[ UKJH_JsonParseLib::TEXT_KEY ];
+			FString audioId = result[ UKJH_JsonParseLib::AUDIO_ID_KEY ];
+
+			if ( text.IsEmpty() == false && audioId.IsEmpty() == false )
+			{
+				OnResponseAskChatbotAnswerDelegate.ExecuteIfBound(true, audioId, text);
+			}
+			else
+			{
+				OnResponseAskChatbotAnswerDelegate.ExecuteIfBound(false, TEXT(""), TEXT(""));
+			}
+		}
 
 		// 챗봇 wav 응답 저장
-		bool bIsSaveAudio = UKJH_FileDataLib::SaveBase64ToWavFile(audioData, ChatbotFileName);
+		////bool bIsSaveAudio = UKJH_FileDataLib::SaveBase64ToWavFile(audioData, ChatbotFileName);
 
-		// 통신 성공 호출
-		if ( bIsSaveAudio )
-		{
-			OnResponseAskChatbotAnswerDelegate.ExecuteIfBound(true, audioData, text);
-			UE_LOG(LogTemp, Warning, TEXT("OnRes_AskChatbotByFile Succeed!! : %s"), *text);
+		//// 통신 성공 호출
+		//if ( bIsSaveAudio )
+		//{
+			//OnResponseAskChatbotAnswerDelegate.ExecuteIfBound(true, audioData, text);
+		//	UE_LOG(LogTemp, Warning, TEXT("OnRes_AskChatbotByFile Succeed!! : %s"), *text);
 
-		}
-		else
-		{
-			OnResponseAskChatbotAnswerDelegate.ExecuteIfBound(false, TEXT(""), TEXT(""));
+		//}
+		//else
+		//{
+		//	OnResponseAskChatbotAnswerDelegate.ExecuteIfBound(false, TEXT(""), TEXT(""));
 
-		}
+		//}
 	}
 	else
 	{
 		// 통신 실패
+		OnResponseAskChatbotAnswerDelegate.ExecuteIfBound(false, TEXT(""), TEXT(""));
 
 		UE_LOG(LogTemp, Warning, TEXT("Req_AskByFileToChatbot Failed!!"));
+	}
+}
+
+
+void AKJH_HttpManager::Req_GetChatbotAudioData(const FString& AudioId)
+{
+
+	FHttpModule& httpModule = FHttpModule::Get();
+	TSharedRef<IHttpRequest> req = httpModule.CreateRequest();
+
+	// 요청 정보
+	//req->SetURL(WavServerURL);
+	FString url = TempChatbotTextServerURL + FString::Printf(TEXT("\"%s\""), *AudioId);
+
+	UE_LOG(LogTemp, Warning, TEXT("GetChatbotAudio Request Url : %s"), *url);
+
+	req->SetURL(url);
+	req->SetVerb(TEXT("GET"));
+	req->SetHeader(TEXT("content-type"), TEXT("application/json"));
+
+	// 응답 처리
+	req->OnProcessRequestComplete().BindUObject(this, &AKJH_HttpManager::OnRes_GetChatbotAudioData);
+
+	// 서버에 요청
+	req->ProcessRequest();
+}
+
+
+void AKJH_HttpManager::OnRes_GetChatbotAudioData(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bConnectedSuccessfully)
+{
+	FString result;
+	if ( bConnectedSuccessfully )
+	{
+		FString res = Response->GetContentAsString();
+		result = UKJH_JsonParseLib::JsonParseChatbotAudioData(res);
+		
+		// Audio Data가 있을 경우
+		if ( result.IsEmpty() == false )
+		{
+			OnResponseGetAudioDataDelegate.ExecuteIfBound(result);
+
+			UE_LOG(LogTemp, Warning, TEXT("OnRes_GetChatbotAudioData Succeed!! : %s"), *result);
+		}
+		// Audio Data가 없을 경우
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("OnRes_GetChatbotAudioData Failed!!"));
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("OnRes_GetChatbotAudioData Failed!!"));
 	}
 }
