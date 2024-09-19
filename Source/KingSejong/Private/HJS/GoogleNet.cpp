@@ -70,7 +70,7 @@ void UGoogleNet::FileUploadToFirebase(const FString& FilePath, const FString& Fi
 		UE_LOG(LogTemp , Error , TEXT("파일 읽기 실패!: %s") , *FilePath);
 		return;
 	}
-
+    UE_LOG(LogTemp, Log, TEXT("File : %s"), *FilePath);
 	// HTTP 요청 생성
 	TSharedRef<IHttpRequest , ESPMode::ThreadSafe> HttpRequest = FHttpModule::Get().CreateRequest();
 	HttpRequest->SetURL(FirebaseStorageUrl + FileName + "?alt=media");
@@ -84,7 +84,7 @@ void UGoogleNet::FileUploadToFirebase(const FString& FilePath, const FString& Fi
 		{
 			if ( bWasSuccessful && Response->GetResponseCode() == 200 )
 			{
-				UE_LOG(LogTemp , Log , TEXT("File uploaded successfully")); \
+                UE_LOG(LogTemp, Log, TEXT("File uploaded successfully"));
 					// 이긴 쪽의 클라이언트에서 업로드가 완료되면 서버의 다운로드 함수를 부르기
 					Me->ServerDownloadSound(Me->RecordFileName);
 			}
@@ -129,7 +129,7 @@ void UGoogleNet::FileDownloadFromFirebase(const FString& SavePath, const FString
             }
             else
             {
-                UE_LOG(LogTemp, Error, TEXT("File download failed: %s"), *Response->GetContentAsString());
+                UE_LOG(LogTemp, Error, TEXT("File download failed!!"));
             }
         });
 

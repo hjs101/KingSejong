@@ -29,5 +29,7 @@ public:
 	FString Answer3;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Question")
 	FString Answer4;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Question")
+	FString Answer;
 };
  

@@ -51,7 +51,7 @@ public:
 	// 게임 시스템 구조 만들기
 	// 녹음 시간은 15초.
 
-    void SendRecordToAIServer();
+    void SendRecordToAIServer(const FString& Result);
 	FString STTResult = TEXT("안녕하세요");
 	// 2. STT 결과 텍스트를 서버(게임모드)에서 체크하여 승자를 가려내고, 승자의 어택 함수를 멀티캐스트로 발동시킨다.
 	UFUNCTION(Server, Reliable)
@@ -125,6 +125,9 @@ public:
 	UFUNCTION(Client, Reliable)
 	void AddMainUI();
 
+	UFUNCTION(client, Reliable)
+	void ClientMainTextSet(const FString& Text);
+
 	// 게임 시작 과정
 
 	// 1. 훈장님이 나와 튜토리얼을 진행함 ( 클라이언트로 )
@@ -151,6 +154,14 @@ public:
 
 	void OnMyTakeDamage(int32 Damage);
 
+	UPROPERTY()
+	int32 MaxHP = 3;
+
+	UPROPERTY()
+	int32 HP = MaxHP;
+
+	void ShowGameEndUI();
+
 private:
 	bool bIsRecording = false;
 
@@ -169,6 +180,9 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "Audio")
 	class USoundSubmix* RecordSound;
+
+	UPROPERTY(EditDefaultsOnly, Category="Net")
+	class UAINet* AINetComp;
 
 	FTimerHandle RecordHandle;
 
@@ -218,9 +232,8 @@ private:
 	UPROPERTY()
 	class AHJS_BattleGameMode* GM;
 
-	UPROPERTY()
-	int32 MaxHP = 3;
+	FTimerHandle AINetTimerHandle;
 
-	UPROPERTY()
-	int32 HP = MaxHP;
+	UFUNCTION()
+	void AINetReq();
 };

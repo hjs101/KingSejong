@@ -7,6 +7,8 @@
 #include "Camera/CameraComponent.h"
 #include "Blueprint/UserWidget.h"
 #include "KJH/KJH_InteractiveActor.h"
+#include "KJH/KJH_PlayerController.h"
+
 
 // Sets default values for this component's properties
 UKJH_PlayerInteraction::UKJH_PlayerInteraction()
@@ -15,8 +17,6 @@ UKJH_PlayerInteraction::UKJH_PlayerInteraction()
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
 	bWantsInitializeComponent = true;
-
-	//SetIsReplicatedByDefault(true);
 }
 
 void UKJH_PlayerInteraction::InitializeComponent()
@@ -28,6 +28,9 @@ void UKJH_PlayerInteraction::InitializeComponent()
 	{
 		MyActor->OnInputBindingDelegate.AddUObject(this, &UKJH_PlayerInteraction::SetupInputBinding);
 	}
+
+	MyPlayerController = Cast<AKJH_PlayerController>(GetWorld()->GetFirstPlayerController());
+
 }
 
 // Called when the game starts
@@ -92,9 +95,7 @@ void UKJH_PlayerInteraction::OnActionInteraction(const FInputActionValue& value)
 	if(HitActor == nullptr) return;
 	if(HitActor->IsInteractable() == false) return;
 
-	
-	ServerRPCInteractiveActor(HitActor, MyActor);
-
+	ServerRPC_InteractiveActor(HitActor, MyPlayerController);
 
 	UE_LOG(LogTemp, Warning, TEXT("OnActionInteraction!!"));
 }
@@ -130,8 +131,8 @@ bool UKJH_PlayerInteraction::IsInteractableActor(AKJH_InteractiveActor* OtherAct
 	return OtherActor && OtherActor->IsInteractable();
 }
 
-void UKJH_PlayerInteraction::ServerRPCInteractiveActor_Implementation(AKJH_InteractiveActor* TargetActor, AKJH_Player* PlayerActor)
+void UKJH_PlayerInteraction::ServerRPC_InteractiveActor_Implementation(AKJH_InteractiveActor* TargetActor, AKJH_PlayerController* PC)
 {
-	TargetActor->SetOwner(PlayerActor);
-	TargetActor->OnBeginInteraction(PlayerActor);
+	TargetActor->SetOwner(PC);
+	TargetActor->OnBeginInteraction(PC->GetPawn());
 }
