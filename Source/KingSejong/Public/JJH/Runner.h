@@ -79,5 +79,16 @@ public:
 	void MulticastTeleportForward(float Speed, float InputValue);
 	void MulticastTeleportForward_Implementation(float Speed, float InputValue);
 
+	//캐릭터 메시 업데이트
+	void UpdateCharacterMesh();
 
+	//메시 리플리케이트
+	UPROPERTY(ReplicatedUsing = OnRep_CharacterMesh)
+    class USkeletalMesh* CharacterMesh;
+
+    UFUNCTION()
+    void OnRep_CharacterMesh();
+
+    UFUNCTION(Server, Reliable)
+    void ServerSetCharacterMesh(USkeletalMesh* NewMesh);
 };

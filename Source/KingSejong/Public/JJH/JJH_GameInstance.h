@@ -99,4 +99,10 @@ public:
 	FString CategoryValue;
 	FString RoomNameValue;
 	FString HostNameValue;
+
+	UFUNCTION(BlueprintCallable, Category = "Character")
+	void SetSelectedCharacterMesh(USkeletalMesh* Mesh);
+
+	class USkeletalMesh* SelectedCharacterMesh;
+
 };

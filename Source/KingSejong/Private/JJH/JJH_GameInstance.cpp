@@ -257,4 +257,9 @@ void UJJH_GameInstance::OnMyJoinSessionComplete(FName SessionName, EOnJoinSessio
 	}
 }
 
+void UJJH_GameInstance::SetSelectedCharacterMesh(USkeletalMesh* Mesh)
+{
+	SelectedCharacterMesh = Mesh;
+}
+
 

@@ -8,6 +8,8 @@
 #include "Components/CanvasPanel.h"
 #include "JJH/RunningGameModeBase.h"
 #include "Kismet/GameplayStatics.h"
+#include "JJH/Runner.h"
+#include "JJH/CharacterSelectionWidget.h"
 
 void ARunnerController::BeginPlay()
 {
@@ -15,7 +17,20 @@ void ARunnerController::BeginPlay()
 
     //이걸 해야 복제됨
     bReplicates = true;
+
+
     // 서버에서 받은 데이터를 기반으로 위젯을 생성합니다.
+    if ( CharacterSelectionWidgetClass )
+    {
+        UCharacterSelectionWidget* Widget = CreateWidget<UCharacterSelectionWidget>(this, CharacterSelectionWidgetClass);
+        if ( Widget )
+        {
+            Widget->AddToViewport();
+            SetInputMode(FInputModeUIOnly());
+            bShowMouseCursor = true;
+        }
+    }
+
 }
 
 void ARunnerController::ClientCreateQuizWidget_Implementation(const FWordsData& QuizData)
@@ -216,4 +231,16 @@ void ARunnerController::ClientReturnToLobby_Implementation()
 {
     // 로비 레벨로 이동
     UGameplayStatics::OpenLevel(this, FName("TestLobby"));
+}
+
+void ARunnerController::OnPossess(APawn* aPawn)
+{
+    Super::OnPossess(aPawn);
+    
+    ARunner* MyCharacter = Cast<ARunner>(aPawn);
+    if ( MyCharacter )
+    {
+        MyCharacter->UpdateCharacterMesh();
+    }
+
 }

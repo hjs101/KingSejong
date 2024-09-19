@@ -82,4 +82,10 @@ public:
 
 	UFUNCTION(Client, Reliable)
 	void ClientReturnToLobby();
+
+	//이때 메시 바꾸기
+	virtual void OnPossess(APawn* aPawn) override;
+	//메시 선택 위젯 컨트롤러 비긴플레이에서 생성    
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
+    TSubclassOf<class UCharacterSelectionWidget> CharacterSelectionWidgetClass;
 };

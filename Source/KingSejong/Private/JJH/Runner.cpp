@@ -7,6 +7,8 @@
 #include "../../../../Plugins/EnhancedInput/Source/EnhancedInput/Public/EnhancedInputSubsystems.h"
 #include "../../../../Plugins/EnhancedInput/Source/EnhancedInput/Public/EnhancedInputComponent.h"
 #include "Engine/Engine.h"
+#include "JJH/JJH_GameInstance.h"
+#include "Net/UnrealNetwork.h"
 
 // Sets default values
 ARunner::ARunner()
@@ -41,6 +43,7 @@ void ARunner::BeginPlay()
 			subSys->AddMappingContext(IMC_Runner, 0);
 		}
 	}
+
 }
 
 // Called every frame
@@ -184,3 +187,32 @@ void ARunner::MulticastTeleportForward_Implementation(float Speed, float InputVa
 	SetActorLocation(GetActorLocation() + Direction * Speed);
 }
 
+void ARunner::UpdateCharacterMesh()
+{
+	UJJH_GameInstance* GameInstance = Cast<UJJH_GameInstance>(GetGameInstance());
+	if ( GameInstance && GameInstance->SelectedCharacterMesh )
+	{
+		GetMesh()->SetSkeletalMesh(GameInstance->SelectedCharacterMesh);
+	}
+}
+
+void ARunner::OnRep_CharacterMesh()
+{
+	if ( CharacterMesh )
+	{
+		GetMesh()->SetSkeletalMesh(CharacterMesh);
+	}
+}
+
+void ARunner::ServerSetCharacterMesh_Implementation(USkeletalMesh* NewMesh)
+{
+	CharacterMesh = NewMesh;
+	OnRep_CharacterMesh();
+}
+
+void ARunner::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	//캐릭터 메시 리플리케이트
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(ARunner, CharacterMesh);
+}
