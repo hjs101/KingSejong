@@ -105,4 +105,20 @@ public:
 
 	class USkeletalMesh* SelectedCharacterMesh;
 
+	//=============================메시
+	//UPROPERTY()
+ //   USkeletalMesh* SelectedMesh;
+
+ //   //UFUNCTION()
+ //   //void OnRep_SelectedMesh();
+
+	//void SetSelectedMesh(USkeletalMesh* NewMesh, APlayerController* PC);
+ //   UFUNCTION(Server, Reliable)
+ //   void ServerSetSelectedMesh(USkeletalMesh* NewMesh, APlayerController* PC);
+	//UFUNCTION(NetMulticast, Reliable)
+ //   void MulticastSetSelectedMesh(USkeletalMesh* NewMesh, APlayerController* PC);
+	//
+	
+	void UpdatePlayerMesh(APlayerController* PC, USkeletalMesh* NewMesh);
+
 };

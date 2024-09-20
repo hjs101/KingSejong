@@ -44,4 +44,6 @@ public:
 	void ManMeshButtonClicked();
 	UFUNCTION()
 	void WomanMeshButtonClicked();
+	
+	void OnMeshSelected(USkeletalMesh* Mesh);
 };

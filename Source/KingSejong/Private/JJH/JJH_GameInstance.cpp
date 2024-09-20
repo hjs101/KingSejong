@@ -8,6 +8,8 @@
 #include "../../../../Plugins/Online/OnlineBase/Source/Public/Online/OnlineSessionNames.h"
 #include "Online/CoreOnline.h"
 #include "JJH/LobbyWidget.h"
+#include "Net/UnrealNetwork.h"
+#include "JJH/SelectPlayerInterface.h"
 
 const static FName SESSION_NAME = TEXT("My Session Game");
 const static FName SESSION_CATEGORY = TEXT("RUN");
@@ -263,3 +265,111 @@ void UJJH_GameInstance::SetSelectedCharacterMesh(USkeletalMesh* Mesh)
 }
 
 
+//================================== 메시 
+
+void UJJH_GameInstance::UpdatePlayerMesh(APlayerController* PC, USkeletalMesh* NewMesh)
+{
+	if ( PC )
+	{
+		APawn* Pawn = PC->GetPawn();
+		if ( Pawn )
+		{
+			//인터페이스를 상속받아야함
+			ISelectPlayerInterface* SelectablePlayer = Cast<ISelectPlayerInterface>(Pawn);
+			if ( SelectablePlayer )
+			{
+				SelectablePlayer->UpdateMesh(NewMesh);
+			}
+			else
+			{
+				UE_LOG(LogTemp, Warning, TEXT("Pawn does not implement ISelectPlayerInterface"));
+			}
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("PlayerController does not possess a Pawn"));
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Invalid PlayerController"));
+	}
+}
+////void UJJH_GameInstance::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+////{
+////	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+////	DOREPLIFETIME(UJJH_GameInstance, SelectedMesh);
+////}
+////
+////void UJJH_GameInstance::OnRep_SelectedMesh()
+////{
+////	//APawn* Pawn = GetPawn();
+////	//if ( Pawn && SelectedMesh )
+////	//{
+////	//	//메시 업데이트
+////	//	ISelectPlayerInterface* UpdateablePawn = Cast<ISelectPlayerInterface>(Pawn);
+////	//	if ( UpdateablePawn )
+////	//	{
+////	//		UpdateablePawn->UpdateMesh(SelectedMesh);
+////	//	}
+////	//}
+////	//for ( auto& Pair : PlayerMeshes )
+////	//{
+////	//	APlayerController* PlayerController = Pair.Key;
+////	//	USkeletalMesh* Mesh = Pair.Value;
+////
+////		//if ( PlayerController && Mesh )
+////		//{
+////			//APawn* Pawn = GetWorld()->GetFirstPlayerController()->GetPawn();
+////			//ISelectPlayerInterface* UpdateablePawn = Cast<ISelectPlayerInterface>(Pawn);
+////			//if ( UpdateablePawn )
+////			//{
+////			//	UpdateablePawn->UpdateMesh(SelectedMesh);
+////			//}
+////		//}
+////	// }
+////}
+//
+//void UJJH_GameInstance::SetSelectedMesh(USkeletalMesh* NewMesh, APlayerController* PC)
+//{
+//	ServerSetSelectedMesh(NewMesh, PC);
+//}
+//
+//void UJJH_GameInstance::ServerSetSelectedMesh_Implementation(USkeletalMesh* NewMesh, APlayerController* PC)
+//{
+//	SelectedMesh = NewMesh;
+//	APawn* P = PC->GetPawn();
+//	ISelectPlayerInterface* UpdateablePawn = Cast<ISelectPlayerInterface>(P);
+//	if ( UpdateablePawn )
+//	{
+//		UpdateablePawn->UpdateMesh(SelectedMesh);
+//	}
+//	MulticastSetSelectedMesh(NewMesh, PC);
+//	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, FString::Printf(TEXT("server %s"), *PC->GetName()));
+//}
+//
+//void UJJH_GameInstance::MulticastSetSelectedMesh_Implementation(USkeletalMesh* NewMesh, APlayerController* PC)
+//{
+//	//if ( UWorld* World = GetWorld() )
+//	//{
+//	//	APlayerController* LocalPlayerController = World->GetFirstPlayerController();
+//	//	if ( LocalPlayerController && LocalPlayerController->IsLocalController() )
+//	//	{
+//	//		APawn* Pawn = LocalPlayerController->GetPawn();
+//	//		ISelectPlayerInterface* UpdateablePawn = Cast<ISelectPlayerInterface>(Pawn);
+//	//		if ( UpdateablePawn )
+//	//		{
+//	//			UpdateablePawn->UpdateMesh(SelectedMesh);
+//	//		}
+//	//	}
+//	//}
+//	SelectedMesh = NewMesh;
+//	APawn* P = PC->GetPawn();
+//	ISelectPlayerInterface* UpdateablePawn = Cast<ISelectPlayerInterface>(P);
+//	if ( UpdateablePawn )
+//	{
+//		UpdateablePawn->UpdateMesh(SelectedMesh);
+//		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, FString::Printf(TEXT("multi1 %s"), *PC->GetName()));
+//	}
+//	GEngine->AddOnScreenDebugMessage(-1 , 5.f , FColor::Blue , FString::Printf(TEXT("multi2 %s") , *PC->GetName()));
+//}

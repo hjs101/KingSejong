@@ -5,6 +5,8 @@
 #include "Components/Button.h"
 #include "JJH/JJH_GameInstance.h"
 #include "GameFramework/Character.h"
+#include "JJH/JJHPlayerState.h"
+#include "JJH/SelectPlayerInterface.h"
 
 void UCharacterSelectionWidget::UpdateSelectedMesh(USkeletalMesh* NewMesh)
 {
@@ -20,27 +22,14 @@ void UCharacterSelectionWidget::NativeConstruct()
 
 void UCharacterSelectionWidget::SelectButtonClicked()
 {
-	if ( UJJH_GameInstance* gi = Cast<UJJH_GameInstance>(GetGameInstance()) )
+	OnMeshSelected(SelectedMesh);
+	APlayerController* PC = GetOwningPlayer();
+	if ( PC )
 	{
-		gi->SetSelectedCharacterMesh(SelectedMesh);
+		PC->SetInputMode(FInputModeGameOnly());
+		PC->bShowMouseCursor = false;
+		RemoveFromParent();
 	}
-    // UI 제거
-    RemoveFromParent();
-
-    // 게임플레이 모드로 전환
-    APlayerController* PC = GetOwningPlayer();
-    if ( PC )
-    {
-        PC->SetInputMode(FInputModeGameOnly());
-        PC->bShowMouseCursor = false;
-
-        // 캐릭터 스폰 또는 메시 업데이트
-        ACharacter* MyCharacter = Cast<ACharacter>(PC->GetPawn());
-        if ( MyCharacter )
-        {
-            MyCharacter->GetMesh()->SetSkeletalMesh(SelectedMesh);
-        }
-    }
 }
 
 void UCharacterSelectionWidget::ManMeshButtonClicked()
@@ -51,4 +40,30 @@ void UCharacterSelectionWidget::ManMeshButtonClicked()
 void UCharacterSelectionWidget::WomanMeshButtonClicked()
 {
 	UpdateSelectedMesh(WomanMesh);
+}
+
+void UCharacterSelectionWidget::OnMeshSelected(USkeletalMesh* Mesh)
+{
+    //// 1. 위젯의 소유자(플레이어 컨트롤러) 가져오기
+    //APlayerController* PlayerController = GetOwningPlayer();
+    //if ( PlayerController )
+    //{
+    //    // 2. 플레이어 컨트롤러의 폰(캐릭터) 가져오기
+    //    APawn* ControlledPawn = PlayerController->GetPawn();
+    //    if ( ControlledPawn )
+    //    {
+    //        // 3. ISelectPlayerInterface 구현 여부 확인
+    //        ISelectPlayerInterface* SelectablePlayer = Cast<ISelectPlayerInterface>(ControlledPawn);
+    //        if ( SelectablePlayer )
+    //        {
+    //            // 4. UpdateMesh 함수 호출
+    //            SelectablePlayer->UpdateMesh(Mesh);
+    //        }
+    //    }
+    //}
+	UJJH_GameInstance* GameInstance = Cast<UJJH_GameInstance>(GetGameInstance());
+	if ( GameInstance )
+	{
+		GameInstance->UpdatePlayerMesh(GetOwningPlayer(), SelectedMesh);
+	}
 }

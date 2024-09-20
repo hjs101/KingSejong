@@ -196,23 +196,50 @@ void ARunner::UpdateCharacterMesh()
 	}
 }
 
-void ARunner::OnRep_CharacterMesh()
+//=================================스켈레탈 메시
+void ARunner::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
-	if ( CharacterMesh )
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(ARunner, CurrentMesh);
+}
+
+void ARunner::UpdateMesh(USkeletalMesh* NewMesh)
+{
+	if ( HasAuthority() )
 	{
-		GetMesh()->SetSkeletalMesh(CharacterMesh);
+		ServerUpdateMesh(NewMesh);
+	}
+	else
+	{
+		ServerUpdateMesh(NewMesh);
 	}
 }
 
-void ARunner::ServerSetCharacterMesh_Implementation(USkeletalMesh* NewMesh)
+bool ARunner::ServerUpdateMesh_Validate(USkeletalMesh* NewMesh)
 {
-	CharacterMesh = NewMesh;
-	OnRep_CharacterMesh();
+	return true; // 필요한 경우 추가 검증
 }
 
-void ARunner::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+void ARunner::ServerUpdateMesh_Implementation(USkeletalMesh* NewMesh)
 {
-	//캐릭터 메시 리플리케이트
-	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-	DOREPLIFETIME(ARunner, CharacterMesh);
+	CurrentMesh = NewMesh;
+	OnRep_CurrentMesh();
+	MulticastUpdateMesh(NewMesh);
+}
+
+void ARunner::MulticastUpdateMesh_Implementation(USkeletalMesh* NewMesh)
+{
+	if ( !HasAuthority() )
+	{
+		CurrentMesh = NewMesh;
+		OnRep_CurrentMesh();
+	}
+}
+
+void ARunner::OnRep_CurrentMesh()
+{
+	if ( CurrentMesh )
+	{
+		GetMesh()->SetSkeletalMesh(CurrentMesh);
+	}
 }

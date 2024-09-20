@@ -18,8 +18,6 @@ void ARunnerController::BeginPlay()
     //이걸 해야 복제됨
     bReplicates = true;
 
-
-    // 서버에서 받은 데이터를 기반으로 위젯을 생성합니다.
     if ( CharacterSelectionWidgetClass )
     {
         UCharacterSelectionWidget* Widget = CreateWidget<UCharacterSelectionWidget>(this, CharacterSelectionWidgetClass);
@@ -28,8 +26,11 @@ void ARunnerController::BeginPlay()
             Widget->AddToViewport();
             SetInputMode(FInputModeUIOnly());
             bShowMouseCursor = true;
+            UE_LOG(LogTemp, Warning, TEXT("QWER"));
         }
+        UE_LOG(LogTemp, Warning, TEXT("QWER2"));
     }
+    UE_LOG(LogTemp, Warning, TEXT("QWER3"));
 
 }
 

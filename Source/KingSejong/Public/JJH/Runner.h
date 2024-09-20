@@ -5,10 +5,11 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "../../../../Plugins/EnhancedInput/Source/EnhancedInput/Public/InputActionValue.h"
+#include "SelectPlayerInterface.h"
 #include "Runner.generated.h"
 
 UCLASS()
-class KINGSEJONG_API ARunner : public ACharacter
+class KINGSEJONG_API ARunner : public ACharacter, public ISelectPlayerInterface
 {
 	GENERATED_BODY()
 
@@ -82,13 +83,21 @@ public:
 	//캐릭터 메시 업데이트
 	void UpdateCharacterMesh();
 
-	//메시 리플리케이트
-	UPROPERTY(ReplicatedUsing = OnRep_CharacterMesh)
-    class USkeletalMesh* CharacterMesh;
+    // 기존 UpdateMesh 함수를 서버 RPC로 변경
+    UFUNCTION(Server, Reliable, WithValidation)
+    void ServerUpdateMesh(USkeletalMesh* NewMesh);
+
+    // 클라이언트에서 메시 업데이트를 수행하는 함수
+    UFUNCTION(NetMulticast, Reliable)
+    void MulticastUpdateMesh(USkeletalMesh* NewMesh);
+
+    // ISelectPlayerInterface 구현
+    virtual void UpdateMesh(USkeletalMesh* NewMesh) override;
+
+private:
+    UPROPERTY(ReplicatedUsing = OnRep_CurrentMesh)
+    USkeletalMesh* CurrentMesh;
 
     UFUNCTION()
-    void OnRep_CharacterMesh();
-
-    UFUNCTION(Server, Reliable)
-    void ServerSetCharacterMesh(USkeletalMesh* NewMesh);
+    void OnRep_CurrentMesh();
 };
