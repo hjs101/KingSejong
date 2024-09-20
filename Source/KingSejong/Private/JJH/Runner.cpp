@@ -23,6 +23,7 @@ ARunner::ARunner()
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
 	FollowCamera->SetupAttachment(CameraBoom);
 
+	
 }
 
 // Called when the game starts or when spawned
@@ -44,6 +45,21 @@ void ARunner::BeginPlay()
 		}
 	}
 
+	//UJJH_GameInstance* GI = Cast<UJJH_GameInstance>(GetGameInstance());
+	//APlayerController* PC = Cast<APlayerController>(GetController());
+	//if ( GI && PC )
+	//{
+	//	USkeletalMesh** FoundMesh = GI->PlayerMeshes.Find(PC);
+	//	if ( FoundMesh && *FoundMesh )
+	//	{
+	//		UpdateMesh(*FoundMesh);
+	//	}
+	//}
+	//else
+	//{
+	//	// 클라이언트에서 서버에 메시 정보 요청
+	//	GI->ServerSetPlayerMesh(PC, nullptr);
+	//}
 }
 
 // Called every frame
@@ -187,32 +203,50 @@ void ARunner::MulticastTeleportForward_Implementation(float Speed, float InputVa
 	SetActorLocation(GetActorLocation() + Direction * Speed);
 }
 
-void ARunner::UpdateCharacterMesh()
+
+//====================================
+
+
+//void ARunner::UpdateCharacterMesh()
+//{
+//	UJJH_GameInstance* GameInstance = Cast<UJJH_GameInstance>(GetGameInstance());
+//	if ( GameInstance && GameInstance->SelectedCharacterMesh )
+//	{
+//		GetMesh()->SetSkeletalMesh(GameInstance->SelectedCharacterMesh);
+//	}
+//}
+//
+//void ARunner::OnRep_CharacterMesh()
+//{
+//	if ( CharacterMesh )
+//	{
+//		GetMesh()->SetSkeletalMesh(CharacterMesh);
+//	}
+//}
+
+void ARunner::UpdateMesh(USkeletalMesh* NewMesh)
 {
-	UJJH_GameInstance* GameInstance = Cast<UJJH_GameInstance>(GetGameInstance());
-	if ( GameInstance && GameInstance->SelectedCharacterMesh )
+	if ( NewMesh )
 	{
-		GetMesh()->SetSkeletalMesh(GameInstance->SelectedCharacterMesh);
+		GetMesh()->SetSkeletalMesh(NewMesh);
+		UE_LOG(LogTemp, Error, TEXT("qwer5"));
 	}
 }
 
-void ARunner::OnRep_CharacterMesh()
-{
-	if ( CharacterMesh )
-	{
-		GetMesh()->SetSkeletalMesh(CharacterMesh);
-	}
-}
+//void ARunner::ServerSetCharacterMesh_Implementation(USkeletalMesh* NewMesh)
+//{
+//	CharacterMesh = NewMesh;
+//	OnRep_CharacterMesh();
+//}
+//
+//void ARunner::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+//{
+//	//캐릭터 메시 리플리케이트
+//	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+//	DOREPLIFETIME(ARunner, CharacterMesh);
+//}
 
-void ARunner::ServerSetCharacterMesh_Implementation(USkeletalMesh* NewMesh)
-{
-	CharacterMesh = NewMesh;
-	OnRep_CharacterMesh();
-}
 
-void ARunner::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
-{
-	//캐릭터 메시 리플리케이트
-	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-	DOREPLIFETIME(ARunner, CharacterMesh);
-}
+//인터페이스 상속
+//게임모드 포스트 로그인에서 GI->SyncAllPlayerMeshes();
+//

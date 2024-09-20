@@ -105,4 +105,24 @@ public:
 
 	class USkeletalMesh* SelectedCharacterMesh;
 
+	//===================================ㅁㅅ
+	    // 서버에서만 사용되는 TMap (리플리케이트되지 않음)
+    TMap<int32, USkeletalMesh*> PlayerMeshes;
+
+    // 서버에서 호출되는 함수
+    UFUNCTION(Server, Reliable)
+    void ServerSetPlayerMesh(APlayerController* PC, USkeletalMesh* NewMesh);
+
+    // 클라이언트에서 호출되는 함수
+    UFUNCTION(Client, Reliable)
+    void ClientUpdatePlayerMesh(int32 PlayerId, USkeletalMesh* NewMesh);
+
+    // 모든 클라이언트에 메시 정보 전송
+    UFUNCTION(NetMulticast, Reliable)
+    void MulticastSyncAllPlayerMeshes();
+
+	// 게임 시작 시 모든 플레이어의 메시 동기화
+	void SyncAllPlayerMeshes();
+
+	APlayerController* GetPlayerControllerFromUniqueID(int32 UniqueID);
 };

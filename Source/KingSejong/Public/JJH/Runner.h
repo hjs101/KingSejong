@@ -4,11 +4,12 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "JJH/SelectCharacterInterface.h"
 #include "../../../../Plugins/EnhancedInput/Source/EnhancedInput/Public/InputActionValue.h"
 #include "Runner.generated.h"
 
 UCLASS()
-class KINGSEJONG_API ARunner : public ACharacter
+class KINGSEJONG_API ARunner : public ACharacter, public ISelectCharacterInterface
 {
 	GENERATED_BODY()
 
@@ -79,16 +80,19 @@ public:
 	void MulticastTeleportForward(float Speed, float InputValue);
 	void MulticastTeleportForward_Implementation(float Speed, float InputValue);
 
-	//캐릭터 메시 업데이트
-	void UpdateCharacterMesh();
+	////캐릭터 메시 업데이트
+	//void UpdateCharacterMesh();
 
-	//메시 리플리케이트
-	UPROPERTY(ReplicatedUsing = OnRep_CharacterMesh)
-    class USkeletalMesh* CharacterMesh;
+	////메시 리플리케이트
+	//UPROPERTY(ReplicatedUsing = OnRep_CharacterMesh)
+ //   class USkeletalMesh* CharacterMesh;
 
-    UFUNCTION()
-    void OnRep_CharacterMesh();
+ //   UFUNCTION()
+ //   void OnRep_CharacterMesh();
 
-    UFUNCTION(Server, Reliable)
-    void ServerSetCharacterMesh(USkeletalMesh* NewMesh);
+ //   UFUNCTION(Server, Reliable)
+ //   void ServerSetCharacterMesh(USkeletalMesh* NewMesh);
+
+
+	virtual void UpdateMesh(USkeletalMesh* NewMesh);
 };

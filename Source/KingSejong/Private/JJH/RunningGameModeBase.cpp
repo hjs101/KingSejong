@@ -236,16 +236,14 @@ void ARunningGameModeBase::PostLogin(APlayerController* NewPlayer)
 {
 	Super::PostLogin(NewPlayer);
 
-	//게임모드에서 메시 바꿔주기
-	ARunner* MyCharacter = Cast<ARunner>(NewPlayer->GetPawn());
-	if ( MyCharacter )
+	//여기
+	UJJH_GameInstance* GI = Cast<UJJH_GameInstance>(GetGameInstance());
+	if ( GI )
 	{
-		UJJH_GameInstance* GameInstance = Cast<UJJH_GameInstance>(GetGameInstance());
-		if ( GameInstance && GameInstance->SelectedCharacterMesh )
-		{
-			MyCharacter->ServerSetCharacterMesh(GameInstance->SelectedCharacterMesh);
-		}
+		GI->SyncAllPlayerMeshes();
+		UE_LOG(LogTemp, Error, TEXT("qwer4"));
 	}
+	//
 	CurrentPlayerCount++;
 	CheckAndStartQuiz();
 }

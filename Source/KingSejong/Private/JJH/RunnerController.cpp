@@ -30,7 +30,6 @@ void ARunnerController::BeginPlay()
             bShowMouseCursor = true;
         }
     }
-
 }
 
 void ARunnerController::ClientCreateQuizWidget_Implementation(const FWordsData& QuizData)
@@ -232,15 +231,15 @@ void ARunnerController::ClientReturnToLobby_Implementation()
     // 로비 레벨로 이동
     UGameplayStatics::OpenLevel(this, FName("TestLobby"));
 }
+//void ARunnerController::OnPossess(APawn* aPawn)
+//{
+//    Super::OnPossess(aPawn);
+//    
+//    ARunner* MyCharacter = Cast<ARunner>(aPawn);
+//    if ( MyCharacter )
+//    {
+//        MyCharacter->UpdateCharacterMesh();
+//    }
+//}
 
-void ARunnerController::OnPossess(APawn* aPawn)
-{
-    Super::OnPossess(aPawn);
-    
-    ARunner* MyCharacter = Cast<ARunner>(aPawn);
-    if ( MyCharacter )
-    {
-        MyCharacter->UpdateCharacterMesh();
-    }
-
-}
+//

@@ -20,17 +20,21 @@ void UCharacterSelectionWidget::NativeConstruct()
 
 void UCharacterSelectionWidget::SelectButtonClicked()
 {
-	if ( UJJH_GameInstance* gi = Cast<UJJH_GameInstance>(GetGameInstance()) )
-	{
-		gi->SetSelectedCharacterMesh(SelectedMesh);
-	}
-    // UI 제거
-    RemoveFromParent();
-
     // 게임플레이 모드로 전환
     APlayerController* PC = GetOwningPlayer();
     if ( PC )
     {
+
+    
+	    if ( UJJH_GameInstance* gi = Cast<UJJH_GameInstance>(GetGameInstance()) )
+	    {
+		    gi->ServerSetPlayerMesh(GetOwningPlayer(), SelectedMesh);
+	    }
+        // UI 제거
+        RemoveFromParent();
+
+        // 게임플레이 모드로 전환
+
         PC->SetInputMode(FInputModeGameOnly());
         PC->bShowMouseCursor = false;
 

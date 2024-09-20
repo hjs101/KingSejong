@@ -8,6 +8,9 @@
 #include "../../../../Plugins/Online/OnlineBase/Source/Public/Online/OnlineSessionNames.h"
 #include "Online/CoreOnline.h"
 #include "JJH/LobbyWidget.h"
+#include "JJH/SelectCharacterInterface.h"
+#include "EngineUtils.h"
+#include "GameFramework/PlayerState.h"
 
 const static FName SESSION_NAME = TEXT("My Session Game");
 const static FName SESSION_CATEGORY = TEXT("RUN");
@@ -263,3 +266,100 @@ void UJJH_GameInstance::SetSelectedCharacterMesh(USkeletalMesh* Mesh)
 }
 
 
+//============================
+
+//void UJJH_GameInstance::ClientUpdatePlayerMesh_Implementation(APlayerController* PC, USkeletalMesh* NewMesh)
+//{
+//	UE_LOG(LogTemp, Error, TEXT("qwer6"));
+//	//메시 업데이트
+//	ISelectCharacterInterface* UpdateablePawn = Cast<ISelectCharacterInterface>(PC->GetPawn());
+//	if ( UpdateablePawn )
+//	{
+//		UpdateablePawn->UpdateMesh(NewMesh);
+//		UE_LOG(LogTemp, Error, TEXT("qwer2"));
+//	}
+//}
+//
+//void UJJH_GameInstance::MulticastSyncAllPlayerMeshes_Implementation()
+//{
+//	for ( const auto& Pair : PlayerMeshes )
+//	{
+//		ClientUpdatePlayerMesh(Pair.Key, Pair.Value);
+//		UE_LOG(LogTemp, Error, TEXT("qwer3"));
+//	}
+//}
+void UJJH_GameInstance::ServerSetPlayerMesh_Implementation(APlayerController* PC, USkeletalMesh* NewMesh)
+{
+	if ( PC && NewMesh )
+	{
+		APlayerState* PlayerState = PC->GetPlayerState<APlayerState>();
+		if ( PlayerState )
+		{
+			int32 PlayerId = PlayerState->GetPlayerId();
+			UE_LOG(LogTemp, Log, TEXT("Player PlayerId: %d"), PlayerId);		
+			PlayerMeshes.Add(PlayerId, NewMesh);
+			ClientUpdatePlayerMesh(PlayerId, NewMesh);
+		}
+	}
+}
+
+void UJJH_GameInstance::ClientUpdatePlayerMesh_Implementation(int32 PlayerId, USkeletalMesh* NewMesh)
+{
+	UE_LOG(LogTemp, Error, TEXT("ClientUpdatePlayerMesh called for player ID: %d"), PlayerId);
+
+	APlayerController* PlayerController = GetPlayerControllerFromUniqueID(PlayerId);
+	if ( PlayerController )
+	{
+		ISelectCharacterInterface* UpdateablePawn = Cast<ISelectCharacterInterface>(PlayerController->GetPawn());
+		if ( UpdateablePawn )
+		{
+			UpdateablePawn->UpdateMesh(NewMesh);
+			UE_LOG(LogTemp, Error, TEXT("Mesh updated for player ID: %d"), PlayerId);
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("PlayerController not found for ID: %d"), PlayerId);
+	}
+}
+
+void UJJH_GameInstance::MulticastSyncAllPlayerMeshes_Implementation()
+{
+	for ( const auto& Pair : PlayerMeshes )
+	{
+		ClientUpdatePlayerMesh(Pair.Key, Pair.Value);
+		UE_LOG(LogTemp, Error, TEXT("Syncing mesh for player ID: %d"), Pair.Key);
+	}
+}
+
+void UJJH_GameInstance::SyncAllPlayerMeshes()
+{
+	UE_LOG(LogTemp, Error, TEXT("qwer"));
+	MulticastSyncAllPlayerMeshes();
+}
+
+APlayerController* UJJH_GameInstance::GetPlayerControllerFromUniqueID(int32 UniqueID)
+{
+	for ( FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It )
+	{
+		APlayerController* PC = It->Get();
+		if ( IsValid(PC) )
+		{	
+			APlayerState* PlayerState = PC->GetPlayerState<APlayerState>();
+			if ( PlayerState )
+			{
+				int32 CurrentID = PlayerState->GetPlayerId();
+				UE_LOG(LogTemp, Log, TEXT("Checking PC: %d, Passed UniqueID: %d"), CurrentID, UniqueID);
+				if ( CurrentID == UniqueID )
+				{
+					return PC;
+				}
+			}
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Invalid PlayerController encountered"));
+		}
+	}
+	return nullptr;
+}
