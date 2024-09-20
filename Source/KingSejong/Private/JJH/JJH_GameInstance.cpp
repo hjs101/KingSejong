@@ -76,7 +76,7 @@ void UJJH_GameInstance::JoinToSession(int32 Index)
 {
 	UE_LOG(LogTemp, Warning, TEXT("hhhD"));
 	auto result = SessionSearch->SearchResults[Index];
-	SessionInterface->JoinSession(0, FName(MySessionName), result);
+	SessionInterface->JoinSession(0, SESSION_NAME, result);
 }
 
 void UJJH_GameInstance::CreateSession(const FString& RoomName, int32 PlayerCount, const FString& Category)
@@ -178,7 +178,7 @@ void UJJH_GameInstance::FindOtherSessions()
 	//무슨조건으로 찾을래
 	SessionSearch->QuerySettings.Set(SEARCH_PRESENCE, true, EOnlineComparisonOp::Equals);
 	//랜인가?
-	SessionSearch->bIsLanQuery = IOnlineSubsystem::Get()->GetSubsystemName() == "NULL";
+	//SessionSearch->bIsLanQuery = IOnlineSubsystem::Get()->GetSubsystemName() == "NULL";
 	//몇 개 찾을래
 	SessionSearch->MaxSearchResults = 40;
 	SessionInterface->FindSessions(0, SessionSearch.ToSharedRef());
