@@ -75,4 +75,16 @@ public:
 	void QuestionSetting();
 
 	FString CurrentString = TEXT("");
+	int32 RestartPlayer = 0;
+	void ReqRestartGame();
+	void ReqExitGame();
+
+
+	FTimerHandle RestartTimerHandle;
+	UFUNCTION()
+	void Restart();
+
+	FTimerHandle ExitGameTimerHandle;
+	UFUNCTION()
+	void Exit();
 };

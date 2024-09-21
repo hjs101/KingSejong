@@ -155,12 +155,24 @@ public:
 	void OnMyTakeDamage(int32 Damage);
 
 	UPROPERTY()
-	int32 MaxHP = 3;
+	int32 MaxHP = 1;
 
 	UPROPERTY()
 	int32 HP = MaxHP;
 
-	void ShowGameEndUI();
+	void OnDIe();
+
+	void ShowGameEndUI(bool bVictory);
+
+	// 재대결 요청
+	UFUNCTION(Server, Reliable)
+	void ServerRestartGame();
+	// 게임 종료 요청
+	UFUNCTION(Server, Reliable)
+	void ServerExitGame();
+
+	UFUNCTION(Client, Reliable)
+	void ClientEndUISetting(const FString& NewText);
 
 private:
 	bool bIsRecording = false;
@@ -245,4 +257,6 @@ private:
 
 	UFUNCTION()
 	void MoveToChargingVFX();
+
+	FTimerHandle EndGameTimerHandle;
 };

@@ -169,7 +169,7 @@ void AHJS_BattlePlayer::AddMainUI_Implementation()
 		MainUI = CreateWidget<UMainUI>(GetWorld(), MainUIFactory);
 		if (MainUI)
 		{
-			MainUI->Me = this;
+			MainUI->SettingPlayer(this);
 			MainUI->AddToViewport();
 			MainUI->GameStartUIInit();
 		}
@@ -206,11 +206,7 @@ void AHJS_BattlePlayer::ServerWinnerSet_Implementation()
 void AHJS_BattlePlayer::MulticastWinnerSet_Implementation()
 {
 	bWin = true;
-
-
-
 }
-
 
 void AHJS_BattlePlayer::FirebaseLogin_Implementation()
 {
@@ -413,7 +409,7 @@ void AHJS_BattlePlayer::StopRecording_Implementation()
 		// AI 서버에 보내는 함수
 		//SendRecordToAIServer(TEXT("0000"));
 		// USoundwave to binery
-		GetWorldTimerManager().SetTimer(AINetTimerHandle, this, &AHJS_BattlePlayer::AINetReq, 0.3f, false);
+		GetWorldTimerManager().SetTimer(AINetTimerHandle, this, &AHJS_BattlePlayer::AINetReq, 1.f, false);
 		check(MainUI);
 		MainUI->LineText = TEXT("판독중...");
 	}
@@ -443,7 +439,6 @@ void AHJS_BattlePlayer::MoveToChargingVFX()
 	}
 }
 
-
 void AHJS_BattlePlayer::PlayerHit()
 {
 	UBattlePlayerAnim* Anim = Cast<UBattlePlayerAnim>(GetMesh()->GetAnimInstance());
@@ -470,22 +465,63 @@ void AHJS_BattlePlayer::OnMyTakeDamage(int32 Damage)
 	}
 	else
 	{
+		// HP를 깎는 게 내가 관리하고 있는 객체가 아니라면 Player2의 체력을 깎고
 		AHJS_BattlePlayer* MainPlayer = Cast<AHJS_BattlePlayer>(GetWorld()->GetFirstPlayerController()->GetCharacter());
 		check(MainPlayer);
 		MainPlayer->MainUI->SetHP(2, HP);
 	}
 
-	// HP를 깎는 게 내가 관리하고 있는 객체가 아니라면 Player2의 체력을 깎고
+
 	if (HP <= 0)
 	{
 		// 죽음.
+		GetWorldTimerManager().SetTimer(EndGameTimerHandle,this, &AHJS_BattlePlayer::OnDIe,3.f,false);
+		
 		return;
 	}
 }
 
-void AHJS_BattlePlayer::ShowGameEndUI()
+void AHJS_BattlePlayer::OnDIe()
 {
+	// 이건 내가 죽은 것이기 때문에 패배 UI 띄우기
+	if (IsLocallyControlled())
+	{
+		ShowGameEndUI(false);
+	}
+	else
+	{
+		// 아니면 상대가 죽은 것이기 때문에 승리 UI 띄우기
+		AHJS_BattlePlayer* MainPlayer = Cast<AHJS_BattlePlayer>(GetWorld()->GetFirstPlayerController()->GetCharacter());
+		check(MainPlayer);
+		MainPlayer->ShowGameEndUI(true);
+	}
+}
 
+void AHJS_BattlePlayer::ShowGameEndUI(bool bVictory)
+{
+	if (MainUI)
+	{
+		MainUI->ShowEndGameUI(bVictory);
+	}
+}
+
+void AHJS_BattlePlayer::ServerRestartGame_Implementation()
+{
+	// 게임 모드에 재대결 요청
+	check(GM);
+	GM->ReqRestartGame();
+}
+
+void AHJS_BattlePlayer::ServerExitGame_Implementation()
+{
+	// 게임 모드에 종료 요청
+	GM->ReqExitGame();
+}
+
+void AHJS_BattlePlayer::ClientEndUISetting_Implementation(const FString& NewText)
+{
+	check(MainUI);
+	MainUI->SettingEndGameUIText(NewText);
 }
 
 void AHJS_BattlePlayer::ClientMainTextSet_Implementation(const FString& Text)
