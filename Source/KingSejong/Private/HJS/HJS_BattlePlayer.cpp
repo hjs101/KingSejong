@@ -90,7 +90,6 @@ void AHJS_BattlePlayer::Tick(float DeltaTime)
 		{
 			Alpha = 0.f;
 			bReturn = false;
-
 		}
 	}
 
@@ -203,6 +202,9 @@ void AHJS_BattlePlayer::ServerWinnerSet_Implementation()
 void AHJS_BattlePlayer::MulticastWinnerSet_Implementation()
 {
 	bWin = true;
+
+
+
 }
 
 
@@ -297,7 +299,7 @@ void AHJS_BattlePlayer::MulticastPlaySound_Implementation(const FString& WinnerF
 
 	// 파일 읽기
 	TArray<uint8> SoundData;
-	// WinnerNum이 1인데 서버가 아니면면
+	// WinnerNum이 1인데 서버가 아니면
 	if (WinnerNum == 1 && !HasAuthority())
 	{
 		FString MyFileName = RecordFileName + TEXT(".wav");
@@ -377,6 +379,7 @@ void AHJS_BattlePlayer::MulticastAttack_Implementation()
 void AHJS_BattlePlayer::StartRecording_Implementation(const FString& PlayerID)
 {
 	bWin = false;
+
 	FirebaseLogin();
 	if (PlayerRecordID == "")
 	{
@@ -440,6 +443,7 @@ void AHJS_BattlePlayer::MoveToChargingVFX()
 void AHJS_BattlePlayer::PlayerHit()
 {
 	UBattlePlayerAnim* Anim = Cast<UBattlePlayerAnim>(GetMesh()->GetAnimInstance());
+	GetMesh()->SetRenderCustomDepth(false);
 	check(Anim);
 	Anim->PlayHitMontage();
 }
