@@ -33,22 +33,22 @@ void AKJH_HttpManager::BeginPlay()
 /// <param name="Question"> 질문 </param>
 void AKJH_HttpManager::Req_AskByText(FString BookName, FString Question)
 {
-	FHttpModule& httpModule = FHttpModule::Get();
-	TSharedRef<IHttpRequest> req = httpModule.CreateRequest();
-		
-	TMap<FString, FString> data;
-	data.Add(TEXT("query"), Question);
+	//FHttpModule& httpModule = FHttpModule::Get();
+	//TSharedRef<IHttpRequest> req = httpModule.CreateRequest();
+	//	
+	//TMap<FString, FString> data;
+	//data.Add(TEXT("query"), Question);
 
-	// 요청 정보
-	req->SetURL(ServerURL);
-	req->SetVerb(TEXT("POST"));
-	req->SetHeader(TEXT("content-type"), TEXT("application/json"));
-	req->SetContentAsString(UKJH_JsonParseLib::MakeJson(data));
+	//// 요청 정보
+	//req->SetURL(ServerURL);
+	//req->SetVerb(TEXT("POST"));
+	//req->SetHeader(TEXT("content-type"), TEXT("application/json"));
+	//req->SetContentAsString(UKJH_JsonParseLib::MakeJson(data));
 
-	// 응답받을 함수
-	req->OnProcessRequestComplete().BindUObject(this, &AKJH_HttpManager::OnRes_AskByText);
-	// 서버에 요청
-	req->ProcessRequest();
+	//// 응답받을 함수
+	//req->OnProcessRequestComplete().BindUObject(this, &AKJH_HttpManager::OnRes_AskByText);
+	//// 서버에 요청
+	//req->ProcessRequest();
 
 }
 
@@ -98,7 +98,7 @@ void AKJH_HttpManager::Req_AskToChatbot(const FString& BookName, const FString& 
 
 	// 요청 정보
 	//req->SetURL(WavServerURL);
-	req->SetURL(TempChatbotTextServerURL);
+	req->SetURL(ChatbotTextServerURL);
 	req->SetVerb(TEXT("POST"));
 	req->SetHeader(TEXT("content-type"), TEXT("application/json"));
 	req->SetContentAsString(UKJH_JsonParseLib::MakeJson(data));
@@ -108,6 +108,9 @@ void AKJH_HttpManager::Req_AskToChatbot(const FString& BookName, const FString& 
 
 	// 서버에 요청
 	req->ProcessRequest();
+
+	UE_LOG(LogTemp, Warning, TEXT("Req_AskToChatbot API 요청 : %s"), *ChatbotTextServerURL);
+
 }
 
 void AKJH_HttpManager::OnRes_AskToChatbot(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bConnectedSuccessfully)
@@ -132,6 +135,7 @@ void AKJH_HttpManager::OnRes_AskToChatbot(FHttpRequestPtr Request, FHttpResponse
 				OnResponseAskChatbotAnswerDelegate.ExecuteIfBound(false, TEXT(""), TEXT(""));
 			}
 		}
+		UE_LOG(LogTemp, Warning, TEXT("OnRes_AskToChatbot Successed!"));
 
 		// 챗봇 wav 응답 저장
 		////bool bIsSaveAudio = UKJH_FileDataLib::SaveBase64ToWavFile(audioData, ChatbotFileName);
@@ -154,7 +158,7 @@ void AKJH_HttpManager::OnRes_AskToChatbot(FHttpRequestPtr Request, FHttpResponse
 		// 통신 실패
 		OnResponseAskChatbotAnswerDelegate.ExecuteIfBound(false, TEXT(""), TEXT(""));
 
-		UE_LOG(LogTemp, Warning, TEXT("Req_AskByFileToChatbot Failed!!"));
+		UE_LOG(LogTemp, Warning, TEXT("OnRes_AskToChatbot Failed!!"));
 	}
 }
 
@@ -167,7 +171,7 @@ void AKJH_HttpManager::Req_GetChatbotAudioData(const FString& AudioId)
 
 	// 요청 정보
 	//req->SetURL(WavServerURL);
-	FString url = TempChatbotTextServerURL + FString::Printf(TEXT("\"%s\""), *AudioId);
+	FString url = ChatbotAudioServerURL + FString::Printf(TEXT("\"%s\""), *AudioId);
 
 	UE_LOG(LogTemp, Warning, TEXT("GetChatbotAudio Request Url : %s"), *url);
 

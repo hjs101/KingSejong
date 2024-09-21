@@ -33,12 +33,15 @@ public:
 private:
 
 	// 서버 URL (Metaverse)
-	const FString ServerURL = "http://meta-ai.iptime.org:61457/janghoon";
-	const FString WavServerURL = "http://metaai.iptime.org:61457/hoonjang_wav";
+	//const FString ServerURL = "http://meta-ai.iptime.org:61457/janghoon";
+	//const FString WavServerURL = "http://metaai.iptime.org:61457/hoonjang_wav";
+
+	const FString ChatbotTextServerURL = "http://metaai.iptime.org:61457/hoonjang_text";
+	const FString ChatbotAudioServerURL = "http://metaai.iptime.org:61457/hoonjang_wav";
 
 	// 임시 서버 URL 
-	const FString TempChatbotTextServerURL = "https://0e16-222-101-50-123.ngrok-free.app/hoonjang_text";
-	const FString TempChatbotAudioServerURL = "https://0e16-222-101-50-123.ngrok-free.app";
+	//const FString TempChatbotTextServerURL = "https://0e16-222-101-50-123.ngrok-free.app/hoonjang_text";
+	//const FString TempChatbotAudioServerURL = "https://0e16-222-101-50-123.ngrok-free.app";
 
 
 	const FString ChatbotFileName = FString(TEXT("Response_Chatbot"));
