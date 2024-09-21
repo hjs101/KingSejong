@@ -36,10 +36,10 @@ void UKJH_VoiceRecodingWidget::NativeDestruct()
 {
     Super::NativeDestruct();
 
-    if( OnCloseWidgetDelegate.IsBound())
+    if( OnCloseWidgetDelegate.IsBound() && bIsRequest == false)
         OnCloseWidgetDelegate.Broadcast();
 
-    if( bIsRecording && PlayerVoiceRecorder )
+    if( PlayerVoiceRecorder && bIsRecording)
         PlayerVoiceRecorder->OnStopRecord();
 }
 
@@ -69,6 +69,8 @@ void UKJH_VoiceRecodingWidget::OnClickedBtnRecStop()
         bIsRecording = false;
         
         PlayerVoiceRecorder->SendToChatbot();
+
+        bIsRequest = true;
 
         RemoveFromParent();
     }

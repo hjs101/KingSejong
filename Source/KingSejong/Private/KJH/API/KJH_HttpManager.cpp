@@ -173,7 +173,6 @@ void AKJH_HttpManager::Req_GetChatbotAudioData(const FString& AudioId)
 	//req->SetURL(WavServerURL);
 	FString url = ChatbotAudioServerURL + FString::Printf(TEXT("\"%s\""), *AudioId);
 
-	UE_LOG(LogTemp, Warning, TEXT("GetChatbotAudio Request Url : %s"), *url);
 
 	req->SetURL(url);
 	req->SetVerb(TEXT("GET"));
@@ -184,6 +183,9 @@ void AKJH_HttpManager::Req_GetChatbotAudioData(const FString& AudioId)
 
 	// 서버에 요청
 	req->ProcessRequest();
+
+	UE_LOG(LogTemp, Warning, TEXT("GetChatbotAudio Request api : %s"), *url);
+
 }
 
 

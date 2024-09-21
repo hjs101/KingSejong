@@ -294,8 +294,6 @@ FString AKJH_Teacher::GetMessageByTeacherState(ETeacherState NewState)
 
 void AKJH_Teacher::OnRes_ChatbotResult(bool bResult, const FString& AudioId, const FString& Text)
 {
-
-
     // 통신 실패
     if ( bResult == false || Text.IsEmpty())
     {
@@ -343,7 +341,7 @@ void AKJH_Teacher::OnFailedChatbotResponse()
     GetWorld()->GetTimerManager().SetTimer(timerHandle,
         [ this ] ()
         {
-            SetTeacherState(ETeacherState::Idle);
+            ServerRPC_SetTeacherState(ETeacherState::Idle);
         },
         AnswerDelayTime, false
     );
