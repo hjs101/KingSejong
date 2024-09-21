@@ -88,11 +88,11 @@ void AHJS_BattleGameMode::SettingPlayerAnswer(const FString& Result, APlayerCont
         
         if ( WinnerNum == 0 )
         {
-            WinnerText = FString::Printf(TEXT("승자 Text : %s"), *Player0Result);
+            WinnerText = FString::Printf(TEXT("승자의 말 : %s"), *Player0Result);
         }
         else
         {
-            WinnerText = FString::Printf(TEXT("승자 Text : %s"), *Player1Result);
+            WinnerText = FString::Printf(TEXT("승자의 말 : %s"), *Player1Result);
         }
 
         BattleResult(WinnerText);
@@ -220,4 +220,39 @@ void AHJS_BattleGameMode::QuestionSetting()
         Player1->ClientQuestionSetting(*QuestionData);
         CurrentString = QuestionData->Answer;
     }
+}
+
+void AHJS_BattleGameMode::ReqRestartGame()
+{
+    if (RestartPlayer == 0)
+    {
+        RestartPlayer++;
+    }
+    else if (RestartPlayer == 1)
+    {
+        // 리스타트됨을 알리고 3초 뒤에 리스타트 하기
+        Player0->ClientEndUISetting(TEXT("재대결 성립!!"));
+        Player1->ClientEndUISetting(TEXT("재대결 성립!!"));
+
+        GetWorldTimerManager().SetTimer(RestartTimerHandle,this,&AHJS_BattleGameMode::Restart,3.f,false);
+
+    }
+}
+
+void AHJS_BattleGameMode::ReqExitGame()
+{
+    Player0->ClientEndUISetting(TEXT("경기 종료!!"));
+    Player1->ClientEndUISetting(TEXT("경기 종료!!"));
+    // 게임이 종료됨을 알리고 3초 뒤에 종료하기
+    GetWorldTimerManager().SetTimer(ExitGameTimerHandle, this, &AHJS_BattleGameMode::Exit, 3.f, false);
+}
+
+void AHJS_BattleGameMode::Restart()
+{
+    
+}
+
+void AHJS_BattleGameMode::Exit()
+{
+    
 }

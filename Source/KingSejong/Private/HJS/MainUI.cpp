@@ -7,12 +7,16 @@
 #include "components/Border.h"
 #include "HJS/HJS_BattlePlayer.h"
 #include "HJS/BattleQuestionStruct.h"
+#include "HJS/BattleResultWidget.h"
+
 void UMainUI::NativeConstruct()
 {
 	Super::NativeConstruct();
 
 	LineText = TEXT("");
 	CountDown->SetVisibility(ESlateVisibility::Hidden);
+
+	ResultUI->SetVisibility(ESlateVisibility::Hidden);
 
 	TutorialTextArr.Add(TEXT("이 말하기 대결, 나 훈장이 참관하겠네."));
 	TutorialTextArr.Add(TEXT("이 서당의 공식 대결 규칙으로 진행하겠다."));
@@ -205,4 +209,29 @@ void UMainUI::StartTutorialUI(int32 Num)
 void UMainUI::NextTextSet()
 {
 	SetTextToDisplay(TutorialTextArr[++CurrentNum]);
+}
+
+void UMainUI::ShowEndGameUI(bool bWin)
+{
+	ResultUI->SetVisibility(ESlateVisibility::Visible);
+	if (bWin)
+	{
+		ResultUI->WinnerSetting();
+	}
+	else
+	{
+		ResultUI->LoserSetting();
+	}
+}
+
+void UMainUI::SettingEndGameUIText(const FString& NewText)
+{
+	check(ResultUI);
+	ResultUI->SetEndText(NewText);
+}
+
+void UMainUI::SettingPlayer(AHJS_BattlePlayer* Player)
+{
+	Me = Player;
+	ResultUI->Me = Player;
 }

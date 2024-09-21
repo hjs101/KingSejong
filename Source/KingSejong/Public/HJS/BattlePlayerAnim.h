@@ -39,7 +39,8 @@ public:
 
 	UPROPERTY(BlueprintReadWrite)
 	bool bCharging = false;
-
+	UPROPERTY(BlueprintReadWrite)
+	bool bDie = false;
 	UFUNCTION()
 	void AnimNotify_ToCharging();
 

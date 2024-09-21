@@ -73,9 +73,7 @@ void UBattlePlayerAnim::AnimNotify_HitEnd()
 	if ( Player->HP == 0 )
 	{
 		// 죽는 애니메이션
-		
-		// 게임 승리 / 패배 UI
-		
+		bDie = true;
 		return;
 	}
 
