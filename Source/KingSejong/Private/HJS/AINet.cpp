@@ -72,14 +72,12 @@ void UAINet::FileSendToAIServer(const FString& FilePath)
 			else
 			{
 				UE_LOG(LogTemp, Error, TEXT("Get STTText failed!!!"));
+				Me->SendRecordToAIServer(TEXT("이런, 통신이 원활하지 않습니다."));
 			}
 		});
 
 	// 요청 전송
 	HttpRequest->ProcessRequest();
-
-	// 업로드가 완료될 때까지 대기
-
 }
 
 FString UAINet::MakeJson(const TMap<FString, FString> source)

@@ -128,20 +128,16 @@ void AHJS_BattleGameMode::BattleResult(const FString& WinnerString)
 
     if (WinnerNum == 0)
     {
-        
         Player0->ServerWinnerSet();
         Player0->UploadWavToFirebase();
         Player0->SetWinnerNum(WinnerNum);
-
     }
     else if(WinnerNum == 1)
     {
-        
         Player1->ServerWinnerSet();
         Player1->UploadWavToFirebase();
         Player1->SetWinnerNum(WinnerNum);
     }
-    
 }
 
 void AHJS_BattleGameMode::BattleAnimPlay()
@@ -174,7 +170,6 @@ void AHJS_BattleGameMode::JoinPlayer(APlayerController* PC)
     if ( PC0 != nullptr && PC1 != nullptr )
     {
         // 게임 스타트
-        
         Player0 = Cast<AHJS_BattlePlayer>(PC0->GetCharacter());
         Player0->AddMainUI();
         Player0->ClientPlayTutorialUI();
@@ -182,7 +177,6 @@ void AHJS_BattleGameMode::JoinPlayer(APlayerController* PC)
         Player1->AddMainUI();
         Player1->ClientPlayTutorialUI();
     }
-
 }
 
 void AHJS_BattleGameMode::StartTurn()

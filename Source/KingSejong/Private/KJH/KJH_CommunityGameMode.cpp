@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "KJH/KJH_CommunityGameMode.h"
@@ -12,10 +12,10 @@ void AKJH_CommunityGameMode::BeginPlay()
 
 void AKJH_CommunityGameMode::GetAllPlayerControllers()
 {
-	// ÇÃ·¹ÀÌ¾î ÄÁÆ®·Ñ·¯ ¹è¿­ ÃÊ±âÈ­
+	// ï¿½Ã·ï¿½ï¿½Ì¾ï¿½ ï¿½ï¿½Æ®ï¿½Ñ·ï¿½ ï¿½è¿­ ï¿½Ê±ï¿½È­
 	PlayerControllers.Empty();
 
-	// ¸ðµç ÇÃ·¹ÀÌ¾î ÄÁÆ®·Ñ·¯¸¦ Ã£¾Æ ¹è¿­¿¡ Ãß°¡
+	// ï¿½ï¿½ï¿½ ï¿½Ã·ï¿½ï¿½Ì¾ï¿½ ï¿½ï¿½Æ®ï¿½Ñ·ï¿½ï¿½ï¿½ Ã£ï¿½ï¿½ ï¿½è¿­ï¿½ï¿½ ï¿½ß°ï¿½
 	int32 playerCount = GetWorld()->GetNumPlayerControllers();
 
 	for (int i = 0; i < playerCount; i++)

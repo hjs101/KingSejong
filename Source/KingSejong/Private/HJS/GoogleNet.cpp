@@ -96,10 +96,6 @@ void UGoogleNet::FileUploadToFirebase(const FString& FilePath, const FString& Fi
 
 	// 요청 전송
 	HttpRequest->ProcessRequest();
-
-	// 업로드가 완료될 때까지 대기
-
-
 }
 
 void UGoogleNet::FileDownloadFromFirebase(const FString& SavePath, const FString& FileName)
@@ -135,6 +131,4 @@ void UGoogleNet::FileDownloadFromFirebase(const FString& SavePath, const FString
 
     // 요청 전송
     HttpRequest->ProcessRequest();
-
-    // 다운로드가 완료될 때까지 대기
 }

@@ -85,6 +85,20 @@ public:
 
 	void CheckAnswer(const FString& UserAnswer, ARunnerController* AnsweringPlayer);
 
+
+	void EndGameAndReturnToLobby(ARunnerController* WinningPlayer);
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastShowTeachSpeak(bool bIsCorrect);
+
+
+	virtual void PostLogin(APlayerController* NewPlayer) override;
+
+	int32 CurrentPlayerCount = 0;
+	int32 RequiredPlayerCount = 3; // 원하는 플레이어 수 설정
+
+	bool bQuizStarted = false;
+
+	void CheckAndStartQuiz();
+
+
 };

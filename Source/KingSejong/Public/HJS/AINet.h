@@ -30,7 +30,7 @@ public:
 	void FileSendToAIServer(const FString& FilePath);
 private:
 	// 서버 URL
-	const FString ServerURL = "http://meta-ai.iptime.org:57347/hoonjang_stt";
+	const FString ServerURL = "http://metaai.iptime.org:57347/hoonjang_stt";
 
 	FString MakeJson(const TMap<FString, FString> source);
 

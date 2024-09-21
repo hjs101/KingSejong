@@ -75,5 +75,4 @@ public:
 	void QuestionSetting();
 
 	FString CurrentString = TEXT("");
-
 };
