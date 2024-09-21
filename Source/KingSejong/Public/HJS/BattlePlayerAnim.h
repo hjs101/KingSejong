@@ -33,9 +33,12 @@ public:
 	UFUNCTION()
 	void JumpMontageToAttack();
 
-
+	
 	UPROPERTY(BlueprintReadWrite)
 	bool bAttack = false;
+
+	UPROPERTY(BlueprintReadWrite)
+	bool bCharging = false;
 
 	UFUNCTION()
 	void AnimNotify_ToCharging();
