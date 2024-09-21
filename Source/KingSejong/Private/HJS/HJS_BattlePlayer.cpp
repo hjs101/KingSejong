@@ -63,6 +63,10 @@ void AHJS_BattlePlayer::BeginPlay()
 	{
 		GetWorldTimerManager().SetTimer(JoinTimerHandle, this, &AHJS_BattlePlayer::LoginSignal, 0.05f, false);
 	}
+	if (!IsLocallyControlled())
+	{
+		GetMesh()->SetRenderCustomDepth(true);
+	}
 }
 
 // Called every frame
@@ -443,7 +447,6 @@ void AHJS_BattlePlayer::MoveToChargingVFX()
 void AHJS_BattlePlayer::PlayerHit()
 {
 	UBattlePlayerAnim* Anim = Cast<UBattlePlayerAnim>(GetMesh()->GetAnimInstance());
-	GetMesh()->SetRenderCustomDepth(false);
 	check(Anim);
 	Anim->PlayHitMontage();
 }
