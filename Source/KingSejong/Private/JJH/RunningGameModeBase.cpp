@@ -209,6 +209,17 @@ void ARunningGameModeBase::CheckAnswer(const FString& UserAnswer , ARunnerContro
 	}
 }
 
+void ARunningGameModeBase::MulticastShowTeachSpeak_Implementation(bool bIsCorrect)
+{
+	for (ARunnerController* PlayerController : Players)
+	{
+		if (PlayerController)
+		{
+			PlayerController->ClientShowTeacherSpeak(bIsCorrect);
+		}
+	}
+
+}
 void ARunningGameModeBase::EndGameAndReturnToLobby(ARunnerController* WinningPlayer)
 {
 	// 게임 인스턴스를 통해 세션 파괴
@@ -263,17 +274,6 @@ void ARunningGameModeBase::CheckAndStartQuiz()
 	}
 }
 
-void ARunningGameModeBase::MulticastShowTeachSpeak_Implementation(bool bIsCorrect)
-{
-	for ( ARunnerController* PlayerController : Players )
-	{
-		if ( PlayerController )
-		{
-			PlayerController->ClientShowTeacherSpeak(bIsCorrect);
-		}
-	}
-
-}
 
 FWordsData ARunningGameModeBase::SelectRandomQuizData()
 {

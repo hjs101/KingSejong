@@ -150,10 +150,12 @@ void ARunnerController::ServerMoveToNextPlayer_Implementation()
 
 void ARunnerController::ClientShowTeacherSpeak_Implementation(bool bIsCorrect)
 {
-    if ( QuizWidgetInstance )
+    if (!QuizWidgetInstance)
     {
-        QuizWidgetInstance->ShowTeacherSpeak(bIsCorrect);  // UI에서 패널 표시
+        UE_LOG(LogTemp, Error, TEXT("QuizWidgetInstance is null in ClientShowTeacherSpeak"));
+        return;
     }
+    QuizWidgetInstance->ShowTeacherSpeak(bIsCorrect);
 }
 
 void ARunnerController::ClientShowInitials_Implementation()

@@ -36,6 +36,7 @@ void ULobbyWidget::NativeConstruct()
 	PlayerCountSlider->OnValueChanged.AddDynamic(this, &ULobbyWidget::OnSliderValueChanged);
 
 	QuitButton->OnClicked.AddDynamic(this, &ULobbyWidget::OnQuitButtonClicked);
+	QuitButton_1->OnClicked.AddDynamic(this, &ULobbyWidget::OnQuitButtonClicked);
 }
 
 void ULobbyWidget::OnQuitButtonClicked()
