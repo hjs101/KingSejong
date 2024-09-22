@@ -19,7 +19,7 @@ class KINGSEJONG_API UMainUI : public UUserWidget
 public:
 
 	virtual void NativeConstruct() override;
-	
+	UPROPERTY()
 	class AHJS_BattlePlayer* Me;
 
 	UPROPERTY(meta=(BindWidget))
@@ -46,6 +46,9 @@ public:
 	class UBorder* OptionCanvas;
 
 	UPROPERTY(meta=(BindWidget))
+	class UBorder* TextLineBox;
+
+	UPROPERTY(meta=(BindWidget))
 	class UHorizontalBox* Options;
 
 	UPROPERTY(meta=(BindWidget))
@@ -66,7 +69,8 @@ public:
 	UPROPERTY(BlueprintReadWrite)
 	FString CountDownText;
 
-	
+	UPROPERTY(meta=(BindWidget))
+	class UBattleResultWidget* ResultUI;
 
 	UPROPERTY(BlueprintReadWrite)
 	FString Answer1;
@@ -121,4 +125,15 @@ public:
 
 	UFUNCTION()
 	void NextTextSet();
+
+	void ShowEndGameUI(bool bWin);
+
+	void SettingEndGameUIText(const FString& NewText);
+
+	void SettingPlayer(class AHJS_BattlePlayer* Player);
+
+	void HideLineBox();
+
+	void ShowLineBox();
+
 }; 

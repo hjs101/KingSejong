@@ -19,6 +19,9 @@ class KINGSEJONG_API UBattlePlayerAnim : public UAnimInstance
 public:
 	
 	UPROPERTY(EditAnywhere)
+	class USoundBase* HitSound;
+
+	UPROPERTY(EditAnywhere)
 	class UAnimMontage* AttackMontage;
 
 	UPROPERTY(EditAnywhere)
@@ -39,7 +42,8 @@ public:
 
 	UPROPERTY(BlueprintReadWrite)
 	bool bCharging = false;
-
+	UPROPERTY(BlueprintReadWrite)
+	bool bDie = false;
 	UFUNCTION()
 	void AnimNotify_ToCharging();
 

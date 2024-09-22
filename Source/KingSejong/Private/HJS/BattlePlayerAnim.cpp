@@ -4,7 +4,7 @@
 #include "HJS/BattlePlayerAnim.h"
 #include "HJS/HJS_BattlePlayer.h"
 #include "Kismet/GameplayStatics.h"
-
+#include "HJS/MainUI.h"
 void UBattlePlayerAnim::PlayHitMontage()
 {
 	check(HitMontage);
@@ -35,7 +35,6 @@ void UBattlePlayerAnim::AnimNotify_AttackEnd()
 	Player->bReturn = true;
 	PlayReturnAnim();
 	Montage_Stop(0.1f,AttackMontage);
-
 }
 
 void UBattlePlayerAnim::AnimNotify_AttackPoint()
@@ -43,6 +42,8 @@ void UBattlePlayerAnim::AnimNotify_AttackPoint()
 	TArray<AActor*> OutActors;
 
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(),AHJS_BattlePlayer::StaticClass(), OutActors);
+
+	UGameplayStatics::PlaySound2D(GetWorld(),HitSound, 0.5);
 
 	for ( AActor* Actor : OutActors )
 	{
@@ -73,9 +74,7 @@ void UBattlePlayerAnim::AnimNotify_HitEnd()
 	if ( Player->HP == 0 )
 	{
 		// 죽는 애니메이션
-		
-		// 게임 승리 / 패배 UI
-		
+		bDie = true;
 		return;
 	}
 

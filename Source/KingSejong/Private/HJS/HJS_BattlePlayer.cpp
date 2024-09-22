@@ -21,6 +21,7 @@
 #include "HJS/AINet.h"
 #include "../../../../Plugins/FX/Niagara/Source/Niagara/Public/NiagaraComponent.h"
 #include "../../../../Plugins/FX/Niagara/Source/Niagara/Public/NiagaraSystemInstance.h"
+#include "Components/AudioComponent.h"
 // Sets default values
 AHJS_BattlePlayer::AHJS_BattlePlayer()
 {
@@ -62,10 +63,6 @@ void AHJS_BattlePlayer::BeginPlay()
 	if (HasAuthority())
 	{
 		GetWorldTimerManager().SetTimer(JoinTimerHandle, this, &AHJS_BattlePlayer::LoginSignal, 0.05f, false);
-	}
-	if (!IsLocallyControlled())
-	{
-		GetMesh()->SetRenderCustomDepth(true);
 	}
 }
 
@@ -169,7 +166,7 @@ void AHJS_BattlePlayer::AddMainUI_Implementation()
 		MainUI = CreateWidget<UMainUI>(GetWorld(), MainUIFactory);
 		if (MainUI)
 		{
-			MainUI->Me = this;
+			MainUI->SettingPlayer(this);
 			MainUI->AddToViewport();
 			MainUI->GameStartUIInit();
 		}
@@ -206,11 +203,7 @@ void AHJS_BattlePlayer::ServerWinnerSet_Implementation()
 void AHJS_BattlePlayer::MulticastWinnerSet_Implementation()
 {
 	bWin = true;
-
-
-
 }
-
 
 void AHJS_BattlePlayer::FirebaseLogin_Implementation()
 {
@@ -292,7 +285,6 @@ void AHJS_BattlePlayer::ClientPlaySound(const FString& WinnerFIlePath)
 	ServerPlaySound(WinnerFIlePath);
 }
 
-
 void AHJS_BattlePlayer::ServerPlaySound_Implementation(const FString& WinnerFIlePath)
 {
 	MulticastPlaySound(WinnerFIlePath);
@@ -340,6 +332,7 @@ void AHJS_BattlePlayer::MulticastPlaySound_Implementation(const FString& WinnerF
 	{
 		AHJS_BattlePlayer* Player = Cast<AHJS_BattlePlayer>(Actor);
 		Player->WinnerNum = -1;
+		Player->GetMesh()->SetRenderCustomDepth(false);
 	}
 
 	// WAV 헤더에서 필요한 정보 추출 (예: 샘플 속도, 채널 수, 등)
@@ -356,8 +349,7 @@ void AHJS_BattlePlayer::MulticastPlaySound_Implementation(const FString& WinnerF
 	// 오디오 데이터를 SoundWave에 할당
 	TArray<uint8> PCMData(SoundData.GetData() + 44, DataSize); // 44바이트 이후가 오디오 데이터
 	SoundWave->QueueAudio(PCMData.GetData(), PCMData.Num());
-
-	UGameplayStatics::PlaySound2D(GetWorld(), SoundWave);
+	UGameplayStatics::PlaySound2D(this, SoundWave, 200.f);
 
 }
 
@@ -372,6 +364,11 @@ void AHJS_BattlePlayer::MulticastAttack_Implementation()
 	if (Anim)
 	{
 		Anim->PlayChargingMontage();
+	}
+
+	if (!IsLocallyControlled())
+	{
+		GetMesh()->SetRenderCustomDepth(true);
 	}
 
 	bAttack = true;
@@ -413,7 +410,7 @@ void AHJS_BattlePlayer::StopRecording_Implementation()
 		// AI 서버에 보내는 함수
 		//SendRecordToAIServer(TEXT("0000"));
 		// USoundwave to binery
-		GetWorldTimerManager().SetTimer(AINetTimerHandle, this, &AHJS_BattlePlayer::AINetReq, 0.3f, false);
+		GetWorldTimerManager().SetTimer(AINetTimerHandle, this, &AHJS_BattlePlayer::AINetReq, 1.f, false);
 		check(MainUI);
 		MainUI->LineText = TEXT("판독중...");
 	}
@@ -443,20 +440,11 @@ void AHJS_BattlePlayer::MoveToChargingVFX()
 	}
 }
 
-
 void AHJS_BattlePlayer::PlayerHit()
 {
 	UBattlePlayerAnim* Anim = Cast<UBattlePlayerAnim>(GetMesh()->GetAnimInstance());
 	check(Anim);
 	Anim->PlayHitMontage();
-}
-
-void AHJS_BattlePlayer::ServerPlayerHit_Implementation()
-{
-}
-
-void AHJS_BattlePlayer::MulticastPlayerHit_Implementation()
-{
 }
 
 void AHJS_BattlePlayer::OnMyTakeDamage(int32 Damage)
@@ -470,26 +458,90 @@ void AHJS_BattlePlayer::OnMyTakeDamage(int32 Damage)
 	}
 	else
 	{
+		// HP를 깎는 게 내가 관리하고 있는 객체가 아니라면 Player2의 체력을 깎고
 		AHJS_BattlePlayer* MainPlayer = Cast<AHJS_BattlePlayer>(GetWorld()->GetFirstPlayerController()->GetCharacter());
 		check(MainPlayer);
 		MainPlayer->MainUI->SetHP(2, HP);
 	}
 
-	// HP를 깎는 게 내가 관리하고 있는 객체가 아니라면 Player2의 체력을 깎고
 	if (HP <= 0)
 	{
 		// 죽음.
+		GetWorldTimerManager().SetTimer(EndGameTimerHandle,this, &AHJS_BattlePlayer::OnDIe,3.f,false);
+		
 		return;
 	}
 }
 
-void AHJS_BattlePlayer::ShowGameEndUI()
+void AHJS_BattlePlayer::OnDIe()
 {
+	// 이건 내가 죽은 것이기 때문에 패배 UI 띄우기
+	if (IsLocallyControlled())
+	{
+		ShowGameEndUI(false);
+	}
+	else
+	{
+		// 아니면 상대가 죽은 것이기 때문에 승리 UI 띄우기
+		AHJS_BattlePlayer* MainPlayer = Cast<AHJS_BattlePlayer>(GetWorld()->GetFirstPlayerController()->GetCharacter());
+		check(MainPlayer);
+		MainPlayer->ShowGameEndUI(true);
+	}
+}
 
+void AHJS_BattlePlayer::ShowGameEndUI(bool bVictory)
+{
+	if (MainUI)
+	{
+		MainUI->ShowEndGameUI(bVictory);
+	}
+}
+
+void AHJS_BattlePlayer::PlayBGM_Implementation(int32 BGMNum)
+{
+	switch (BGMNum)
+	{
+	case 0:
+		UGameplayStatics::PlaySound2D(GetWorld(), BGM0, 0.1f);
+		break;
+	case 1:
+		UGameplayStatics::PlaySound2D(GetWorld(), BGM1, 0.1f);
+		break;
+	case 2:
+		UGameplayStatics::PlaySound2D(GetWorld(), BGM2, 0.1f);
+		break;
+	}
+}
+
+void AHJS_BattlePlayer::ServerRestartGame_Implementation()
+{
+	// 게임 모드에 재대결 요청
+	check(GM);
+	GM->ReqRestartGame();
+}
+
+void AHJS_BattlePlayer::ServerExitGame_Implementation()
+{
+	// 게임 모드에 종료 요청
+	GM->ReqExitGame();
+}
+
+void AHJS_BattlePlayer::ClientEndUISetting_Implementation(const FString& NewText)
+{
+	check(MainUI);
+	MainUI->SettingEndGameUIText(NewText);
 }
 
 void AHJS_BattlePlayer::ClientMainTextSet_Implementation(const FString& Text)
 {
 	check(MainUI);
 	MainUI->LineText = Text;
+
+	// 2초 뒤에 MainUI 사라지게 하기
+	FTimerHandle Handle;
+	
+	GetWorldTimerManager().SetTimer(Handle, [this]() {
+		MainUI->HideLineBox();
+	},2.f,false);
+
 }
