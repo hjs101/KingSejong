@@ -94,7 +94,7 @@ public:
 	virtual void PostLogin(APlayerController* NewPlayer) override;
 
 	int32 CurrentPlayerCount = 0;
-	int32 RequiredPlayerCount = 3; // 원하는 플레이어 수 설정
+	int32 RequiredPlayerCount = 2; // 원하는 플레이어 수 설정
 
 	bool bQuizStarted = false;
 

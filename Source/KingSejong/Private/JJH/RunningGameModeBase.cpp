@@ -136,9 +136,9 @@ void ARunningGameModeBase::ShowAnswerUIToPlayerInOrder()
 
 void ARunningGameModeBase::AbleInput()
 {
-	for ( ARunnerController* RPCS : FailedToFinishPlayers )
+	for ( ARunnerController* RPCS : Players )
 	{
-		//입력 안받기
+		//입력 받기
 		RPCS->ClientAbleInput();
 	}
 }
@@ -242,6 +242,12 @@ void ARunningGameModeBase::PostLogin(APlayerController* NewPlayer)
 {
 	Super::PostLogin(NewPlayer);
 
+	ARunner* rn = Cast<ARunner> (NewPlayer);
+	if (rn)
+	{
+		ARunnerController* RC = Cast<ARunnerController>(rn->GetController());
+		RC->ClientDisableInput();
+	}
 	CurrentPlayerCount++;
 	CheckAndStartQuiz();
 }

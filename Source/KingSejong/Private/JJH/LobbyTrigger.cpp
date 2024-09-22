@@ -39,5 +39,6 @@ void ALobbyTrigger::ComponentBeginOverlap(UPrimitiveComponent* OverlappedCompone
 	Lobby->SetMenuInterface(gi);
 	Lobby->SetTextAndCategory(TriggerText, TriggerCategory);
 	Lobby->AddToViewport();
+
 }
 

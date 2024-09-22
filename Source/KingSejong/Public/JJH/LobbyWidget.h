@@ -101,7 +101,7 @@ public:
 	TSubclassOf<class USessionSlotWidget>  SessionSlotWidgetFactory;
 
 	UPROPERTY(EditAnywhere)
-	int32 LobbySelectedIndex;
+	int32 LobbySelectedIndex = -1;
 
 	void SetTextAndCategory(const FString& Text, const FString& Category);
 

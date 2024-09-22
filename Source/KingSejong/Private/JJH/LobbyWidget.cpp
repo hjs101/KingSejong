@@ -40,6 +40,12 @@ void ULobbyWidget::NativeConstruct()
 
 void ULobbyWidget::OnQuitButtonClicked()
 {
+	APlayerController* PC = GetOwningPlayer();
+	if (PC)
+	{
+		PC->bShowMouseCursor = false;
+		PC->SetInputMode(FInputModeGameOnly());
+	}
 	RemoveFromParent();
 	UE_LOG(LogTemp, Error, TEXT("Quit"));
 }
@@ -117,9 +123,10 @@ void ULobbyWidget::JoinServer()
 {
 	if (WidgetLobbyInterface)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("hhhD"));
+		UE_LOG(LogTemp, Warning, TEXT("LobbySelectedIndex : %d") , LobbySelectedIndex);
+
 		//그냥 조인 눌렀을때 안터지게
-		if (LobbySelectedIndex)
+		if (LobbySelectedIndex != -1)
 		{
 			WidgetLobbyInterface->JoinToSession(LobbySelectedIndex);
 		}
@@ -171,6 +178,13 @@ void ULobbyWidget::SetTextAndCategory(const FString& Text, const FString& Catego
 	{
 		PlayerCountSlider->SetMaxValue(2);
 	}
+	APlayerController* PC = GetOwningPlayer();
+	if (PC)
+	{
+		PC->bShowMouseCursor = true;
+		PC->SetInputMode(FInputModeUIOnly());
+	}
 }
+
 
 

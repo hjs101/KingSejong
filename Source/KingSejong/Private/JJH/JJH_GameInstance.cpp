@@ -71,7 +71,7 @@ void UJJH_GameInstance::LoadMenu()
 
 void UJJH_GameInstance::JoinToSession(int32 Index)
 {
-	UE_LOG(LogTemp, Warning, TEXT("hhhD"));
+	UE_LOG(LogTemp, Warning, TEXT("Joining"));
 	auto result = SessionSearch->SearchResults[Index];
 	SessionInterface->JoinSession(0, FName(MySessionName), result);
 }
