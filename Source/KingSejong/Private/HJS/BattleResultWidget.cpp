@@ -24,11 +24,12 @@ void UBattleResultWidget::LoserSetting()
 
 void UBattleResultWidget::RequestRestart()
 {
+	EndText = TEXT("재대결 요청중...");
 	// 게임모드에 재대결 요청 넘기기 -> 게임모드에 요청을 넘기려면 플레이어에 서버 함수를 만들고 거기서 요청
 	Me->ServerRestartGame();
 	RestartBtn->OnClicked.Clear();
 	ExitBtn->OnClicked.Clear();
-	EndText = TEXT("재대결 요청중...");
+
 }
 
 void UBattleResultWidget::ExitToLobby()

@@ -19,6 +19,9 @@ class KINGSEJONG_API UBattlePlayerAnim : public UAnimInstance
 public:
 	
 	UPROPERTY(EditAnywhere)
+	class USoundBase* HitSound;
+
+	UPROPERTY(EditAnywhere)
 	class UAnimMontage* AttackMontage;
 
 	UPROPERTY(EditAnywhere)

@@ -46,6 +46,9 @@ public:
 	class UBorder* OptionCanvas;
 
 	UPROPERTY(meta=(BindWidget))
+	class UBorder* TextLineBox;
+
+	UPROPERTY(meta=(BindWidget))
 	class UHorizontalBox* Options;
 
 	UPROPERTY(meta=(BindWidget))
@@ -128,5 +131,9 @@ public:
 	void SettingEndGameUIText(const FString& NewText);
 
 	void SettingPlayer(class AHJS_BattlePlayer* Player);
+
+	void HideLineBox();
+
+	void ShowLineBox();
 
 }; 

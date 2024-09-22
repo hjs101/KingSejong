@@ -97,12 +97,6 @@ public:
 	// 5. 패자의 경우 승자의 어택의 Notify 시점에 피격 애니메이션을 재생하도록 한다.
 	UFUNCTION()
 	void PlayerHit();
-
-	UFUNCTION(Server, Reliable)
-	void ServerPlayerHit();
-
-	UFUNCTION(NetMulticast, Reliable)
-	void MulticastPlayerHit();
 	
 	UFUNCTION(NetMulticast,Reliable)
 	void SetWinnerNum(int32 Value);
@@ -155,7 +149,7 @@ public:
 	void OnMyTakeDamage(int32 Damage);
 
 	UPROPERTY()
-	int32 MaxHP = 1;
+	int32 MaxHP = 3;
 
 	UPROPERTY()
 	int32 HP = MaxHP;
@@ -174,7 +168,24 @@ public:
 	UFUNCTION(Client, Reliable)
 	void ClientEndUISetting(const FString& NewText);
 
+	UFUNCTION(Client, Reliable)
+	void PlayBGM(int32 BGMNum);
+
+	// 노래 출력을 위한 BGM들
+	UPROPERTY(EditAnywhere)
+	class USoundWave* BGM0;
+	UPROPERTY(EditAnywhere)
+	class USoundWave* BGM1;
+	UPROPERTY(EditAnywhere)
+	class USoundWave* BGM2;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class UMainUI> MainUIFactory;
+
+	UPROPERTY()
+	UMainUI* MainUI;
 private:
+
 	bool bIsRecording = false;
 
 	// 테스트를 위한 VFX
@@ -240,12 +251,6 @@ private:
 	void LoginSignal();
 
 	FTimerHandle JoinTimerHandle;
-
-	UPROPERTY(EditAnywhere)
-	TSubclassOf<class UMainUI> MainUIFactory;
-
-	UPROPERTY()
-	UMainUI* MainUI;
 
 	UPROPERTY()
 	class AHJS_BattleGameMode* GM;
