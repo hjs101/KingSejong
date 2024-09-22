@@ -7,7 +7,7 @@
 #include "KJH_QuizManager.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FBlockOxLineSignature, bool, bValue);
-
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FEndQuizTimeSignature);
 
 UENUM()
 enum class EQuizState : uint8
@@ -55,6 +55,8 @@ public:
 	UPROPERTY(BlueprintAssignable)
 	FBlockOxLineSignature OnBlockOXLineDelegate;
 
+	UPROPERTY(BlueprintAssignable)
+	FEndQuizTimeSignature OnEndQuizTimeDelegate;
 
 private:
 	UPROPERTY()

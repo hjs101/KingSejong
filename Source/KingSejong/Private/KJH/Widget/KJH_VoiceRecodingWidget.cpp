@@ -68,10 +68,18 @@ void UKJH_VoiceRecodingWidget::OnClickedBtnRecStop()
     {
         bIsRecording = false;
         
-        PlayerVoiceRecorder->SendToChatbot();
+        // temp
+        FTimerHandle timerHandle;
+        GetWorld()->GetTimerManager().SetTimer(timerHandle,
+            [this]()
+            {
+                PlayerVoiceRecorder->SendToChatbot();
 
-        bIsRequest = true;
+                bIsRequest = true;
 
-        RemoveFromParent();
+                RemoveFromParent();
+            },
+            1, false
+        );
     }
 }

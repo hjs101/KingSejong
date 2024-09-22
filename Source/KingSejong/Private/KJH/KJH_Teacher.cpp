@@ -70,7 +70,6 @@ void AKJH_Teacher::BeginPlay()
         HttpManager->OnResponseAskChatbotAnswerDelegate.BindUObject(this, &AKJH_Teacher::OnRes_ChatbotResult);
         HttpManager->OnResponseGetAudioDataDelegate.BindUObject(this, &AKJH_Teacher::OnRes_ChatbotAudioData);
     }
-
 }
 
 // Called every frame
@@ -125,7 +124,6 @@ bool AKJH_Teacher::IsInteractable()
 
 void AKJH_Teacher::SetTeacherStateToIdle()
 {
-    //SetTeacherState(ETeacherState::Idle);
     ServerRPC_SetTeacherState(ETeacherState::Idle);
 }
 
@@ -161,16 +159,17 @@ void AKJH_Teacher::ClientRPC_CreateRecodingWidget_Implementation()
 
 void AKJH_Teacher::SetTeacherState(ETeacherState NewState)
 {
-    //// 훈장님 상태 변경
+    // 훈장님 상태 변경
+    TeacherState = NewState;
 
-    if ( HasAuthority() )
-    {
-        TeacherState = NewState;
-    }
-    else
-    {
-        OnReq_TeacherState();
-    }
+    //if ( HasAuthority() )
+    //{
+    //    TeacherState = NewState;
+    //}
+    //else
+    //{
+    //    OnReq_TeacherState();
+    //}
 
 }
 
@@ -244,14 +243,6 @@ void AKJH_Teacher::CastSpeechBubbleWidget()
     }
 }
 
-void AKJH_Teacher::GetChatbotAudioData()
-{
-    if ( HttpManager )
-    {
-        HttpManager->Req_GetChatbotAudioData(MyGameState->TeacherAudioId);
-    }
-}
-
 void AKJH_Teacher::ServerRPC_GetChatbotAudioData_Implementation()
 {
     MulticastRPC_GetChatbotAudioData();
@@ -259,10 +250,9 @@ void AKJH_Teacher::ServerRPC_GetChatbotAudioData_Implementation()
 
 void AKJH_Teacher::MulticastRPC_GetChatbotAudioData_Implementation()
 {
-    // GetChatbotAudioData();
-
     if ( HttpManager )
     {
+        //HttpManager->Req_GetChatbotAudioData(TEXT("22c6d2da-ee40-4219-bb6c-95c69cfc5b63"));
         HttpManager->Req_GetChatbotAudioData(MyGameState->TeacherAudioId);
     }
 }
@@ -302,6 +292,7 @@ void AKJH_Teacher::OnRes_ChatbotResult(bool bResult, const FString& AudioId, con
     // 통신 성공
     else
     {
+
         MyGameState->OnChangedTeacherMessage(Text);
         MyGameState->OnChangedTeacherAudioId(AudioId);
 
@@ -329,8 +320,12 @@ void AKJH_Teacher::OnSuccessedChatbotResponse()
         {
             ServerRPC_GetChatbotAudioData();
         },
-        AnswerDelayTime, false
+        AudioRequestDelayTime, false
     );
+
+    UE_LOG(LogTemp, Warning, TEXT("훈장님 text 답변 : %s"), *MyGameState->TeacherMessage);
+
+
 }
 void AKJH_Teacher::OnFailedChatbotResponse()
 {
@@ -343,26 +338,71 @@ void AKJH_Teacher::OnFailedChatbotResponse()
         {
             ServerRPC_SetTeacherState(ETeacherState::Idle);
         },
-        AnswerDelayTime, false
+        IdleDelayTime, false
     );
 }
+
 void AKJH_Teacher::OnRes_ChatbotAudioData(const FString& AudioData)
 {
-    if ( MyGameState == nullptr ) return;
-    if ( AudioData.IsEmpty() ) return;
-
-    // wav 파일을 변환해서 사용하던지
-    // data를 디코딩해서 사용하던지해서 play하기
-    // 오디오 재생
-    auto* soundWave = UKJH_FileDataLib::CreateSoundWaveToAudioData(AudioData);
-    
-    if ( soundWave )
+    bool bIsSuccessed = MyGameState != nullptr && AudioData.IsEmpty() == false;
+    // 훈장님 오디오 응답 통신 성공했을 경우
+    if (bIsSuccessed)
     {
-        AudioComp->SetSound(soundWave);
-        AudioComp->Play();
+        // wav 파일을 변환해서 사용하던지
+        // data를 디코딩해서 사용하던지해서 play하기
+        // 오디오 재생
+        auto* soundWave = UKJH_FileDataLib::CreateSoundWaveToAudioData(AudioData);
+
+        if (soundWave)
+        {
+            AudioComp->SetSound(soundWave);
+            AudioComp->Play();
+
+            UE_LOG(LogTemp, Display, TEXT("[OnRes_ChatbotAudioData] Audio Play!!"));
+
+        }
     }
 
-    // 텍스트 변경
-    ServerRPC_SetTeacherState(ETeacherState::Answer);
-    SetSpeechBubbleText(MyGameState->TeacherMessage);
+    if (HasAuthority())
+    {
+        // 텍스트 변경
+        ServerRPC_SetTeacherState(ETeacherState::Answer);
+        ServerRPC_SetSpeechBubbleText(MyGameState->TeacherMessage);
+
+        UE_LOG(LogTemp, Display, TEXT("[OnRes_ChatbotAudioData] TEXT : %s"), *MyGameState->TeacherMessage);
+
+        // 일정 시간 뒤 idle 상태로 변경
+        FTimerHandle timerHandle;
+        GetWorld()->GetTimerManager().SetTimer(timerHandle,
+            [this]()
+            {
+                ServerRPC_SetTeacherState(ETeacherState::Idle);
+
+                UE_LOG(LogTemp, Display, TEXT("[OnRes_ChatbotAudioData] Idle로 상태 변경"));
+
+            },
+            IdleDelayTime, false
+        );
+
+    }
+
+    //// 텍스트 변경
+    //SetTeacherState(ETeacherState::Answer);
+    //SetSpeechBubbleText(MyGameState->TeacherMessage);
+
+    //UE_LOG(LogTemp, Display, TEXT("[OnRes_ChatbotAudioData] TEXT : %s"), *MyGameState->TeacherMessage);
+
+    //// 일정 시간 뒤 idle 상태로 변경
+    //FTimerHandle timerHandle;
+    //GetWorld()->GetTimerManager().SetTimer(timerHandle,
+    //    [this]()
+    //    {
+    //        SetTeacherState(ETeacherState::Idle);
+
+    //        UE_LOG(LogTemp, Display, TEXT("[OnRes_ChatbotAudioData] Idle로 상태 변경"));
+
+    //    },
+    //    IdleDelayTime, false
+    //);
+
 }

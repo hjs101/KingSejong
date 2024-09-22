@@ -54,9 +54,6 @@ bool UKJH_VoiceRecorder::OnStartRecord()
 		return false;
 	}
 
-	UE_LOG(LogTemp, Warning, TEXT("녹음 시작 시도!"));
-
-
 	AudioCaptureComp->Start();
 	UAudioMixerBlueprintLibrary::StartRecordingOutput(GetWorld(), 0, SoundSubmix);
 	
@@ -84,8 +81,6 @@ bool UKJH_VoiceRecorder::OnStopRecord()
 	FString FileDir = UKJH_FileDataLib::GetSaveWavFileDirectory();
 
 	UAudioMixerBlueprintLibrary::StopRecordingOutput(GetWorld(), EAudioRecordingExportType::WavFile, SaveFileName, FileDir, SoundSubmix);
-
-	UE_LOG(LogTemp, Warning, TEXT("OnStopRecord!!"));
 
 	return true;
 }

@@ -21,11 +21,19 @@ public:
 	FString TeacherAudioId;
 
 public:
+	UFUNCTION(BlueprintCallable)
 	void OnChangedTeacherMessage(const FString& Message);
-	UFUNCTION(Server, Reliable)
+	UFUNCTION(Server, Reliable, BlueprintCallable)
 	void ServerRPC_OnChangedTeacherMessage(const FString& Message);
 
+	//UFUNCTION(NetMulticast, Reliable)
+	//void MulticastRPC_OnChangedTeacherMessage(const FString& Message);
+
+
+	UFUNCTION(BlueprintCallable)
 	void OnChangedTeacherAudioId(const FString& AudioId);
-	UFUNCTION(Server, Reliable)
+	UFUNCTION(Server, Reliable, BlueprintCallable)
 	void ServerRPC_OnChangedTeacherAudioId(const FString& AudioId);
+	//UFUNCTION(NetMulticast, Reliable)
+	//void MulticastRPC_OnChangedTeacherAudioId(const FString& AudioId);
 };

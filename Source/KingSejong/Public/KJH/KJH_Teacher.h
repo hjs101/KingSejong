@@ -48,7 +48,8 @@ public:
 	//FString TeacherAudioId;
 	
 	UPROPERTY(EditDefaultsOnly)
-	float AnswerDelayTime = 5;
+	float AudioRequestDelayTime = 40;
+	float IdleDelayTime = 10;
 
 	// Component
 	UPROPERTY(EditDefaultsOnly)

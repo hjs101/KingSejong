@@ -215,6 +215,8 @@ void UKJH_QuizManager::EndState()
 		pc->ClientRPC_EndQuiz();
 	}
 
+	OnEndQuizTimeDelegate.Broadcast();
+
 	SetQuizState(EQuizState::NotStarted);
 }
 

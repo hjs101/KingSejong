@@ -52,22 +52,40 @@ USoundWaveProcedural* UKJH_FileDataLib::CreateSoundWaveToAudioData(const FString
 		UE_LOG(LogTemp, Error, TEXT("Base64 디코딩에 실패했습니다."));
 		return nullptr;
 	}
-	// 새로운 SoundWave 객체 생성
-	USoundWaveProcedural* SoundWaveProcedural = NewObject<USoundWaveProcedural>(USoundWaveProcedural::StaticClass());
+	//// 새로운 SoundWave 객체 생성
+	//USoundWaveProcedural* SoundWaveProcedural = NewObject<USoundWaveProcedural>(USoundWaveProcedural::StaticClass());
 
-	if ( !SoundWaveProcedural )
-	{
-		UE_LOG(LogTemp, Error, TEXT("SoundWave 객체 생성에 실패했습니다."));
-		return nullptr;
-	}
-	// 샘플레이트와 채널 설정
-	SoundWaveProcedural->SetSampleRate(44100);  // 예시 샘플레이트
-	SoundWaveProcedural->NumChannels = 2;       // 스테레오
+	//if ( !SoundWaveProcedural )
+	//{
+	//	UE_LOG(LogTemp, Error, TEXT("SoundWave 객체 생성에 실패했습니다."));
+	//	return nullptr;
+	//}
+	//// 샘플레이트와 채널 설정
+	//SoundWaveProcedural->SetSampleRate(44100);  // 예시 샘플레이트
+	//SoundWaveProcedural->NumChannels = 2;       // 스테레오
 
-	// 오디오 데이터를 SoundWaveProcedural로 전달
-	SoundWaveProcedural->QueueAudio(DecodedData.GetData(), DecodedData.Num());
+	//// 오디오 데이터를 SoundWaveProcedural로 전달
+	//SoundWaveProcedural->QueueAudio(DecodedData.GetData(), DecodedData.Num());
 
-	return SoundWaveProcedural;
+
+	// WAV 헤더에서 필요한 정보 추출 (예: 샘플 속도, 채널 수, 등)
+	int32 SampleRate = *(int32*)&DecodedData[24]; // WAV 파일의 샘플 속도
+	int16 NumChannels = *(int16*)&DecodedData[22]; // WAV 파일의 채널 수
+	int32 DataSize = *(int32*)&DecodedData[40]; // 데이터 크기
+
+	// USoundWaveProcedural로 동적 사운드 웨이브 생성
+	USoundWaveProcedural* SoundWave = NewObject<USoundWaveProcedural>();
+	SoundWave->SetSampleRate(SampleRate);
+	SoundWave->NumChannels = NumChannels;
+	SoundWave->Duration = static_cast<float>(DataSize) / (SampleRate * NumChannels * sizeof(int16));
+
+	// 오디오 데이터를 SoundWave에 할당
+	TArray<uint8> PCMData(DecodedData.GetData() + 44, DataSize); // 44바이트 이후가 오디오 데이터
+	SoundWave->QueueAudio(PCMData.GetData(), PCMData.Num());
+
+
+	//return SoundWaveProcedural;
+	return SoundWave;
 }
 
 

@@ -12,8 +12,6 @@ void AKJH_CommunityGameState::GetLifetimeReplicatedProps(TArray<FLifetimePropert
     DOREPLIFETIME(AKJH_CommunityGameState, TeacherAudioId);
 }
 
-
-
 void AKJH_CommunityGameState::OnChangedTeacherMessage(const FString& Message)
 {
     if ( HasAuthority() )
@@ -31,6 +29,11 @@ void AKJH_CommunityGameState::ServerRPC_OnChangedTeacherMessage_Implementation(c
     TeacherMessage = Message;
 }
 
+//void AKJH_CommunityGameState::MulticastRPC_OnChangedTeacherMessage_Implementation(const FString& Message)
+//{
+//    TeacherMessage = Message;
+//}
+
 void AKJH_CommunityGameState::OnChangedTeacherAudioId(const FString& AudioId)
 {
     if ( HasAuthority() )
@@ -47,3 +50,9 @@ void AKJH_CommunityGameState::ServerRPC_OnChangedTeacherAudioId_Implementation(c
 {
     TeacherAudioId = AudioId;
 }
+
+//void AKJH_CommunityGameState::MulticastRPC_OnChangedTeacherAudioId_Implementation(const FString& AudioId)
+//{
+//    MulticastRPC_OnChangedTeacherAudioId(AudioId);
+//    TeacherAudioId = AudioId;
+//}
