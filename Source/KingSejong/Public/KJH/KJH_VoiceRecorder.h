@@ -20,6 +20,10 @@ protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
+public:
+	const FString SaveFileName = FString(TEXT("Request_Chatbot"));
+	//const FString SaveFileDir = "Recording";
+
 private:
 	UPROPERTY()
 	class UAudioCaptureComponent* AudioCaptureComp;
@@ -27,12 +31,15 @@ private:
 	UPROPERTY(EditDefaultsOnly)
 	class USoundSubmix* SoundSubmix;
 
-	const FString SaveFileName = "RecordVoiceFile_Question";
+	UPROPERTY()
+	class AKJH_HttpManager* HttpManager;
 
 public:
+
 	UFUNCTION(BlueprintCallable)
 	bool OnStartRecord();
 	UFUNCTION(BlueprintCallable)
 	bool OnStopRecord();
 
+	void SendToChatbot();
 };

@@ -4,7 +4,6 @@
 #include "KJH/Widget/KJH_VoiceRecodingWidget.h"
 #include "KJH/KJH_Player.h"
 #include "KJH/KJH_VoiceRecorder.h"
-#include "KJH/API/KJH_HttpHandler.h"
 #include "Components/Button.h"
 #include "Components/WidgetSwitcher.h"
 #include "Kismet/GameplayStatics.h"
@@ -30,24 +29,17 @@ void UKJH_VoiceRecodingWidget::NativeConstruct()
             UE_LOG(LogTemp, Warning, TEXT("VoiceRecorder 를 바인딩!!!"));
         }
 
-        PlayerHttpHandler = player->GetComponentByClass<UKJH_HttpHandler>();
     }
-
-    // HttpManager
-    HttpManager = Cast<AKJH_HttpManager>(UGameplayStatics::GetActorOfClass(GetWorld(), AKJH_HttpManager::StaticClass()));
-
-    Btn_Question->OnClicked.AddDynamic(this, &UKJH_VoiceRecodingWidget::Req_Question);
-    
 }
 
 void UKJH_VoiceRecodingWidget::NativeDestruct()
 {
     Super::NativeDestruct();
 
-    if( OnCloseWidgetDelegate.IsBound()&& bIsRequest == false)
+    if( OnCloseWidgetDelegate.IsBound() && bIsRequest == false)
         OnCloseWidgetDelegate.Broadcast();
 
-    if( bIsRecording && PlayerVoiceRecorder )
+    if( PlayerVoiceRecorder && bIsRecording)
         PlayerVoiceRecorder->OnStopRecord();
 }
 
@@ -69,29 +61,25 @@ void UKJH_VoiceRecodingWidget::OnClickedBtnRecStop()
 {
     if ( PlayerVoiceRecorder == nullptr ) return;
 
-    // 녹음 종료    
+    // 녹음 종료 및 저장
     bool bResult = PlayerVoiceRecorder->OnStopRecord();
 
     if ( bResult )
     {
         bIsRecording = false;
+        
+        // temp
+        FTimerHandle timerHandle;
+        GetWorld()->GetTimerManager().SetTimer(timerHandle,
+            [this]()
+            {
+                PlayerVoiceRecorder->SendToChatbot();
 
-        Req_Question();
+                bIsRequest = true;
 
-        //RemoveFromParent();
+                RemoveFromParent();
+            },
+            1, false
+        );
     }
-}
-
-void UKJH_VoiceRecodingWidget::Req_Question()
-{
-    // 질문 API 호출
-    if ( HttpManager )
-    {
-        FText text = EditTextBox_Question->GetText();
-        HttpManager->Req_BookAnswer(TEXT(""), text.ToString());
-
-        bIsRequest = true;
-    }
-
-    RemoveFromParent();
 }

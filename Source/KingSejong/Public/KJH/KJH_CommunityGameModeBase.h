@@ -22,7 +22,7 @@ protected:
 	virtual void BeginPlay() override;
 
 public:
-	UPROPERTY()
+	UPROPERTY(BlueprintReadOnly)
 	TArray<class AKJH_Player*> PlayerList;
 
 public:
@@ -33,8 +33,8 @@ public:
 public:
 	void GetAllPlayers();
 
-	//UFUNCTION(BlueprintCallable)
 	//void SetCommunityState(ECommunityState NewState);
+	UFUNCTION(BlueprintCallable)
 	void SetAllPlayersPosition(FTransform& TargetTransform);
 	
 };

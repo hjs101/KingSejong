@@ -34,6 +34,8 @@ void UKJH_QuizManager::BeginPlay()
 		OXLine = FoundActors[0];
 	}
 
+	
+
 	// StartQuiz();
 }
 
@@ -51,12 +53,20 @@ void UKJH_QuizManager::StartQuiz()
 	if (CommunityGameMode == nullptr) return;
 	if (OXLine == nullptr) return;
 
+	CallBlockOxLineDelegate(false);
+
 	//  플레이어 컨트롤러 리스트 갱신
 	CommunityGameMode->GetAllPlayerControllers();
 	if ( CommunityGameMode->PlayerControllers.Num() > 0 )
 	{
 		SetQuizState(EQuizState::Idle);
 	}
+}
+
+void UKJH_QuizManager::CallBlockOxLineDelegate(bool bValue)
+{
+	if ( OnBlockOXLineDelegate.IsBound() )
+		OnBlockOXLineDelegate.Broadcast(bValue);
 }
 
 void UKJH_QuizManager::SetQuizState(EQuizState State)
@@ -112,6 +122,8 @@ void UKJH_QuizManager::IdleState()
 
 void UKJH_QuizManager::QuestionState()
 {
+	CallBlockOxLineDelegate(false);
+
 	// 모든 플레이어에게 문제 설정
 	for (auto pc : CommunityGameMode->PlayerControllers)
 	{
@@ -134,6 +146,9 @@ void UKJH_QuizManager::QuestionState()
 
 void UKJH_QuizManager::WaitingState()
 {
+	CallBlockOxLineDelegate(true);
+
+
 	// 모든 플레이어에게 정답 대기 상태로 전환
 	for (auto pc : CommunityGameMode->PlayerControllers)
 	{
@@ -191,11 +206,16 @@ void UKJH_QuizManager::AnswerState()
 
 void UKJH_QuizManager::EndState()
 {
+	CallBlockOxLineDelegate(false);
+	
+
 	// 모든 플레이어들에게 퀴즈 종료
 	for (auto pc : CommunityGameMode->PlayerControllers)
 	{
 		pc->ClientRPC_EndQuiz();
 	}
+
+	OnEndQuizTimeDelegate.Broadcast();
 
 	SetQuizState(EQuizState::NotStarted);
 }

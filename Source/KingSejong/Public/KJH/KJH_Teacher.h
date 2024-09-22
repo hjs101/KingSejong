@@ -7,13 +7,13 @@
 #include "KJH_Teacher.generated.h"
 
 
-UENUM()
+UENUM(BlueprintType)
 enum class ETeacherState : uint8
 {
-	Idle UMETA(DisplayName = "Idle"),
-	Listen UMETA(DisplayName = "Listen"),
-	Think UMETA(DisplayName = "Think"),
-	Answer UMETA(DisplayName = "Answer")
+	Idle,
+	Listen,
+	Think,
+	Answer,
 };
 
 UCLASS()
@@ -39,42 +39,62 @@ public:
 public:
 
 	// 현재 상태
-	UPROPERTY(ReplicatedUsing = OnReq_TeacherState)
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnReq_TeacherState)
 	ETeacherState TeacherState = ETeacherState::Idle;
 
+	//UPROPERTY(Replicated)
+	//FString TeacherMessage;
+	//UPROPERTY(Replicated)
+	//FString TeacherAudioId;
+	
+	UPROPERTY(EditDefaultsOnly)
+	float AudioRequestDelayTime = 40;
+	float IdleDelayTime = 10;
+
+	// Component
 	UPROPERTY(EditDefaultsOnly)
 	class UCapsuleComponent* CapsuleComp;
 	UPROPERTY(EditDefaultsOnly)
 	class USkeletalMeshComponent* SkeletalMeshComp;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	class UAudioComponent* AudioComp;
 
 	// UI
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<UUserWidget> RecodingWidgetFactory;
-
 	UPROPERTY()
 	class UKJH_VoiceRecodingWidget* RecodingWidget;
-
 	UPROPERTY(EditDefaultsOnly)
 	class UWidgetComponent* StateWidgetComp;
-
 	UPROPERTY()
 	class UKJH_SpeechBubbleWidget* SpeechBubbleWidget;
 
+	// API
 	UPROPERTY()
 	class AKJH_HttpManager* HttpManager;
 
+
+
+private:
+	class AKJH_CommunityGameState* MyGameState;
+
 public:
+
+	UFUNCTION(BlueprintCallable)
 	void SetTeacherState(ETeacherState NewState);
 	void SetTeacherStateToIdle();
-
 
 
 private:
 		
 	void CreateRecodingWidget();
-	void SetVisiblityStateWidget(bool bValue);
 
-	/**/
+
+		// 훈장님 상태 변경 이벤트 함수
+	UFUNCTION()
+	void OnReq_TeacherState();
+
+	/* 질문하기 */
     UFUNCTION(Client, Reliable)
     void ClientRPC_CreateRecodingWidget();
 
@@ -84,7 +104,9 @@ private:
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastRPC_SetTeacherState(ETeacherState NewState);
 
-	/**/
+	/* 말풍선 */
+	void CastSpeechBubbleWidget();
+	
 	void SetSpeechBubbleText(FString Message);
 
 	UFUNCTION(Server, Reliable)
@@ -93,13 +115,22 @@ private:
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastRPC_SetSpeechBubbleText(const FString& Message);
 
-	
-	void CastSpeechBubbleWidget();
+	/* 음성 데이터 가져오기*/
+	void GetChatbotAudioData();
 
+	UFUNCTION(Server, Reliable)
+	void ServerRPC_GetChatbotAudioData();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastRPC_GetChatbotAudioData();
+	
 	FString GetMessageByTeacherState(ETeacherState NewState);
 
-	void OnRes_ChatbotResult(FString Message);
+	// 훈장님 음성
+	void OnRes_ChatbotResult(bool bResult, const FString& AudioId, const FString& Text);
+	void OnRes_ChatbotAudioData(const FString& AudioData);
 
-	UFUNCTION()
-	void OnReq_TeacherState();
+	void OnSuccessedChatbotResponse();
+	void OnFailedChatbotResponse();
+
 };

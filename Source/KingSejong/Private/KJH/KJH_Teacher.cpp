@@ -4,13 +4,18 @@
 #include "KJH/KJH_Teacher.h"
 #include "Blueprint/UserWidget.h"
 #include "Components/CapsuleComponent.h"
+#include "Components/WidgetComponent.h"
+#include "Components/AudioComponent.h"
+#include "Kismet/GameplayStatics.h"
+#include "Containers/StringConv.h"
 #include "Net/UnrealNetwork.h"
 #include "KJH/Widget/KJH_VoiceRecodingWidget.h"
-#include "Components/WidgetComponent.h"
 #include "KJH/Widget/KJH_SpeechBubbleWidget.h"
-#include "KJH/API/KJH_HttpHandler.h"
-#include "Kismet/GameplayStatics.h"
 #include "KJH/API/KJH_HttpManager.h"
+#include "KJH/KJH_CommunityGameState.h"
+#include "KJH/API/KJH_FileDataLib.h"
+
+
 
 AKJH_Teacher::AKJH_Teacher()
 {
@@ -33,37 +38,37 @@ AKJH_Teacher::AKJH_Teacher()
     StateWidgetComp = CreateDefaultSubobject<UWidgetComponent>(TEXT("StateWidgetComp"));
     StateWidgetComp->SetupAttachment(RootComponent);
 
-    //// HttpHandler
-    //HttpHandler = CreateDefaultSubobject<UKJH_HttpHandler>(TEXT("HttpHandler"));
+    // AudioComp
+    AudioComp = CreateDefaultSubobject<UAudioComponent>(TEXT("AudioComp"));
+    AudioComp->SetupAttachment(RootComponent);
+
 }
 
 // Called when the game starts or when spawned
 void AKJH_Teacher::BeginPlay()
 {
     Super::BeginPlay();
-    
-    // SetSpeechBubbleText(FString("Idle"));
 
-    SetVisiblityStateWidget(true);
+    // GameState
+    MyGameState = Cast<AKJH_CommunityGameState>(GetWorld()->GetGameState());
+
     CastSpeechBubbleWidget();
-    
 
     FTimerHandle timerHandle;
     GetWorld()->GetTimerManager().SetTimer(timerHandle,
         [ this ] ()
-        {
-            UE_LOG(LogTemp, Warning, TEXT("begin play에서 TeacherState : %d"), TeacherState);
-            SetTeacherState(TeacherState);
+        {   
+            OnReq_TeacherState();
         },
         0.05f, false
     );
 
     // HttpManager
     HttpManager = Cast<AKJH_HttpManager>(UGameplayStatics::GetActorOfClass(GetWorld(), AKJH_HttpManager::StaticClass()));
-
     if ( HttpManager )
     {
-        HttpManager->OnResponseBookAnswerDelegate.AddUObject(this, &AKJH_Teacher::OnRes_ChatbotResult);
+        HttpManager->OnResponseAskChatbotAnswerDelegate.BindUObject(this, &AKJH_Teacher::OnRes_ChatbotResult);
+        HttpManager->OnResponseGetAudioDataDelegate.BindUObject(this, &AKJH_Teacher::OnRes_ChatbotAudioData);
     }
 }
 
@@ -78,8 +83,6 @@ void AKJH_Teacher::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLife
     Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
     DOREPLIFETIME(AKJH_Teacher, TeacherState);
-    //DOREPLIFETIME(AKJH_Teacher, StateWidgetComp);
-    //DOREPLIFETIME(AKJH_Teacher, SpeechBubbleWidget);
 }
 
 /// <summary>
@@ -99,8 +102,8 @@ void AKJH_Teacher::OnBeginInteraction(AActor* OtherActor)
     // SetOwner(OtherActor);
     ClientRPC_CreateRecodingWidget();
 
-    if( RecodingWidget )
-        ServerRPC_SetTeacherState(ETeacherState::Listen);
+    //if( RecodingWidget )
+    //    ServerRPC_SetTeacherState(ETeacherState::Listen);
 }
 
 void AKJH_Teacher::OnEndInteraction()
@@ -121,7 +124,6 @@ bool AKJH_Teacher::IsInteractable()
 
 void AKJH_Teacher::SetTeacherStateToIdle()
 {
-    //SetTeacherState(ETeacherState::Idle);
     ServerRPC_SetTeacherState(ETeacherState::Idle);
 }
 
@@ -141,8 +143,8 @@ void AKJH_Teacher::CreateRecodingWidget()
         RecodingWidget->OnCloseWidgetDelegate.AddUObject(this, &AKJH_Teacher::SetTeacherStateToIdle);
         // RecodingWidget->OnResponseQuestResultDelegate.AddUObject(this, &AKJH_Teacher::OnRes_ChatbotResult);
 
-        // 서버에게 훈장님 상태를 변경 요청
-        //ServerRPC_SetTeacherState(ETeacherState::Listen);
+        //서버에게 훈장님 상태를 변경 요청
+        ServerRPC_SetTeacherState(ETeacherState::Listen);
     }
     else
     {
@@ -155,37 +157,34 @@ void AKJH_Teacher::ClientRPC_CreateRecodingWidget_Implementation()
     CreateRecodingWidget();
 }
 
-void AKJH_Teacher::SetVisiblityStateWidget(bool bValue)
-{
-    
-    StateWidgetComp->SetVisibility( bValue);
-}
-
 void AKJH_Teacher::SetTeacherState(ETeacherState NewState)
 {
     // 훈장님 상태 변경
     TeacherState = NewState;
 
-    OnReq_TeacherState();
-    //if ( TeacherState != ETeacherState::Answer )
+    //if ( HasAuthority() )
     //{
-    //    CastSpeechBubbleWidget();
-
-    //    FString message = GetMessageByTeacherState(NewState);
-    //    SpeechBubbleWidget->SetTextMessage(message);
+    //    TeacherState = NewState;
+    //}
+    //else
+    //{
+    //    OnReq_TeacherState();
     //}
 
-    //ServerRPC_SetTeacherState(NewState);
 }
 
 void AKJH_Teacher::ServerRPC_SetTeacherState_Implementation(ETeacherState NewState)
 {
+    TeacherState = NewState;
+
     MulticastRPC_SetTeacherState(NewState);
 }
 
 void AKJH_Teacher::MulticastRPC_SetTeacherState_Implementation(ETeacherState NewState)
 {
-    SetTeacherState(NewState);
+    //SetTeacherState(NewState);
+    //TeacherState = NewState;
+    OnReq_TeacherState();
 }
 
 void AKJH_Teacher::SetSpeechBubbleText(FString Message)
@@ -206,18 +205,17 @@ void AKJH_Teacher::MulticastRPC_SetSpeechBubbleText_Implementation(const FString
 {
     CastSpeechBubbleWidget();
     SetSpeechBubbleText(Message);
-    //SpeechBubbleWidget->SetTextMessage(Message);
 
-    // 임시 코드
-    FTimerHandle timerHandle;
-    GetWorld()->GetTimerManager().SetTimer(timerHandle,
-        [ this ] ()
-        {
-            //ServerRPC_SetTeacherState(ETeacherState::Idle);
-            SetTeacherState(ETeacherState::Idle);
-        },
-        5.0f, false
-    );
+    //// 임시 코드
+    //// todo : 음성 재생 끝났을 때 idle 상태로 전환되도록 수정
+    //FTimerHandle timerHandle;
+    //GetWorld()->GetTimerManager().SetTimer(timerHandle,
+    //    [ this ] ()
+    //    {
+    //        SetTeacherState(ETeacherState::Idle);
+    //    },
+    //    5.0f, false
+    //);
 
 }
 
@@ -227,36 +225,38 @@ void AKJH_Teacher::CastSpeechBubbleWidget()
     {
         SpeechBubbleWidget = Cast<UKJH_SpeechBubbleWidget>(StateWidgetComp->GetWidget());
 
-        if ( SpeechBubbleWidget == nullptr )
+        if ( SpeechBubbleWidget != nullptr )
         {
-            if ( HasAuthority() )
+            if ( MyGameState == nullptr )
             {
-                UE_LOG(LogTemp, Warning, TEXT("Server : SpeechBubbleWidget null!!"));
+                auto* gs = Cast<AKJH_CommunityGameState>(GetWorld()->GetGameState());
 
-            }
-            else
-            {
-                UE_LOG(LogTemp, Warning, TEXT("Client : SpeechBubbleWidget null!!"));
+                if ( gs != nullptr )
+                {
+                    MyGameState = gs;
 
+                    SpeechBubbleWidget->SetTextMessage(MyGameState->TeacherMessage);
+                }
             }
+            
         }
-        else
-        {
-            if ( HasAuthority() )
-            {
-                UE_LOG(LogTemp, Warning, TEXT("Server : SpeechBubbleWidget not null!!"));
-
-            }
-            else
-            {
-                UE_LOG(LogTemp, Warning, TEXT("Client : SpeechBubbleWidget not null!!"));
-
-            }
-
-        }
-
     }
 }
+
+void AKJH_Teacher::ServerRPC_GetChatbotAudioData_Implementation()
+{
+    MulticastRPC_GetChatbotAudioData();
+}
+
+void AKJH_Teacher::MulticastRPC_GetChatbotAudioData_Implementation()
+{
+    if ( HttpManager )
+    {
+        //HttpManager->Req_GetChatbotAudioData(TEXT("22c6d2da-ee40-4219-bb6c-95c69cfc5b63"));
+        HttpManager->Req_GetChatbotAudioData(MyGameState->TeacherAudioId);
+    }
+}
+
 
 FString AKJH_Teacher::GetMessageByTeacherState(ETeacherState NewState)
 {
@@ -282,49 +282,127 @@ FString AKJH_Teacher::GetMessageByTeacherState(ETeacherState NewState)
     return message;
 }
 
-
-void AKJH_Teacher::OnRes_ChatbotResult(FString Message)
+void AKJH_Teacher::OnRes_ChatbotResult(bool bResult, const FString& AudioId, const FString& Text)
 {
     // 통신 실패
-    if ( Message.IsEmpty() )
+    if ( bResult == false || Text.IsEmpty())
     {
-        Message = FString(TEXT("훈장님과의 소통이 원활하지 않습니다."));
+        OnFailedChatbotResponse();
     }
     // 통신 성공
     else
     {
-        // - 음성 재생
-       
+
+        MyGameState->OnChangedTeacherMessage(Text);
+        MyGameState->OnChangedTeacherAudioId(AudioId);
+
+        OnSuccessedChatbotResponse();
     }
-
-    ServerRPC_SetTeacherState(ETeacherState::Answer);
-    ServerRPC_SetSpeechBubbleText(Message);
-
-    // todo : 녹음 파일 재생하도록 변경
-    // 녹음 파일 재생이 끝나면 훈장님 상태를 Idle로 변경해야 함
-
-    //// 임시 코드
-    //FTimerHandle timerHandle;
-    //GetWorld()->GetTimerManager().SetTimer(timerHandle,
-    //    [ this ] ()
-    //    {
-    //        ServerRPC_SetTeacherState(ETeacherState::Idle);
-    //        //SetTeacherState(ETeacherState::Idle);
-    //    },
-    //    5.0f, false
-    //);
-
 }
 
 void AKJH_Teacher::OnReq_TeacherState()
 {
     // 훈장님 상태 변경
+    if ( TeacherState == ETeacherState::Answer )
+        return;
 
-    if ( TeacherState != ETeacherState::Answer )
+    CastSpeechBubbleWidget();
+
+    MyGameState->TeacherMessage = GetMessageByTeacherState(TeacherState);
+    SpeechBubbleWidget->SetTextMessage(MyGameState->TeacherMessage);
+}
+
+void AKJH_Teacher::OnSuccessedChatbotResponse()
+{
+    FTimerHandle timerHandle;
+    GetWorld()->GetTimerManager().SetTimer(timerHandle,
+        [ this ] ()
+        {
+            ServerRPC_GetChatbotAudioData();
+        },
+        AudioRequestDelayTime, false
+    );
+
+    UE_LOG(LogTemp, Warning, TEXT("훈장님 text 답변 : %s"), *MyGameState->TeacherMessage);
+
+
+}
+void AKJH_Teacher::OnFailedChatbotResponse()
+{
+    ServerRPC_SetTeacherState(ETeacherState::Answer);
+    ServerRPC_SetSpeechBubbleText(TEXT("질문을 이해하지 못했구나"));
+
+    FTimerHandle timerHandle;
+    GetWorld()->GetTimerManager().SetTimer(timerHandle,
+        [ this ] ()
+        {
+            ServerRPC_SetTeacherState(ETeacherState::Idle);
+        },
+        IdleDelayTime, false
+    );
+}
+
+void AKJH_Teacher::OnRes_ChatbotAudioData(const FString& AudioData)
+{
+    bool bIsSuccessed = MyGameState != nullptr && AudioData.IsEmpty() == false;
+    // 훈장님 오디오 응답 통신 성공했을 경우
+    if (bIsSuccessed)
     {
-        CastSpeechBubbleWidget();
+        // wav 파일을 변환해서 사용하던지
+        // data를 디코딩해서 사용하던지해서 play하기
+        // 오디오 재생
+        auto* soundWave = UKJH_FileDataLib::CreateSoundWaveToAudioData(AudioData);
 
-        FString message = GetMessageByTeacherState(TeacherState);
-        SpeechBubbleWidget->SetTextMessage(message);
+        if (soundWave)
+        {
+            AudioComp->SetSound(soundWave);
+            AudioComp->Play();
+
+            UE_LOG(LogTemp, Display, TEXT("[OnRes_ChatbotAudioData] Audio Play!!"));
+
+        }
     }
+
+    if (HasAuthority())
+    {
+        // 텍스트 변경
+        ServerRPC_SetTeacherState(ETeacherState::Answer);
+        ServerRPC_SetSpeechBubbleText(MyGameState->TeacherMessage);
+
+        UE_LOG(LogTemp, Display, TEXT("[OnRes_ChatbotAudioData] TEXT : %s"), *MyGameState->TeacherMessage);
+
+        // 일정 시간 뒤 idle 상태로 변경
+        FTimerHandle timerHandle;
+        GetWorld()->GetTimerManager().SetTimer(timerHandle,
+            [this]()
+            {
+                ServerRPC_SetTeacherState(ETeacherState::Idle);
+
+                UE_LOG(LogTemp, Display, TEXT("[OnRes_ChatbotAudioData] Idle로 상태 변경"));
+
+            },
+            IdleDelayTime, false
+        );
+
+    }
+
+    //// 텍스트 변경
+    //SetTeacherState(ETeacherState::Answer);
+    //SetSpeechBubbleText(MyGameState->TeacherMessage);
+
+    //UE_LOG(LogTemp, Display, TEXT("[OnRes_ChatbotAudioData] TEXT : %s"), *MyGameState->TeacherMessage);
+
+    //// 일정 시간 뒤 idle 상태로 변경
+    //FTimerHandle timerHandle;
+    //GetWorld()->GetTimerManager().SetTimer(timerHandle,
+    //    [this]()
+    //    {
+    //        SetTeacherState(ETeacherState::Idle);
+
+    //        UE_LOG(LogTemp, Display, TEXT("[OnRes_ChatbotAudioData] Idle로 상태 변경"));
+
+    //    },
+    //    IdleDelayTime, false
+    //);
+
 }

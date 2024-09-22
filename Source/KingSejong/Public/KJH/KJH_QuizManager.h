@@ -6,6 +6,8 @@
 #include "Components/ActorComponent.h"
 #include "KJH_QuizManager.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FBlockOxLineSignature, bool, bValue);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FEndQuizTimeSignature);
 
 UENUM()
 enum class EQuizState : uint8
@@ -48,17 +50,26 @@ public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
+
+public:
+	UPROPERTY(BlueprintAssignable)
+	FBlockOxLineSignature OnBlockOXLineDelegate;
+
+	UPROPERTY(BlueprintAssignable)
+	FEndQuizTimeSignature OnEndQuizTimeDelegate;
+
 private:
 	UPROPERTY()
 	class AKJH_CommunityGameMode* CommunityGameMode;
 	
 	EQuizState QuizState = EQuizState::NotStarted;
 
-	UPROPERTY()
-	class AActor* OXLine;
-
 
 public:
+	// 기준선
+	UPROPERTY(BlueprintReadWrite)
+	class AActor* OXLine;
+
 	// 퀴즈 상태별 시간
 	UPROPERTY(EditDefaultsOnly)
 	int32 IdleTime = 5;
@@ -80,6 +91,8 @@ public:
 public:
 	UFUNCTION(BlueprintCallable)
 	void StartQuiz();
+
+	void CallBlockOxLineDelegate(bool bValue);
 
 private:
 	void SetQuizState(EQuizState State);
