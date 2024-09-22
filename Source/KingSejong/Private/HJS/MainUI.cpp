@@ -103,10 +103,16 @@ void UMainUI::OnCountDown()
 	}else if ( CountDownText.Equals(TEXT("2")) )
 	{
 		CountDownText = TEXT("1");
-	}else if ( CountDownText.Equals(TEXT("1")) )
+	}
+	else if (CountDownText.Equals(TEXT("1")))
+	{
+		CountDownText = TEXT("시작!!");
+	}
+	else if(CountDownText.Equals(TEXT("시작!!")))
 	{
 		GetWorld()->GetTimerManager().ClearTimer(CountDownTimerHandle);
 		Me->ServerQuestionSetting();
+		ShowLineBox();
 		CountDown->SetVisibility(ESlateVisibility::Hidden);
 		CountDownText = TEXT("3");
 	}
@@ -234,4 +240,18 @@ void UMainUI::SettingPlayer(AHJS_BattlePlayer* Player)
 {
 	Me = Player;
 	ResultUI->Me = Player;
+}
+
+void UMainUI::HideLineBox()
+{
+	TextLineBox->SetVisibility(ESlateVisibility::Hidden);
+	OptionCanvas->SetVisibility(ESlateVisibility::Hidden);
+	Teacher->SetVisibility(ESlateVisibility::Hidden);
+}
+
+void UMainUI::ShowLineBox()
+{
+	TextLineBox->SetVisibility(ESlateVisibility::Visible);
+	OptionCanvas->SetVisibility(ESlateVisibility::Visible);	
+	Teacher->SetVisibility(ESlateVisibility::Visible);
 }

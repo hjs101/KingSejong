@@ -169,13 +169,17 @@ void AHJS_BattleGameMode::JoinPlayer(APlayerController* PC)
 
     if ( PC0 != nullptr && PC1 != nullptr )
     {
+        int32 RandNum = FMath::RandRange(0,2);
         // 게임 스타트
         Player0 = Cast<AHJS_BattlePlayer>(PC0->GetCharacter());
         Player0->AddMainUI();
         Player0->ClientPlayTutorialUI();
+        // BGM 배열에 담기
+        Player0->PlayBGM(RandNum);
         Player1 = Cast<AHJS_BattlePlayer>(PC1->GetCharacter());
         Player1->AddMainUI();
         Player1->ClientPlayTutorialUI();
+        Player1->PlayBGM(RandNum);
     }
 }
 

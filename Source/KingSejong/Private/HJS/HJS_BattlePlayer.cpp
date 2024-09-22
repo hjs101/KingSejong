@@ -21,6 +21,7 @@
 #include "HJS/AINet.h"
 #include "../../../../Plugins/FX/Niagara/Source/Niagara/Public/NiagaraComponent.h"
 #include "../../../../Plugins/FX/Niagara/Source/Niagara/Public/NiagaraSystemInstance.h"
+#include "Components/AudioComponent.h"
 // Sets default values
 AHJS_BattlePlayer::AHJS_BattlePlayer()
 {
@@ -62,10 +63,6 @@ void AHJS_BattlePlayer::BeginPlay()
 	if (HasAuthority())
 	{
 		GetWorldTimerManager().SetTimer(JoinTimerHandle, this, &AHJS_BattlePlayer::LoginSignal, 0.05f, false);
-	}
-	if (!IsLocallyControlled())
-	{
-		GetMesh()->SetRenderCustomDepth(true);
 	}
 }
 
@@ -288,7 +285,6 @@ void AHJS_BattlePlayer::ClientPlaySound(const FString& WinnerFIlePath)
 	ServerPlaySound(WinnerFIlePath);
 }
 
-
 void AHJS_BattlePlayer::ServerPlaySound_Implementation(const FString& WinnerFIlePath)
 {
 	MulticastPlaySound(WinnerFIlePath);
@@ -336,6 +332,7 @@ void AHJS_BattlePlayer::MulticastPlaySound_Implementation(const FString& WinnerF
 	{
 		AHJS_BattlePlayer* Player = Cast<AHJS_BattlePlayer>(Actor);
 		Player->WinnerNum = -1;
+		Player->GetMesh()->SetRenderCustomDepth(false);
 	}
 
 	// WAV 헤더에서 필요한 정보 추출 (예: 샘플 속도, 채널 수, 등)
@@ -352,8 +349,7 @@ void AHJS_BattlePlayer::MulticastPlaySound_Implementation(const FString& WinnerF
 	// 오디오 데이터를 SoundWave에 할당
 	TArray<uint8> PCMData(SoundData.GetData() + 44, DataSize); // 44바이트 이후가 오디오 데이터
 	SoundWave->QueueAudio(PCMData.GetData(), PCMData.Num());
-
-	UGameplayStatics::PlaySound2D(GetWorld(), SoundWave);
+	UGameplayStatics::PlaySound2D(this, SoundWave, 200.f);
 
 }
 
@@ -368,6 +364,11 @@ void AHJS_BattlePlayer::MulticastAttack_Implementation()
 	if (Anim)
 	{
 		Anim->PlayChargingMontage();
+	}
+
+	if (!IsLocallyControlled())
+	{
+		GetMesh()->SetRenderCustomDepth(true);
 	}
 
 	bAttack = true;
@@ -446,14 +447,6 @@ void AHJS_BattlePlayer::PlayerHit()
 	Anim->PlayHitMontage();
 }
 
-void AHJS_BattlePlayer::ServerPlayerHit_Implementation()
-{
-}
-
-void AHJS_BattlePlayer::MulticastPlayerHit_Implementation()
-{
-}
-
 void AHJS_BattlePlayer::OnMyTakeDamage(int32 Damage)
 {
 	HP--;
@@ -470,7 +463,6 @@ void AHJS_BattlePlayer::OnMyTakeDamage(int32 Damage)
 		check(MainPlayer);
 		MainPlayer->MainUI->SetHP(2, HP);
 	}
-
 
 	if (HP <= 0)
 	{
@@ -505,6 +497,22 @@ void AHJS_BattlePlayer::ShowGameEndUI(bool bVictory)
 	}
 }
 
+void AHJS_BattlePlayer::PlayBGM_Implementation(int32 BGMNum)
+{
+	switch (BGMNum)
+	{
+	case 0:
+		UGameplayStatics::PlaySound2D(GetWorld(), BGM0, 0.1f);
+		break;
+	case 1:
+		UGameplayStatics::PlaySound2D(GetWorld(), BGM1, 0.1f);
+		break;
+	case 2:
+		UGameplayStatics::PlaySound2D(GetWorld(), BGM2, 0.1f);
+		break;
+	}
+}
+
 void AHJS_BattlePlayer::ServerRestartGame_Implementation()
 {
 	// 게임 모드에 재대결 요청
@@ -528,4 +536,12 @@ void AHJS_BattlePlayer::ClientMainTextSet_Implementation(const FString& Text)
 {
 	check(MainUI);
 	MainUI->LineText = Text;
+
+	// 2초 뒤에 MainUI 사라지게 하기
+	FTimerHandle Handle;
+	
+	GetWorldTimerManager().SetTimer(Handle, [this]() {
+		MainUI->HideLineBox();
+	},2.f,false);
+
 }
