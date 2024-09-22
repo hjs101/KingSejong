@@ -7,13 +7,13 @@
 #include "KJH_Teacher.generated.h"
 
 
-UENUM()
+UENUM(BlueprintType)
 enum class ETeacherState : uint8
 {
-	Idle UMETA(DisplayName = "Idle"),
-	Listen UMETA(DisplayName = "Listen"),
-	Think UMETA(DisplayName = "Think"),
-	Answer UMETA(DisplayName = "Answer")
+	Idle,
+	Listen,
+	Think,
+	Answer,
 };
 
 UCLASS()
@@ -39,7 +39,7 @@ public:
 public:
 
 	// 현재 상태
-	UPROPERTY(ReplicatedUsing = OnReq_TeacherState)
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnReq_TeacherState)
 	ETeacherState TeacherState = ETeacherState::Idle;
 
 	//UPROPERTY(Replicated)
