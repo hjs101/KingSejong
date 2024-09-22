@@ -78,13 +78,19 @@ void ARunningGameModeBase::MoveToNextLevel()
 
 void ARunningGameModeBase::MulticastShowLoading_Implementation()
 {
-	for ( ARunnerController* RPC : FailedToFinishPlayers )
+	if (!FailedToFinishPlayers.IsEmpty())
 	{
-		RPC->ClientShowLoading();
-	}	
-	for ( ARunnerController* RPCc : PlayerFinishOrder )
+		for (ARunnerController* RPC : FailedToFinishPlayers)
+		{
+			RPC->ClientShowLoading();
+		}
+	}
+	if (!PlayerFinishOrder.IsEmpty())
 	{
-		RPCc->ClientShowLoading();
+		for (ARunnerController* RPCc : PlayerFinishOrder)
+		{
+			RPCc->ClientShowLoading();
+		}
 	}
 	FTimerHandle TimerHandle;
 

@@ -34,6 +34,14 @@ void ULobbyWidget::NativeConstruct()
 	CreateSessionButton->OnClicked.AddDynamic(this, &ULobbyWidget::CreateSession);
 
 	PlayerCountSlider->OnValueChanged.AddDynamic(this, &ULobbyWidget::OnSliderValueChanged);
+
+	QuitButton->OnClicked.AddDynamic(this, &ULobbyWidget::OnQuitButtonClicked);
+}
+
+void ULobbyWidget::OnQuitButtonClicked()
+{
+	RemoveFromParent();
+	UE_LOG(LogTemp, Error, TEXT("Quit"));
 }
 
 void ULobbyWidget::SetMenuInterface(ILobbyInterface* LobbyInterface)
@@ -110,7 +118,11 @@ void ULobbyWidget::JoinServer()
 	if (WidgetLobbyInterface)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("hhhD"));
-		WidgetLobbyInterface->JoinToSession(LobbySelectedIndex);
+		//그냥 조인 눌렀을때 안터지게
+		if (LobbySelectedIndex)
+		{
+			WidgetLobbyInterface->JoinToSession(LobbySelectedIndex);
+		}
 	}	
 }
 
@@ -137,8 +149,6 @@ void ULobbyWidget::AddSessionSlotWidget(const FRoomInfo& info)
 
 void ULobbyWidget::OnFindButtonClicked()
 {
-
-
 	//기존 스크롤박스 목록 삭제하고
 	if ( FS_ScrollBox && FS_ScrollBox->GetChildrenCount() == 0 )
 	{
@@ -157,6 +167,10 @@ void ULobbyWidget::SetTextAndCategory(const FString& Text, const FString& Catego
 {
 	BattleTypeText->SetText(FText::FromString(Text));
 	WidgetCategory = Category;
+	if (Category == "Battle")
+	{
+		PlayerCountSlider->SetMaxValue(2);
+	}
 }
 
 

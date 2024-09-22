@@ -17,6 +17,8 @@ class KINGSEJONG_API ULobbyWidget : public UUserWidget
 protected:
 	virtual void NativeConstruct();
 public:
+	UFUNCTION()
+	void OnQuitButtonClicked();
 
 	UPROPERTY(meta = (BindWidget))
 	class UButton* Host;
@@ -28,7 +30,7 @@ public:
 	class UButton* FindButton;
 
 	UPROPERTY(meta = (BindWidget))
-	class UEditableText* IPAddress;
+	class UButton* QuitButton;
 
 	UPROPERTY(meta = (BindWidget))
 	class UTextBlock* BattleTypeText;
