@@ -182,18 +182,22 @@ void UQuizWidget::UpdateTextBoxContent(const FString& TextContent)
 
 void UQuizWidget::ShowTeacherSpeak(bool bIsCorrect)
 {
+	if (!IsValid(TeacherSpeak) || !IsValid(Teacher) || !IsValid(TeacherText))
+	{
+		UE_LOG(LogTemp, Error, TEXT("One or more widget components are invalid in ShowTeacherSpeak"));
+		return;
+	}
 	TeacherSpeak->SetVisibility(ESlateVisibility::Visible);
 	FTimerHandle TeacherSpeakTimer;
 
 	if ( bIsCorrect )
 	{
-		Teacher->SetBrushFromTexture(SmileTeacher);
+		//Teacher->SetBrushFromTexture(SmileTeacher);
 		TeacherText->SetText(FText::FromString(TEXT("대단하구나!")));
-
 	}
 	else
 	{
-		Teacher->SetBrushFromTexture(AngryTeacher);
+		//Teacher->SetBrushFromTexture(AngryTeacher);
 		TeacherText->SetText(FText::FromString(TEXT("아니다 욘석아")));
 		PlayAnimation(TeacherAngry , 0 , 1 , EUMGSequencePlayMode::PingPong);
 		GEngine->AddOnScreenDebugMessage(-1 , 5.f , FColor::Blue , FString::Printf(TEXT("false")));

@@ -142,11 +142,11 @@ void UJJH_GameInstance::OnMyCreateSessionComplete(FName SessionName, bool Succes
 	}
 	if ( CategoryValue == TEXT("Run") )
 	{
-		GetWorld()->ServerTravel("/Game/JJH/ProtoRunningMap?listen");
+		GetWorld()->ServerTravel("/Game/JJH/AlphaRunningMap?listen");
 	}
 	else if ( CategoryValue == TEXT("Battle") )
 	{
-		GetWorld()->ServerTravel("/Game/HJS/Maps/BattleTestMap?listen");
+		GetWorld()->ServerTravel("/Game/HJS/Maps/AlphaBattleMap?listen");
 	}
 	else if ( CategoryValue == TEXT("Talk") )
 	{

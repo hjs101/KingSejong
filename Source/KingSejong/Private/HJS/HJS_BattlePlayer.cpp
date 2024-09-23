@@ -22,6 +22,7 @@
 #include "../../../../Plugins/FX/Niagara/Source/Niagara/Public/NiagaraComponent.h"
 #include "../../../../Plugins/FX/Niagara/Source/Niagara/Public/NiagaraSystemInstance.h"
 #include "Components/AudioComponent.h"
+#include "HAL/PlatformFileManager.h"
 // Sets default values
 AHJS_BattlePlayer::AHJS_BattlePlayer()
 {
@@ -263,12 +264,54 @@ void AHJS_BattlePlayer::MulticastDownloadSound_Implementation(const FString& Cli
 	// WinnerNum이 1인데 서버가 아니면
 	if (WinnerNum == 1 && !HasAuthority())
 	{
+		// 플랫폼 파일 시스템 접근
+		IPlatformFile& PlatformFile = FPlatformFileManager::Get().GetPlatformFile();
+		FString MyFileName = RecordFileName + TEXT(".wav");
+		FString MyFilePath = RecordFilePath + MyFileName;
+		FString DestinationFilePath = FPaths::Combine(FPaths::ProjectDir(), TEXT("RecordData/Winner/")) + MyFileName;
+		// 원본 파일 경로가 존재하는지 확인
+		if (PlatformFile.FileExists(*MyFilePath))
+		{
+			// 파일 복사 시도
+			bool bSuccess = PlatformFile.CopyFile(*DestinationFilePath, *MyFilePath);
+
+			// 결과 출력
+			if (bSuccess)
+			{
+				UE_LOG(LogTemp, Log, TEXT("파일이 성공적으로 복사되었습니다: %s -> %s"), *MyFilePath, *DestinationFilePath);
+			}
+			else
+			{
+				UE_LOG(LogTemp, Warning, TEXT("파일 복사 실패: %s -> %s"), *MyFilePath, *DestinationFilePath);
+			}
+		}
 		return;
 	}
 
 	// WinnerNum이 0인데 서버라면
 	if (WinnerNum == 0 && HasAuthority())
 	{
+		// 플랫폼 파일 시스템 접근
+		IPlatformFile& PlatformFile = FPlatformFileManager::Get().GetPlatformFile();
+		FString MyFileName = RecordFileName + TEXT(".wav");
+		FString MyFilePath = RecordFilePath + MyFileName;
+		FString DestinationFilePath = FPaths::Combine(FPaths::ProjectDir(), TEXT("RecordData/Winner/")) + MyFileName;
+		// 원본 파일 경로가 존재하는지 확인
+		if (PlatformFile.FileExists(*MyFilePath))
+		{
+			// 파일 복사 시도
+			bool bSuccess = PlatformFile.CopyFile(*DestinationFilePath, *MyFilePath);
+
+			// 결과 출력
+			if (bSuccess)
+			{
+				UE_LOG(LogTemp, Log, TEXT("파일이 성공적으로 복사되었습니다: %s -> %s"), *MyFilePath, *DestinationFilePath);
+			}
+			else
+			{
+				UE_LOG(LogTemp, Warning, TEXT("파일 복사 실패: %s -> %s"), *MyFilePath, *DestinationFilePath);
+			}
+		}
 		return;
 	}
 

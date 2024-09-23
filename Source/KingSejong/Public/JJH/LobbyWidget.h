@@ -30,7 +30,9 @@ public:
 	class UButton* FindButton;
 
 	UPROPERTY(meta = (BindWidget))
-	class UButton* QuitButton;
+	class UButton* QuitButton;	
+	UPROPERTY(meta = (BindWidget))
+	class UButton* QuitButton_1;
 
 	UPROPERTY(meta = (BindWidget))
 	class UTextBlock* BattleTypeText;
