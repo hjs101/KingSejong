@@ -8,6 +8,7 @@
 #include "Components/CanvasPanel.h"
 #include "JJH/RunningGameModeBase.h"
 #include "Kismet/GameplayStatics.h"
+#include "JJH/EndGameWidget.h"
 
 void ARunnerController::BeginPlay()
 {
@@ -218,4 +219,18 @@ void ARunnerController::ClientReturnToLobby_Implementation()
 {
     // 로비 레벨로 이동
     UGameplayStatics::OpenLevel(this, FName("TestLobby"));
+}
+
+void ARunnerController::CreateEndGameWidget()
+{
+    UEndGameWidget* End = CreateWidget<UEndGameWidget>(GetWorld(), EndGameWidgetFactory);
+    if (End)
+    {			
+        End->AddToViewport();
+    }
+}
+
+void ARunnerController::ClientSwitchToEndWidget_Implementation()
+{
+    QuizWidgetInstance->SwitchToEnd();
 }

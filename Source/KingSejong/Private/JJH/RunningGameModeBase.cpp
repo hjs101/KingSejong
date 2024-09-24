@@ -144,7 +144,17 @@ void ARunningGameModeBase::AbleInput()
 }
 void ARunningGameModeBase::SubmitAnswer()
 {
-	if(PlayerFinishOrder.IsEmpty()) return;
+	//아무도 없으면 종료 위젯 생성하기;
+	if (PlayerFinishOrder.IsEmpty())
+	{
+		for (ARunnerController* player : Players)
+		{
+			//위젯 스위쳐나 생성함수
+			player->ClientSwitchToEndWidget();
+		
+		}
+		return;
+	}
 	//첫번째 플레이어가 정답입력 찬스 가져감
 	ARunnerController* CurrentController = *PlayerFinishOrder.begin();
 	if ( CurrentController )

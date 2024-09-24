@@ -99,4 +99,16 @@ public:
 
 	void HideTeacherSpeak();
 	void HideAnswerText();
+
+	void SwitchToEnd();
+
+	UFUNCTION()
+	void OnRestartButtonClicked();
+	UFUNCTION()
+	void OnQuitButtonClicked();
+	UPROPERTY(meta = (BindWidget))
+	class UButton* QuitButton;		
+	
+	UPROPERTY(meta = (BindWidget))
+	class UButton* RestartButton;
 };

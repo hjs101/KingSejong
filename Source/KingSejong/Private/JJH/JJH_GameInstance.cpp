@@ -156,15 +156,6 @@ void UJJH_GameInstance::OnMyCreateSessionComplete(FName SessionName, bool Succes
 
 }
 
-void UJJH_GameInstance::OnMyDestroySessionComplete(FName SessionName, bool Success)
-{
-	//파괴에 성공하면 다시 만들기
-	if ( Success )
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Session Destroyed"));
-	}
-}
-
 void UJJH_GameInstance::FindOtherSessions()
 {
 
@@ -257,4 +248,58 @@ void UJJH_GameInstance::OnMyJoinSessionComplete(FName SessionName, EOnJoinSessio
 	}
 }
 
+void UJJH_GameInstance::SetCharacterMesh(USkeletalMesh* Mesh)
+{
+	CharacterMesh = Mesh;
+}
 
+void UJJH_GameInstance::ExitSession()
+{
+	ServerRPCExitSession();
+}
+
+void UJJH_GameInstance::ServerRPCExitSession_Implementation()
+{
+	MulticastRPCExitSession();
+}
+
+void UJJH_GameInstance::MulticastRPCExitSession_Implementation()
+{
+	if (nullptr != GEngine)
+	{
+		GEngine->OnNetworkFailure().AddUObject(this, &UJJH_GameInstance::OnNetworkFailure);
+	}
+	//방퇴장 요청
+	//클라이언트 입장에서는 그냥 나가는 거 호스트 입장에선 파괴하는거
+	SessionInterface->DestroySession(SESSION_NAME);
+
+	UE_LOG(LogTemp, Error, TEXT("Session Destroy"));
+}
+
+void UJJH_GameInstance::OnMyDestroySessionComplete(FName SessionName, bool bWasSuccessful)
+{
+	if (bWasSuccessful)
+	{
+		//로비로 여행을 가고 싶다.
+		auto* pc = GetWorld()->GetFirstPlayerController();
+		pc->ClientTravel(TEXT("/Game/JJH/MAP_Reallobby_SHN"), ETravelType::TRAVEL_Absolute);
+	}
+}
+
+void UJJH_GameInstance::OnNetworkFailure(UWorld* World, UNetDriver* NetDriver, ENetworkFailure::Type FailureType, const FString& ErrorString)
+{
+	LoadServerWidgetMap();
+}
+void UJJH_GameInstance::LoadServerWidgetMap()
+{
+	// AKJH_PlayerController를 가져온다,
+	APlayerController* PC = GetWorld()->GetFirstPlayerController();
+	//// 플레이어의 첫번째 컨트롤러를 가져온다.
+	//APlayerController* PlayerController = GetFirstLocalPlayerController();
+	if (PC && PC->IsLocalController()) // 컨트롤러가 있으면,
+	{
+		// ServerUI가 있는 맵으로 이동시킨다.
+		PC->ClientTravel("/Game/JJH/MAP_Reallobby_SHN", ETravelType::TRAVEL_Absolute);
+		UE_LOG(LogTemp, Error, TEXT("Session Destroy Network Failure"));
+	}
+}

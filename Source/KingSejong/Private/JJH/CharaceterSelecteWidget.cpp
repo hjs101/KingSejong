@@ -4,6 +4,7 @@
 #include "JJH/CharaceterSelecteWidget.h"
 #include "Components/Button.h"
 #include "GameFramework/Character.h"
+#include "JJH/JJH_GameInstance.h"
 
 void UCharaceterSelecteWidget::NativeConstruct()
 {
@@ -19,7 +20,8 @@ void UCharaceterSelecteWidget::NativeConstruct()
 void UCharaceterSelecteWidget::SelecteButtonClicked()
 {
 	//CharacterList[index]를 게임인스턴스에 전달해주고 게임 시작하기 
-
+	UJJH_GameInstance* GI = Cast<UJJH_GameInstance>(GetWorld()->GetGameInstance());
+	GI->SetCharacterMesh(CharacterList[index]);
 }
 
 void UCharaceterSelecteWidget::NextButtonClicked()

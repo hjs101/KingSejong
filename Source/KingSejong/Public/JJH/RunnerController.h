@@ -82,4 +82,13 @@ public:
 
 	UFUNCTION(Client, Reliable)
 	void ClientReturnToLobby();
+
+	UFUNCTION()
+	void CreateEndGameWidget();
+
+	UFUNCTION(Client, Reliable)
+	void ClientSwitchToEndWidget();
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class UEndGameWidget> EndGameWidgetFactory;
 };

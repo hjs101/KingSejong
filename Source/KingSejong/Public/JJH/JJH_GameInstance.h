@@ -90,6 +90,8 @@ public:
 	//델리게이트
 	void OnMyCreateSessionComplete(FName SessionName, bool Success);
 	void OnMyDestroySessionComplete(FName SessionName, bool Success);
+	void OnNetworkFailure(UWorld* World, UNetDriver* NetDriver, ENetworkFailure::Type FailureType, const FString& ErrorString);
+	void LoadServerWidgetMap();
 	void OnMyFindSessionComplete(bool Success);
 	void OnMyJoinSessionComplete(FName SessionName, EOnJoinSessionCompleteResult::Type Result);
 	
@@ -99,4 +101,16 @@ public:
 	FString CategoryValue;
 	FString RoomNameValue;
 	FString HostNameValue;
+
+
+	class USkeletalMesh* CharacterMesh;
+	void  SetCharacterMesh(USkeletalMesh* Mesh);
+
+	//방 퇴장 요청 -> UI에서 호출
+	void ExitSession();
+	UFUNCTION(Server, Reliable)
+	void ServerRPCExitSession();
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastRPCExitSession();
+
 };
