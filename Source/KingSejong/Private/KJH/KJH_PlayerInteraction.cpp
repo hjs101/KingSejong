@@ -108,7 +108,7 @@ void UKJH_PlayerInteraction::CreateKeyGuide()
 	KeyGuideWidget = CreateWidget(GetWorld(), KeyGuideFactory);
 	if ( KeyGuideWidget )
 	{
-		KeyGuideWidget->AddToViewport();
+		KeyGuideWidget->AddToViewport(1);
 		SetActiveKeyGuide(false);
 	}
 }
