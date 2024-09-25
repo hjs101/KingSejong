@@ -23,6 +23,10 @@
 #include "../../../../Plugins/FX/Niagara/Source/Niagara/Public/NiagaraSystemInstance.h"
 #include "Components/AudioComponent.h"
 #include "HAL/PlatformFileManager.h"
+#include "Components/WidgetComponent.h"
+#include "Kismet/KismetMathLibrary.h"
+#include "../KingSejong.h"
+
 // Sets default values
 AHJS_BattlePlayer::AHJS_BattlePlayer()
 {
@@ -46,12 +50,15 @@ AHJS_BattlePlayer::AHJS_BattlePlayer()
 	AINetComp = CreateDefaultSubobject<UAINet>(TEXT("AINetComp"));
 
 	ChargingRightHandComp = CreateDefaultSubobject<UNiagaraComponent>(TEXT("ChargingRightHandComp"));
-	ChargingRightHandComp->SetupAttachment(GetMesh(), TEXT("middle_01_r"));
-	ChargingRightHandComp->SetAutoActivate(true);  // 기본적으로 비활성화
+	ChargingRightHandComp->SetupAttachment(GetMesh());
+	ChargingRightHandComp->SetAutoActivate(false);  // 기본적으로 비활성화
 
 	ChargingLeftHandComp = CreateDefaultSubobject<UNiagaraComponent>(TEXT("ChargingLeftHandComp"));
-	ChargingLeftHandComp->SetupAttachment(GetMesh(), TEXT("middle_01_l"));
-	ChargingLeftHandComp->SetAutoActivate(true);  // 기본적으로 활성화
+	ChargingLeftHandComp->SetupAttachment(GetMesh());
+	ChargingLeftHandComp->SetAutoActivate(false);  // 기본적으로 활성화
+
+	RecordUIComp = CreateDefaultSubobject<UWidgetComponent>(TEXT("RecordUIComp"));
+	RecordUIComp->SetupAttachment(RootComponent);
 }
 
 // Called when the game starts or when spawned
@@ -65,6 +72,8 @@ void AHJS_BattlePlayer::BeginPlay()
 	{
 		GetWorldTimerManager().SetTimer(JoinTimerHandle, this, &AHJS_BattlePlayer::LoginSignal, 0.05f, false);
 	}
+	AudioCapture->OnAudioEnvelopeValue.AddDynamic(this,&AHJS_BattlePlayer::OnChangeEnvValue);
+	RecordUIComp->SetVisibility(false);
 }
 
 // Called every frame
@@ -95,8 +104,15 @@ void AHJS_BattlePlayer::Tick(float DeltaTime)
 		}
 	}
 
-	MoveToChargingVFX();
+	if (RecordUIComp && RecordUIComp->GetVisibleFlag())
+	{
+		// 0번 플레이어 ( 클라이언트든 서버든 자기 자신 )
+		FVector CameraLoc = UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0)->GetCameraLocation();
+		FVector Dir = CameraLoc - RecordUIComp->GetComponentLocation();
+		Dir.Z = 0.f;
 
+		RecordUIComp->SetWorldRotation(Dir.GetSafeNormal().ToOrientationRotator());
+	}
 }
 
 // Called to bind functionality to input
@@ -142,7 +158,6 @@ void AHJS_BattlePlayer::ServerQuestionSetting_Implementation()
 
 void AHJS_BattlePlayer::ClientQuestionSetting_Implementation(FBattleQuestionData Data)
 {
-
 	// UI에 데이터 세팅해주고
 	MainUI->RecordStartUIInit(Data);
 	// 녹음 시작
@@ -151,6 +166,31 @@ void AHJS_BattlePlayer::ClientQuestionSetting_Implementation(FBattleQuestionData
 	StartRecording(PlayerID);
 }
 
+void AHJS_BattlePlayer::OnChangeEnvValue(float Value)
+{
+	if (!IsLocallyControlled())
+	{
+		return;
+	}
+
+	Value = UKismetMathLibrary::Log(Value, 10.0);
+
+	Value = UKismetMathLibrary::MapRangeClamped(Value,-2.7,-0.7,0.0,1.0);
+
+	if (Value >= 0.2f)
+	{
+		ServerSetShowRecordComp(true);
+	}
+	else
+	{
+		ServerSetShowRecordComp(false);
+	}
+}
+
+void AHJS_BattlePlayer::ServerSetShowRecordComp_Implementation(bool Value)
+{
+	RecordUIComp->SetVisibility(Value);
+}
 
 void AHJS_BattlePlayer::Punch()
 {
@@ -159,7 +199,10 @@ void AHJS_BattlePlayer::Punch()
 	{
 		Anim->JumpMontageToAttack();
 	}
+	ChargingRightHandComp->Deactivate();
+	ChargingLeftHandComp->Deactivate();
 }
+
 void AHJS_BattlePlayer::AddMainUI_Implementation()
 {
 	if (MainUIFactory)
@@ -170,6 +213,7 @@ void AHJS_BattlePlayer::AddMainUI_Implementation()
 			MainUI->SettingPlayer(this);
 			MainUI->AddToViewport();
 			MainUI->GameStartUIInit();
+			MainUI->SetInitHP(MaxHP);
 		}
 	}
 }
@@ -216,7 +260,6 @@ void AHJS_BattlePlayer::SendRecordToAIServer(const FString& Result)
 	STTResult = Result;
 	SendSTTResultToGameMode(STTResult);
 }
-
 
 // STT 통신 결과를 서버에서 GM에 보내는 코드
 void AHJS_BattlePlayer::SendSTTResultToGameMode_Implementation(const FString& Result)
@@ -415,29 +458,32 @@ void AHJS_BattlePlayer::MulticastAttack_Implementation()
 		GetMesh()->SetRenderCustomDepth(true);
 	}
 
+	ChargingRightHandComp->Activate();
+	ChargingLeftHandComp->Activate();
+
 	bAttack = true;
 	Alpha = 0.f;
 
-	GetWorldTimerManager().SetTimer(PunchHandle, this, &AHJS_BattlePlayer::Punch, 10.f, false);
+	GetWorldTimerManager().SetTimer(PunchHandle, this, &AHJS_BattlePlayer::Punch, 7.f, false);
 }
 
 void AHJS_BattlePlayer::StartRecording_Implementation(const FString& PlayerID)
 {
 	bWin = false;
-
+	MainUI->SetTalkCanvasVisiblity(true);
 	FirebaseLogin();
 	if (PlayerRecordID == "")
 	{
 		PlayerRecordID = PlayerID;
 	}
 
-	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), TestVFX, GetActorTransform());
+	
 	if (!bIsRecording)
 	{
 		bIsRecording = true;
 		AudioCapture->Start();  // 오디오 캡처 시작
 		UAudioMixerBlueprintLibrary::StartRecordingOutput(GetWorld(), 0.f, RecordSound);
-		GetWorldTimerManager().SetTimer(RecordHandle, this, &AHJS_BattlePlayer::StopRecording, 10.f, false);
+		GetWorldTimerManager().SetTimer(RecordHandle, this, &AHJS_BattlePlayer::StopRecording, 7.f, false);
 	}
 }
 
@@ -447,16 +493,16 @@ void AHJS_BattlePlayer::StopRecording_Implementation()
 	if (bIsRecording)
 	{
 		bIsRecording = false;
-		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), TestVFX, GetActorTransform());
 		AudioCapture->Stop();  // 오디오 캡처 중지
 		RecordFileName = FString::Printf(TEXT("%s_Record"), *PlayerRecordID);
 		MyRecord = UAudioMixerBlueprintLibrary::StopRecordingOutput(GetWorld(), EAudioRecordingExportType::WavFile, RecordFileName, RecordFilePath, RecordSound);
 		// AI 서버에 보내는 함수
-		//SendRecordToAIServer(TEXT("0000"));
 		// USoundwave to binery
 		GetWorldTimerManager().SetTimer(AINetTimerHandle, this, &AHJS_BattlePlayer::AINetReq, 1.f, false);
 		check(MainUI);
-		MainUI->LineText = TEXT("판독중...");
+		MainUI->LineText = TEXT("판독중이니 잠시만 기다려주시게.");
+		MainUI->SetTalkCanvasVisiblity(false);
+		RecordUIComp->SetVisibility(false);
 	}
 }
 
