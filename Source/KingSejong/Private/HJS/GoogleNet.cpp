@@ -90,7 +90,7 @@ void UGoogleNet::FileUploadToFirebase(const FString& FilePath, const FString& Fi
 			}
 			else
 			{
-				UE_LOG(LogTemp , Error , TEXT("File upload failed: %s") , *Response->GetContentAsString());
+				UE_LOG(LogTemp , Error , TEXT("File upload failed !!!"));
 			}
 		});
 

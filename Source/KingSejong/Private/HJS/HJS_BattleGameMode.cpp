@@ -6,6 +6,7 @@
 #include "GameFramework/PlayerState.h"
 #include "HJS/BattleQuestionStruct.h"
 #include "HJS/LevenshteinLib.h"
+#include "JJH/JJH_GameInstance.h"
 
 AHJS_BattleGameMode::AHJS_BattleGameMode()
 {
@@ -253,10 +254,12 @@ void AHJS_BattleGameMode::ReqExitGame()
 
 void AHJS_BattleGameMode::Restart()
 {
-    
+    GetWorld()->ServerTravel("/Game/HJS/Maps/AlphaBattleMap?listen");
 }
 
 void AHJS_BattleGameMode::Exit()
 {
-    
+    UJJH_GameInstance* GameIns = Cast<UJJH_GameInstance>(GetWorld()->GetGameInstance());
+    check(GameIns);
+    GameIns->DestroySession();
 }
