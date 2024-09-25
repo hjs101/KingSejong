@@ -4,11 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
+#include "../KJH_QuizManager.h"
 #include "KJH_JsonParseLib.generated.h"
 
 /**
  * 
  */
+
 UCLASS()
 class KINGSEJONG_API UKJH_JsonParseLib : public UBlueprintFunctionLibrary
 {
@@ -26,5 +28,5 @@ public:
 	static FString JsonParseBookAnwser(const FString& json);
 	static TMap<FString, FString> JsonParseChatbotAnswer(const FString& json);
 	static FString JsonParseChatbotAudioData(const FString& json);
-
+	static TArray<FChatbotQuizData> JsonParseChatbotQuizData(const FString& json);
 };

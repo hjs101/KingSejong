@@ -5,6 +5,8 @@
 #include "KJH/KJH_CommunityGameMode.h"
 #include "KJH/KJH_PlayerController.h"
 #include "Kismet/GameplayStatics.h"
+#include "KJH/API/KJH_HttpManager.h"
+
 
 // Sets default values for this component's properties
 UKJH_QuizManager::UKJH_QuizManager()
@@ -34,9 +36,13 @@ void UKJH_QuizManager::BeginPlay()
 		OXLine = FoundActors[0];
 	}
 
+	// HttpManager
+	HttpManager = Cast<AKJH_HttpManager>(UGameplayStatics::GetActorOfClass(GetWorld(), AKJH_HttpManager::StaticClass()));
 	
-
-	// StartQuiz();
+	if (HttpManager)
+	{
+		HttpManager->OnResponseChatbotQuizDataDelegate.AddDynamic(this, &UKJH_QuizManager::SetQuizData);
+	}
 }
 
 
@@ -55,12 +61,20 @@ void UKJH_QuizManager::StartQuiz()
 
 	CallBlockOxLineDelegate(false);
 
-	//  플레이어 컨트롤러 리스트 갱신
-	CommunityGameMode->GetAllPlayerControllers();
-	if ( CommunityGameMode->PlayerControllers.Num() > 0 )
-	{
-		SetQuizState(EQuizState::Idle);
-	}
+	// 일정 시간이 지난 후 정답 공개 대기 상태로 전환
+	FTimerHandle timerHandle;
+	GetWorld()->GetTimerManager().SetTimer(timerHandle, FTimerDelegate::CreateLambda([this]()
+		{
+			//  플레이어 컨트롤러 리스트 갱신
+			CommunityGameMode->GetAllPlayerControllers();
+			if (CommunityGameMode->PlayerControllers.Num() > 0)
+			{
+				SetQuizState(EQuizState::Idle);
+			}
+		}),
+		StartIdleTime, false);
+
+
 }
 
 void UKJH_QuizManager::CallBlockOxLineDelegate(bool bValue)
@@ -104,6 +118,7 @@ void UKJH_QuizManager::IdleState()
 	// todo:  API로 문제 가져왔고, idletime이 지났으면 퀴즈 상태로 전환
 	QuizCount = 0;
 
+
 	// 모든 플레이어에게 문제, 정답 설정
 	for ( auto pc : CommunityGameMode->PlayerControllers )
 	{
@@ -128,9 +143,9 @@ void UKJH_QuizManager::QuestionState()
 	for (auto pc : CommunityGameMode->PlayerControllers)
 	{
 		if (pc == nullptr) continue;
-		if (QuizInfos.IsValidIndex(QuizCount) == false) continue;
+		if (QuizData.IsValidIndex(QuizCount) == false) continue;
 
-		FString Question = QuizInfos[QuizCount].Question;
+		FString Question = QuizData[QuizCount].Question;
 
 		pc->ClientRPC_ShowQuestionWidget(Question);
 	}
@@ -147,7 +162,6 @@ void UKJH_QuizManager::QuestionState()
 void UKJH_QuizManager::WaitingState()
 {
 	CallBlockOxLineDelegate(true);
-
 
 	// 모든 플레이어에게 정답 대기 상태로 전환
 	for (auto pc : CommunityGameMode->PlayerControllers)
@@ -175,7 +189,7 @@ void UKJH_QuizManager::AnswerState()
 		if (pc == nullptr || pc->GetPawn() == nullptr) continue;
 
 		// 실제 문제의 정답
-		bool bCorrectAnswer = QuizInfos[QuizCount].Answer;
+		bool bCorrectAnswer = QuizData[QuizCount].Answer;
 		// 플레이어가 선택한 정답
 		bool bSelectedAnswer = GetPlayerQuizAnswer(pc);
 
@@ -190,7 +204,7 @@ void UKJH_QuizManager::AnswerState()
 	GetWorld()->GetTimerManager().SetTimer(timerHandle, FTimerDelegate::CreateLambda([this]()
 		{
 			//  풀 문제가 남았다면 다음 퀴즈로 전환
-			if (QuizCount < QuizInfos.Num())
+			if (QuizCount < QuizData.Num())
 			{
 				SetQuizState(EQuizState::Question);
 			}
@@ -208,16 +222,20 @@ void UKJH_QuizManager::EndState()
 {
 	CallBlockOxLineDelegate(false);
 	
-
 	// 모든 플레이어들에게 퀴즈 종료
 	for (auto pc : CommunityGameMode->PlayerControllers)
 	{
 		pc->ClientRPC_EndQuiz();
 	}
+	
+	FTimerHandle timerHandle;
+	GetWorld()->GetTimerManager().SetTimer(timerHandle, FTimerDelegate::CreateLambda([this]()
+		{
+			OnEndQuizTimeDelegate.Broadcast();
 
-	OnEndQuizTimeDelegate.Broadcast();
-
-	SetQuizState(EQuizState::NotStarted);
+			SetQuizState(EQuizState::NotStarted);
+		}),
+		EndTime, false);
 }
 
 bool UKJH_QuizManager::GetPlayerQuizAnswer(AKJH_PlayerController* TargetPC)
@@ -235,4 +253,21 @@ bool UKJH_QuizManager::GetPlayerQuizAnswer(AKJH_PlayerController* TargetPC)
 	// 왼쪽
 	else
 		return true;
+}
+
+void UKJH_QuizManager::SetQuizData(TArray<FChatbotQuizData> TargetData)
+{
+	QuizData = TargetData;
+
+	bool bSuccessed = QuizData.Num() > 0;
+    if (bSuccessed)
+    {
+        //StartQuiz();
+    }
+    else
+    {
+        UE_LOG(LogTemp, Warning, TEXT("Quiz Data를 불러올 수 없습니다."));
+    }
+
+	OnStartQuizTimeDelegate.Broadcast(bSuccessed);
 }

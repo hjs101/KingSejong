@@ -32,7 +32,7 @@ void AKJH_HttpManager::BeginPlay()
 /// </summary>
 /// <param name="BookName"> 책 이름</param>
 /// <param name="FilePath"> 보이스 파일 경로 </param>
-void AKJH_HttpManager::Req_AskToChatbot(const FString& BookName, const FString& FilePath)
+void AKJH_HttpManager::Req_AskToChatbot(const FString& FilePath)
 {
 	FHttpModule& httpModule = FHttpModule::Get();
 	TSharedRef<IHttpRequest> req = httpModule.CreateRequest();
@@ -52,11 +52,9 @@ void AKJH_HttpManager::Req_AskToChatbot(const FString& BookName, const FString& 
 	// 통신할 데이터
 	TMap<FString, FString> data;
 	data.Add(TEXT("audio"), EncodingFileData);
-
-	UE_LOG(LogTemp, Warning, TEXT("파일 읽기 성공: %s"), *FilePath);
+	req->SetContentAsString(UKJH_JsonParseLib::MakeJson(data));
 
 	// 요청 정보
-	//req->SetURL(WavServerURL);
 	req->SetURL(ChatbotTextServerURL);
 	req->SetVerb(TEXT("POST"));
 	req->SetHeader(TEXT("content-type"), TEXT("application/json"));
@@ -105,18 +103,13 @@ void AKJH_HttpManager::OnRes_AskToChatbot(FHttpRequestPtr Request, FHttpResponse
 	}
 }
 
-
 void AKJH_HttpManager::Req_GetChatbotAudioData(const FString& AudioId)
 {
-
 	FHttpModule& httpModule = FHttpModule::Get();
 	TSharedRef<IHttpRequest> req = httpModule.CreateRequest();
 
 	// 요청 정보
-	//req->SetURL(WavServerURL);
-
 	FString url = ChatbotAudioServerURL + FString::Printf(TEXT("\"%s\""), *AudioId);
-
 
 	req->SetURL(url);
 	req->SetVerb(TEXT("GET"));
@@ -132,7 +125,6 @@ void AKJH_HttpManager::Req_GetChatbotAudioData(const FString& AudioId)
 
 }
 
-
 void AKJH_HttpManager::OnRes_GetChatbotAudioData(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bConnectedSuccessfully)
 {
 	FString result;
@@ -143,4 +135,47 @@ void AKJH_HttpManager::OnRes_GetChatbotAudioData(FHttpRequestPtr Request, FHttpR
 	}
 
 	OnResponseGetAudioDataDelegate.ExecuteIfBound(result);
+}
+
+/// <summary>
+/// 퀴즈 정보 가져오기
+/// </summary>
+/// <param name="BookName"></param>
+void AKJH_HttpManager::Req_GetChatbotQuizData(const FString& BookName)
+{
+	FHttpModule& httpModule = FHttpModule::Get();
+	TSharedRef<IHttpRequest> req = httpModule.CreateRequest();
+
+	// 통신할 데이터
+	TMap<FString, FString> data;
+	data.Add(TEXT("query"), FString::Printf(TEXT("%s 이야기에서 OX 퀴즈를 내줘"), *BookName));
+	req->SetContentAsString(UKJH_JsonParseLib::MakeJson(data));
+
+	// 요청 정보
+	req->SetURL(QuizServerURL);
+	req->SetVerb(TEXT("POST"));
+	req->SetHeader(TEXT("content-type"), TEXT("application/json"));
+	req->SetContentAsString(UKJH_JsonParseLib::MakeJson(data));
+
+
+
+	// 응답 처리
+	req->OnProcessRequestComplete().BindUObject(this, &AKJH_HttpManager::OnRes_GetChatbotQuizData);
+
+	// 서버에 요청
+	req->ProcessRequest();
+
+	UE_LOG(LogTemp, Warning, TEXT("Call Req_GetQuizInfo!!"));
+}
+
+void AKJH_HttpManager::OnRes_GetChatbotQuizData(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bConnectedSuccessfully)
+{
+	TArray<FChatbotQuizData> result;
+	if (bConnectedSuccessfully)
+	{
+		FString res = Response->GetContentAsString();
+		result = UKJH_JsonParseLib::JsonParseChatbotQuizData(res);
+	}
+
+	OnResponseChatbotQuizDataDelegate.Broadcast(result);
 }
