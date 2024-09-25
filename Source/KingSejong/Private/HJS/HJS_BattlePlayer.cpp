@@ -323,17 +323,17 @@ void AHJS_BattlePlayer::MulticastDownloadSound_Implementation(const FString& Cli
 	GoogleNetComp->FileDownloadFromFirebase(SavePath, FileName);
 }
 
-void AHJS_BattlePlayer::ClientPlaySound(const FString& WinnerFIlePath)
+void AHJS_BattlePlayer::ClientPlaySound(const FString& FileName)
 {
-	ServerPlaySound(WinnerFIlePath);
+	ServerPlaySound(FileName);
 }
 
-void AHJS_BattlePlayer::ServerPlaySound_Implementation(const FString& WinnerFIlePath)
+void AHJS_BattlePlayer::ServerPlaySound_Implementation(const FString& FileName)
 {
-	MulticastPlaySound(WinnerFIlePath);
+	MulticastPlaySound(FileName);
 }
 
-void AHJS_BattlePlayer::MulticastPlaySound_Implementation(const FString& WinnerFIlePath)
+void AHJS_BattlePlayer::MulticastPlaySound_Implementation(const FString& FileName)
 {
 
 	// 파일 읽기
@@ -362,9 +362,10 @@ void AHJS_BattlePlayer::MulticastPlaySound_Implementation(const FString& WinnerF
 	}
 	else
 	{
-		if (!FFileHelper::LoadFileToArray(SoundData, *WinnerFIlePath))
+		FString WinnerFilePath = FPaths::Combine(FPaths::ProjectDir(), TEXT("RecordData/Winner/")) + FileName;
+		if (!FFileHelper::LoadFileToArray(SoundData, *WinnerFilePath))
 		{
-			UE_LOG(LogTemp, Error, TEXT("파일 읽기 실패!: %s"), *WinnerFIlePath);
+			UE_LOG(LogTemp, Error, TEXT("파일 읽기 실패!: %s"), *WinnerFilePath);
 			return;
 		}
 	}
