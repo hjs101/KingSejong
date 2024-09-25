@@ -113,4 +113,7 @@ public:
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastRPCExitSession();
 
+	UFUNCTION(Client, Reliable)
+	void ClientLeaveSession();
+
 };

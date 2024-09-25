@@ -255,11 +255,19 @@ void UJJH_GameInstance::SetCharacterMesh(USkeletalMesh* Mesh)
 
 void UJJH_GameInstance::ExitSession()
 {
-	ServerRPCExitSession();
+	if (GetWorld()->IsNetMode(NM_Client))
+	{
+		ClientLeaveSession();
+	}
+	else
+	{
+		ServerRPCExitSession();
+	}
 }
 
 void UJJH_GameInstance::ServerRPCExitSession_Implementation()
 {
+	SessionInterface->DestroySession(SESSION_NAME);
 	MulticastRPCExitSession();
 }
 
@@ -271,9 +279,31 @@ void UJJH_GameInstance::MulticastRPCExitSession_Implementation()
 	}
 	//방퇴장 요청
 	//클라이언트 입장에서는 그냥 나가는 거 호스트 입장에선 파괴하는거
-	SessionInterface->DestroySession(SESSION_NAME);
+	//SessionInterface->DestroySession(SESSION_NAME);
+
+	// 모든 클라이언트에게 세션이 종료되었음을 알림
+	if (GetWorld()->IsNetMode(NM_Client))
+	{
+		// 클라이언트에서 로컬 정리 작업
+		ClientLeaveSession();
+	}
 
 	UE_LOG(LogTemp, Error, TEXT("Session Destroy"));
+}
+
+void UJJH_GameInstance::ClientLeaveSession_Implementation()
+{
+	if (SessionInterface.IsValid())
+	{
+		SessionInterface->DestroySession(SESSION_NAME);
+	}
+
+	// 로비로 이동
+	APlayerController* PC = GetWorld()->GetFirstPlayerController();
+	if (PC)
+	{
+		PC->ClientTravel("/Game/JJH/MAP_Reallobby_SHN", TRAVEL_Absolute);
+	}
 }
 
 void UJJH_GameInstance::OnMyDestroySessionComplete(FName SessionName, bool bWasSuccessful)
