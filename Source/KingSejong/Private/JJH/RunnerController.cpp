@@ -20,19 +20,6 @@ void ARunnerController::BeginPlay()
 
     //이걸 해야 복제됨
     bReplicates = true;
-
-	UJJH_GameInstance* GI = Cast<UJJH_GameInstance>(GetWorld()->GetGameInstance());
-	if (GI == nullptr)
-	{
-		return;
-	}
-    ARunner* Char = Cast<ARunner>(GetCharacter());
-    if (Char)
-    {
-        UE_LOG(LogTemp, Warning, TEXT("!@#$!@#!@#!@21412"));
-        ControllerMeshIndex = GI->CharacterMeshIndex;
-        Char->GetMesh()->SetSkeletalMesh(GI->CharacterList[ControllerMeshIndex]);
-    }
 }
 
 void ARunnerController::ClientCreateQuizWidget_Implementation(const FWordsData& QuizData)
@@ -256,6 +243,14 @@ void ARunnerController::ClientSwitchToEndWidget_Implementation()
     QuizWidgetInstance->SwitchToEnd();
 }
 
+void ARunnerController::ClientEndGame_Implementation()
+{
+    UJJH_GameInstance* gi = Cast<UJJH_GameInstance>(GetWorld()->GetGameInstance());
+    if (gi)
+    {
+        gi->ExitSession();
+    }
+}
 
 
 

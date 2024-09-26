@@ -228,7 +228,7 @@ void UJJH_GameInstance::OnMyFindSessionComplete(bool Success)
 	{
 		// 검색 결과가 없을 때 처리
 		FRoomInfo EmptyRoomInfo;
-		EmptyRoomInfo.roomName = TEXT("No Rooms Found");
+		EmptyRoomInfo.roomName = TEXT("입장 가능한 방이 없습니다.");
 		OnSearchSignatureCompleteDelegate.Broadcast(EmptyRoomInfo);
 	}
 }

@@ -39,6 +39,7 @@ void ALobbyTrigger::ComponentBeginOverlap(UPrimitiveComponent* OverlappedCompone
 	Lobby->SetMenuInterface(gi);
 	Lobby->SetTextAndCategory(TriggerText, TriggerCategory);
 	Lobby->AddToViewport();
-
+	//입장하자마자 세션찾기
+	gi->FindOtherSessions();
 }
 

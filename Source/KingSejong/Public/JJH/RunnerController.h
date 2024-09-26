@@ -95,4 +95,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int32 ControllerMeshIndex;
 
+	UFUNCTION(Client, Reliable)
+	void ClientEndGame();
+
 };
