@@ -46,12 +46,13 @@ void UAINet::FileSendToAIServer(const FString& FilePath)
 		UE_LOG(LogTemp, Error, TEXT("파일 읽기 실패!: %s"), *FilePath);
 		return;
 	}
+	Me->GetWorldTimerManager().ClearTimer(Me->AINetTimerHandle);
 	FString SendText = FBase64::Encode(FileData);
 	TMap<FString, FString> Senddata;
 	Senddata.Add(TEXT("audio"), SendText);
 	
 	// HTTP 요청 생성
-	TSharedRef<IHttpRequest, ESPMode::ThreadSafe> HttpRequest = FHttpModule::Get().CreateRequest();
+	TSharedRef<IHttpRequest> HttpRequest = FHttpModule::Get().CreateRequest();
 	HttpRequest->SetURL(ServerURL);
 	HttpRequest->SetVerb("POST");
 	HttpRequest->SetHeader(TEXT("content-type"), TEXT("application/json"));

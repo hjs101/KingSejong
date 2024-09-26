@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -6,10 +6,10 @@
 #include "GameFramework/GameMode.h"
 #include "KJH_CommunityGameMode.generated.h"
 
-UENUM()
-enum class ECommunityState :uint8
+UENUM(BlueprintType)
+enum class ECommunityMode :uint8
 {
-	Debate,
+	Community,
 	Quiz
 };
 
@@ -26,14 +26,15 @@ public:
 	UPROPERTY(BlueprintReadOnly)
 	TArray<class AKJH_PlayerController*> PlayerControllers;
 
-
+	UPROPERTY(BlueprintReadWrite)
+	ECommunityMode CommunityMode = ECommunityMode::Community;
 
 public:
 	UFUNCTION(BlueprintCallable)
 	void GetAllPlayerControllers();
 
-
-	void SetCommunityState(ECommunityState NewState);
+	//UFUNCTION(BlueprintCallable)
+	//void SetCommunityState(ECommunityState NewState);
 
 	UFUNCTION(BlueprintCallable)
 	void PlayQuizMode();

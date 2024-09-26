@@ -71,3 +71,29 @@ FString UKJH_JsonParseLib::JsonParseChatbotAudioData(const FString& json)
 
 	return result;
 }
+
+TArray<FChatbotQuizData> UKJH_JsonParseLib::JsonParseChatbotQuizData(const FString& json)
+{
+	TSharedRef<TJsonReader<TCHAR>> reader = TJsonReaderFactory<TCHAR>::Create(json);
+	TSharedPtr<FJsonObject> response = MakeShareable(new FJsonObject());
+
+	TArray<FChatbotQuizData> quizDataList;
+	if (FJsonSerializer::Deserialize(reader, response))
+	{
+		TArray<TSharedPtr<FJsonValue>> results = response->GetArrayField(TEXT("result"));
+		for (const TSharedPtr<FJsonValue>& value : results)
+		{
+			TSharedPtr<FJsonObject> data = value->AsObject();
+
+			// 퀴즈 정보 
+			FChatbotQuizData quizData;
+			quizData.Question = data->GetStringField(TEXT("question"));
+			quizData.Answer = data->GetStringField(TEXT("answer")).Equals(TEXT("O")) ? true : false;
+			quizData.Explanation = data->GetStringField(TEXT("explanation"));
+
+			// 배열에 추가
+			quizDataList.Add(quizData);
+		}
+	}
+	return quizDataList;
+}

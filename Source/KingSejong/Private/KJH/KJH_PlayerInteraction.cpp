@@ -8,6 +8,7 @@
 #include "Blueprint/UserWidget.h"
 #include "KJH/KJH_InteractiveActor.h"
 #include "KJH/KJH_PlayerController.h"
+#include "Kismet/GameplayStatics.h"
 
 
 // Sets default values for this component's properties
@@ -95,6 +96,8 @@ void UKJH_PlayerInteraction::OnActionInteraction(const FInputActionValue& value)
 	if(HitActor == nullptr) return;
 	if(HitActor->IsInteractable() == false) return;
 
+	UGameplayStatics::PlaySound2D(GetWorld(), SFX_Interaction);
+
 	ServerRPC_InteractiveActor(HitActor, MyPlayerController);
 
 	UE_LOG(LogTemp, Warning, TEXT("OnActionInteraction!!"));
@@ -108,7 +111,7 @@ void UKJH_PlayerInteraction::CreateKeyGuide()
 	KeyGuideWidget = CreateWidget(GetWorld(), KeyGuideFactory);
 	if ( KeyGuideWidget )
 	{
-		KeyGuideWidget->AddToViewport();
+		KeyGuideWidget->AddToViewport(1);
 		SetActiveKeyGuide(false);
 	}
 }

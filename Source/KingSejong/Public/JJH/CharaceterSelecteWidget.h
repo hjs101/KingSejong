@@ -43,7 +43,10 @@ public:
 	
 	UFUNCTION()
 	void PrevButtonClicked();
+	UPROPERTY(meta = (BindWidgetAnim), Transient)
+	class UWidgetAnimation* ChooseCharacterAnim;
 
-
+	UPROPERTY(EditDefaultsOnly)
+	class TSubclassOf<UUserWidget> LobbyMainFactory;
 
 };
