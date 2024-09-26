@@ -8,6 +8,7 @@
 #include "../../../../Plugins/Online/OnlineBase/Source/Public/Online/OnlineSessionNames.h"
 #include "Online/CoreOnline.h"
 #include "JJH/LobbyWidget.h"
+#include "string"
 
 const static FName SESSION_NAME = TEXT("My Session Game");
 const static FName SESSION_CATEGORY = TEXT("RUN");
@@ -105,8 +106,9 @@ void UJJH_GameInstance::CreateSession(const FString& RoomName, int32 PlayerCount
 		SessionSettings.NumPublicConnections = PlayerCount;
 
 		// 세션 설정 시 카테고리 지정 -> 추후에 
+		FString roomname = StringBase64Encode(RoomName);
 		SessionSettings.Set<FString>(FName("Category"), Category, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
-		SessionSettings.Set<FString>(FName("Room_Name"), RoomName, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
+		SessionSettings.Set<FString>(FName("Room_Name"), roomname, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
 		SessionSettings.Set<FString>(FName("Host_Name"), SESSION_NAME.ToString(), EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
 
 		// SessionSettings에서 값을 가져와 로그로 출력
@@ -154,15 +156,6 @@ void UJJH_GameInstance::OnMyCreateSessionComplete(FName SessionName, bool Succes
 	}
 	GEngine->AddOnScreenDebugMessage(0, 2, FColor::Green, TEXT("Hosting"));
 
-}
-
-void UJJH_GameInstance::OnMyDestroySessionComplete(FName SessionName, bool Success)
-{
-	//파괴에 성공하면 다시 만들기
-	if ( Success )
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Session Destroyed"));
-	}
 }
 
 void UJJH_GameInstance::FindOtherSessions()
@@ -214,7 +207,7 @@ void UJJH_GameInstance::OnMyFindSessionComplete(bool Success)
 			//방이름
 			FString roomNameString;
 			results[ i ].Session.SessionSettings.Get<FString>(FName("Room_Name"), roomNameString);
-			roomInfo.roomName = roomNameString;
+			roomInfo.roomName = StringBase64Decode(roomNameString);
 			//호스트 이름
 			FString hostNameString;
 			results[ i ].Session.SessionSettings.Get<FString>(FName("Host_Name"), hostNameString);
@@ -257,4 +250,111 @@ void UJJH_GameInstance::OnMyJoinSessionComplete(FName SessionName, EOnJoinSessio
 	}
 }
 
+void UJJH_GameInstance::SetCharacterMesh(USkeletalMesh* Mesh)
+{
+	CharacterMesh = Mesh;
+}
 
+void UJJH_GameInstance::ExitSession()
+{
+	if (GetWorld()->IsNetMode(NM_Client))
+	{
+		ClientLeaveSession();
+	}
+	else
+	{
+		ServerRPCExitSession();
+	}
+}
+
+void UJJH_GameInstance::ServerRPCExitSession_Implementation()
+{
+	SessionInterface->DestroySession(SESSION_NAME);
+	MulticastRPCExitSession();
+}
+
+void UJJH_GameInstance::MulticastRPCExitSession_Implementation()
+{
+	if (nullptr != GEngine)
+	{
+		GEngine->OnNetworkFailure().AddUObject(this, &UJJH_GameInstance::OnNetworkFailure);
+	}
+	//방퇴장 요청
+	//클라이언트 입장에서는 그냥 나가는 거 호스트 입장에선 파괴하는거
+	//SessionInterface->DestroySession(SESSION_NAME);
+
+	// 모든 클라이언트에게 세션이 종료되었음을 알림
+	if (GetWorld()->IsNetMode(NM_Client))
+	{
+		// 클라이언트에서 로컬 정리 작업
+		ClientLeaveSession();
+	}
+
+	UE_LOG(LogTemp, Error, TEXT("Session Destroy"));
+}
+
+void UJJH_GameInstance::ClientLeaveSession_Implementation()
+{
+	if (SessionInterface.IsValid())
+	{
+		SessionInterface->DestroySession(SESSION_NAME);
+	}
+
+	// 로비로 이동
+	APlayerController* PC = GetWorld()->GetFirstPlayerController();
+	if (PC)
+	{
+		PC->ClientTravel("/Game/JJH/MAP_Reallobby_SHN", TRAVEL_Absolute);
+	}
+}
+
+void UJJH_GameInstance::OnMyDestroySessionComplete(FName SessionName, bool bWasSuccessful)
+{
+	if (bWasSuccessful)
+	{
+		//로비로 여행을 가고 싶다.
+		auto* pc = GetWorld()->GetFirstPlayerController();
+		pc->ClientTravel(TEXT("/Game/JJH/MAP_Reallobby_SHN"), ETravelType::TRAVEL_Absolute);
+	}
+}
+
+void UJJH_GameInstance::OnNetworkFailure(UWorld* World, UNetDriver* NetDriver, ENetworkFailure::Type FailureType, const FString& ErrorString)
+{
+	LoadServerWidgetMap();
+}
+
+void UJJH_GameInstance::LoadServerWidgetMap()
+{
+	// AKJH_PlayerController를 가져온다,
+	APlayerController* PC = GetWorld()->GetFirstPlayerController();
+	//// 플레이어의 첫번째 컨트롤러를 가져온다.
+	//APlayerController* PlayerController = GetFirstLocalPlayerController();
+	if (PC && PC->IsLocalController()) // 컨트롤러가 있으면,
+	{
+		// ServerUI가 있는 맵으로 이동시킨다.
+		PC->ClientTravel("/Game/JJH/MAP_Reallobby_SHN", ETravelType::TRAVEL_Absolute);
+		UE_LOG(LogTemp, Error, TEXT("Session Destroy Network Failure"));
+	}
+}
+	//============================ 스팀에서 한글명 방제 만들기
+	// 보낼 때
+FString UJJH_GameInstance::StringBase64Encode(const FString & str)
+{
+	// Set 할 때 : FString -> UTF8 (std::string) -> TArray<uint8> -> base64 로 Encode
+	std::string utf8String = TCHAR_TO_UTF8(*str);
+	TArray<uint8> arrayData = TArray<uint8>((uint8*)(utf8String.c_str()),
+	utf8String.length());
+	return FBase64::Encode(arrayData);
+}
+
+// 받을 때
+FString UJJH_GameInstance::StringBase64Decode(const FString & str)
+{
+	// Get 할 때 : base64 로 Decode -> TArray<uint8> -> TCHAR
+	TArray<uint8> arrayData;
+	FBase64::Decode(str, arrayData);
+	std::string ut8String((char*)(arrayData.GetData()), arrayData.Num());
+	return UTF8_TO_TCHAR(ut8String.c_str());
+	
+	
+}

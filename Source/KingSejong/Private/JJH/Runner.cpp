@@ -7,6 +7,9 @@
 #include "../../../../Plugins/EnhancedInput/Source/EnhancedInput/Public/EnhancedInputSubsystems.h"
 #include "../../../../Plugins/EnhancedInput/Source/EnhancedInput/Public/EnhancedInputComponent.h"
 #include "Engine/Engine.h"
+#include "JJH/JJHPlayerState.h"
+#include "JJH/JJH_GameInstance.h"
+#include "Net/UnrealNetwork.h"
 
 // Sets default values
 ARunner::ARunner()
@@ -41,6 +44,28 @@ void ARunner::BeginPlay()
 			subSys->AddMappingContext(IMC_Runner, 0);
 		}
 	}
+	// 시작하면 메시 선택한걸로 바꾸기
+	// 바꾼 메시를 다른 플레이어의 눈에도 바뀐것처럼 보여야함
+	//UJJH_GameInstance* GI = Cast<UJJH_GameInstance>(GetGameInstance());
+	//RunnerMeshIndex = GI->CharacterMeshIndex;
+	//if (HasAuthority())
+	//{
+	//	if (GI)
+	//	{
+	//		
+	//		OnRep_RunnerMeshIndex();
+	//	}
+	//}
+	//if (HasAuthority())
+	//{
+	//	AJJHPlayerState* PS = Cast<AJJHPlayerState>(GetPlayerState());
+	//	if (PS)
+	//	{
+	//		RunnerMeshIndex = PS->SelectedMeshIndex;
+	//		// 서버에서 직접 메시 업데이트
+	//		UpdateMesh();
+	//	}
+	//}
 }
 
 // Called every frame
@@ -183,4 +208,54 @@ void ARunner::MulticastTeleportForward_Implementation(float Speed, float InputVa
 	FVector Direction = FRotationMatrix(GetControlRotation()).GetScaledAxis(EAxis::X);
 	SetActorLocation(GetActorLocation() + Direction * Speed);
 }
+//
+//void ARunner::OnRep_RunnerMeshIndex()
+//{
+//	UJJH_GameInstance* GI = Cast<UJJH_GameInstance>(GetGameInstance());
+//	if (GI)
+//	{
+//		RunnerMeshIndex = GI->CharacterMeshIndex;
+//		UE_LOG(LogTemp, Warning, TEXT(" Runnerindex !%d"), RunnerMeshIndex);
+//		GetMesh()->SetSkeletalMesh(GI->CharacterList[RunnerMeshIndex]);
+//	}
+//}
+//
+//void ARunner::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+//{
+//	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+//	DOREPLIFETIME(ARunner, RunnerMeshIndex);
+//}
+void ARunner::OnRep_RunnerMeshIndex()
+{
+	UpdateMesh();
+}
 
+void ARunner::UpdateMesh()
+{
+	UJJH_GameInstance* GI = Cast<UJJH_GameInstance>(GetGameInstance());
+	if (GI)
+	{
+		GetMesh()->SetSkeletalMesh(GI->CharacterList[RunnerMeshIndex]);
+		UE_LOG(LogTemp, Warning, TEXT("Runner index: %d"), RunnerMeshIndex);
+	}
+}
+
+void ARunner::OnRep_MeshIndex()
+{
+	UJJH_GameInstance* GI = Cast<UJJH_GameInstance>(GetWorld()->GetGameInstance());
+	if (GI)
+	{
+		int32* MeshIndex = GI->PlayerMeshMap.Find(PlayerUniqueID);
+		if (MeshIndex && GI->CharacterList.IsValidIndex(*MeshIndex))
+		{
+			GetMesh()->SetSkeletalMesh(GI->CharacterList[*MeshIndex]);
+		}
+	}
+}
+
+void ARunner::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(ARunner, ControllerMeshIndex);
+	DOREPLIFETIME(ARunner, PlayerUniqueID);
+}
