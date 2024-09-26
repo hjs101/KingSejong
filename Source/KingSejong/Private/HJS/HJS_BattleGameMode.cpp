@@ -7,6 +7,7 @@
 #include "HJS/BattleQuestionStruct.h"
 #include "HJS/LevenshteinLib.h"
 #include "JJH/JJH_GameInstance.h"
+#include "../KingSejong.h"
 
 AHJS_BattleGameMode::AHJS_BattleGameMode()
 {
@@ -61,8 +62,7 @@ void AHJS_BattleGameMode::Client_StartRecording(APlayerController* PlayerControl
 void AHJS_BattleGameMode::SettingPlayerAnswer(const FString& Result, APlayerController* PC)
 {
     FString PCName = PC->GetName();
-    int32 PlayerNum = PCName[PCName.Len() - 1] - '0';
-    if (PlayerNum == 0)
+    if (PCStr == PCName)
     {
         Player0Result = Result;
         PC0 = PC;
@@ -157,17 +157,17 @@ void AHJS_BattleGameMode::JoinPlayer(APlayerController* PC)
 {
     check(PC);
     FString PCName = PC->GetName();
-    int32 PlayerNum = PCName[PCName.Len() - 1] - '0';
-
-    if ( PlayerNum == 0 )
+    
+    if (PCStr == "")
     {
+        PCStr = PCName;
         PC0 = PC;
     }
     else
     {
         PC1 = PC;
     }
-
+    PRINTLOG(TEXT("PlayerNum : %s"), *PCName);
     if ( PC0 != nullptr && PC1 != nullptr )
     {
         int32 RandNum = FMath::RandRange(0,2);

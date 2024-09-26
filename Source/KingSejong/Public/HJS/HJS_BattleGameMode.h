@@ -32,6 +32,8 @@ public:
 
 	FString AnswerString = "";
 
+	FString PCStr = "";
+
 	FString Player0Result = "";
 	UPROPERTY()
 	APlayerController* PC0;
