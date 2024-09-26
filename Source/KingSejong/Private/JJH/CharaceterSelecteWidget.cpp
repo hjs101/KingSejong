@@ -35,6 +35,12 @@ void UCharaceterSelecteWidget::SelecteButtonClicked()
 	PC->SetInputMode(FInputModeGameOnly());
 	Cast<USpringArmComponent>(Char->GetComponentsByTag(USpringArmComponent::StaticClass(),FName(TEXT("PlayerCamera")))[0])->bUsePawnControlRotation = true;
 
+	UUserWidget* LobbyMain = CreateWidget<UUserWidget>(GetWorld(),LobbyMainFactory);
+	if (LobbyMain)
+	{
+		LobbyMain->AddToViewport();
+	}
+
 }
 
 void UCharaceterSelecteWidget::NextButtonClicked()
