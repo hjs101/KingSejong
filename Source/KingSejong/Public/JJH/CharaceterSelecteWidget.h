@@ -46,5 +46,7 @@ public:
 	UPROPERTY(meta = (BindWidgetAnim), Transient)
 	class UWidgetAnimation* ChooseCharacterAnim;
 
+	UPROPERTY(EditDefaultsOnly)
+	class TSubclassOf<UUserWidget> LobbyMainFactory;
 
 };
