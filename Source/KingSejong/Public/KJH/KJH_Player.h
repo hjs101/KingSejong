@@ -46,6 +46,9 @@ public:
 	UPROPERTY(Replicated)
 	bool bIsSit;
 
+	UPROPERTY(Replicated)
+	bool bIsMove;
+
 private:
 	UPROPERTY(EditDefaultsOnly)
 	class USpringArmComponent* SpringArmComp;
@@ -70,10 +73,18 @@ private:
 	UPROPERTY(EditDefaultsOnly)
 	class UKJH_VoiceRecorder* VoiceRecorderComp;
 	
-
+	// Audio
+	UPROPERTY(EditDefaultsOnly)
+	class UAudioComponent* MoveAudioComp;
+	UPROPERTY(EditDefaultsOnly)
+	class USoundBase* SFX_Move;
+	UPROPERTY(EditDefaultsOnly)
+	class USoundBase* SFX_Jump;
 
 private:
 	void OnActionMove(const FInputActionValue& value);
+	void OnActionMoveStart(const FInputActionValue& value);
+	void OnActionMoveStop(const FInputActionValue& value);
 	void OnActionLook(const FInputActionValue& value);
 	void OnActionJump(const FInputActionValue& value);
 
@@ -86,4 +97,11 @@ public:
 	void OnEndSit();
 
 	void SetPlayerPosition(FTransform TargetTransform);
+
+
+	UFUNCTION(Server, Unreliable)
+	void ServerRPC_TogglePlayMoveSound(bool bValue);
+
+	UFUNCTION(NetMulticast, Unreliable)
+	void MulticastRPC_TogglePlayMoveSound(bool bValue);
 };
