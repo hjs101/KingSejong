@@ -68,6 +68,30 @@ public:
 	UPROPERTY(meta = (BindWidget))
 	class UScrollBox* FS_ScrollBox;	
 
+	UPROPERTY(meta = (BindWidget))
+	class UTextBlock* BattleTypeText2;
+
+	UPROPERTY(meta = (BindWidget))
+	class UCanvasPanel* DescPanel;
+	UPROPERTY(meta = (BindWidget))
+	class UImage* DescImg;
+	UPROPERTY(meta = (BindWidget))
+	class UButton* DescExitButton;
+	UPROPERTY(meta = (BindWidget))
+	class UButton* DescButton;
+
+	UPROPERTY(EditAnywhere)
+	class UTexture2D* RunningTexture;
+	UPROPERTY(EditAnywhere)
+	class UTexture2D* BattleTexture;
+	UPROPERTY(EditAnywhere)
+	class UTexture2D* TalkTexture;
+
+	UFUNCTION()
+	void OnDescButtonClicked();
+	UFUNCTION()
+	void OnDescExitButtonClicked();
+
 
 	//체크박스 체크되었을때
 	UFUNCTION()

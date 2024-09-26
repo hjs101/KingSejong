@@ -26,6 +26,7 @@
 #include "Components/WidgetComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "../KingSejong.h"
+#include "JJH/JJH_GameInstance.h"
 
 // Sets default values
 AHJS_BattlePlayer::AHJS_BattlePlayer()
@@ -59,6 +60,8 @@ AHJS_BattlePlayer::AHJS_BattlePlayer()
 
 	RecordUIComp = CreateDefaultSubobject<UWidgetComponent>(TEXT("RecordUIComp"));
 	RecordUIComp->SetupAttachment(RootComponent);
+
+	bReplicates = true;
 }
 
 // Called when the game starts or when spawned
@@ -74,6 +77,24 @@ void AHJS_BattlePlayer::BeginPlay()
 	}
 	AudioCapture->OnAudioEnvelopeValue.AddDynamic(this,&AHJS_BattlePlayer::OnChangeEnvValue);
 	RecordUIComp->SetVisibility(false);
+
+	UJJH_GameInstance* GameIns = Cast<UJJH_GameInstance>(GetWorld()->GetGameInstance());
+
+	if (IsLocallyControlled())
+	{
+		ServerSetMesh(GameIns->CharacterMeshIndex);
+	}
+	else
+	{
+		GetMesh()->SetSkeletalMesh(GameIns->CharacterList[MyMeshIndex]);
+	}
+}
+
+void AHJS_BattlePlayer::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(AHJS_BattlePlayer, MyMeshIndex);
 }
 
 // Called every frame
@@ -152,7 +173,7 @@ void AHJS_BattlePlayer::StartTurn_Implementation()
 void AHJS_BattlePlayer::ServerQuestionSetting_Implementation()
 {
 	check(GM)
-		GM->QuestionSetting();
+	GM->QuestionSetting();
 }
 
 
@@ -190,6 +211,27 @@ void AHJS_BattlePlayer::OnChangeEnvValue(float Value)
 void AHJS_BattlePlayer::ServerSetShowRecordComp_Implementation(bool Value)
 {
 	RecordUIComp->SetVisibility(Value);
+}
+
+void AHJS_BattlePlayer::ServerSetMesh_Implementation(int32 MeshIndex)
+{
+	MyMeshIndex = MeshIndex;
+	MulticastSetMesh(MyMeshIndex);
+}
+
+void AHJS_BattlePlayer::MulticastSetMesh_Implementation(int32 MeshIndex)
+{
+	UJJH_GameInstance* GameIns = Cast<UJJH_GameInstance>(GetWorld()->GetGameInstance());
+	PRINTLOG(TEXT("%d"), MeshIndex);
+	check(GameIns);
+	GetMesh()->SetSkeletalMesh(GameIns->CharacterList[MeshIndex]);
+}
+
+void AHJS_BattlePlayer::ClientExitRoom_Implementation()
+{
+	UJJH_GameInstance* GameIns = Cast<UJJH_GameInstance>(GetWorld()->GetGameInstance());
+	check(GameIns);
+	GameIns->ExitSession();
 }
 
 void AHJS_BattlePlayer::Punch()

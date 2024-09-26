@@ -20,6 +20,8 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -184,6 +186,9 @@ public:
 
 	UPROPERTY()
 	UMainUI* MainUI;
+
+	UFUNCTION(Client, Reliable)
+	void ClientExitRoom();
 private:
 
 	bool bIsRecording = false;
@@ -220,6 +225,15 @@ private:
 
 	UFUNCTION(Server, Unreliable)
 	void ServerSetShowRecordComp(bool Value);
+
+	UFUNCTION(Server, Reliable)
+	void ServerSetMesh(int32 MeshIndex);
+
+	UPROPERTY(Replicated)
+	int32 MyMeshIndex = 0;
+
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastSetMesh(int32 MeshIndex);
 
 	FTimerHandle RecordHandle;
 

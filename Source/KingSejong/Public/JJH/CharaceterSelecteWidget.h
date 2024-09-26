@@ -43,7 +43,8 @@ public:
 	
 	UFUNCTION()
 	void PrevButtonClicked();
-
+	UPROPERTY(meta = (BindWidgetAnim), Transient)
+	class UWidgetAnimation* ChooseCharacterAnim;
 
 
 };
