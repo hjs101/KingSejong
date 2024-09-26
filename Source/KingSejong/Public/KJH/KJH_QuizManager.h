@@ -7,6 +7,7 @@
 #include "KJH_QuizManager.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FBlockOxLineSignature, bool, bValue);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FStartQuizTimeSignature, bool, bValue);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FEndQuizTimeSignature);
 
 UENUM()
@@ -21,16 +22,17 @@ enum class EQuizState : uint8
 };
 
 USTRUCT(BlueprintType)
-struct FQuizInfo
+struct FChatbotQuizData
 {
 	GENERATED_BODY()
 
 public:
 	UPROPERTY(EditAnywhere, Category = "QuizInfo")
 	FString Question;
-
 	UPROPERTY(EditAnywhere, Category = "QuizInfo")
 	bool Answer;
+	UPROPERTY(EditAnywhere, Category = "QuizInfo")
+	FString Explanation;
 };
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -56,6 +58,9 @@ public:
 	FBlockOxLineSignature OnBlockOXLineDelegate;
 
 	UPROPERTY(BlueprintAssignable)
+	FStartQuizTimeSignature OnStartQuizTimeDelegate;
+
+	UPROPERTY(BlueprintAssignable)
 	FEndQuizTimeSignature OnEndQuizTimeDelegate;
 
 private:
@@ -72,21 +77,30 @@ public:
 
 	// 퀴즈 상태별 시간
 	UPROPERTY(EditDefaultsOnly)
+	int32 StartIdleTime = 5;
+	UPROPERTY(EditDefaultsOnly)
 	int32 IdleTime = 5;
 	UPROPERTY(EditDefaultsOnly)
-	int32 QuizTime = 15;
+	int32 QuizTime = 10;
 	UPROPERTY(EditDefaultsOnly)
 	int32 WaitingTime = 5;
 	UPROPERTY(EditDefaultsOnly)
 	int32 AnwserTime = 10;
+	UPROPERTY(EditDefaultsOnly)
+	int32 EndTime = 3;
 
 	// 퀴즈 개수
 	UPROPERTY(EditDefaultsOnly)
 	int32 MaxQuizCount = 3;
 	int32 QuizCount = 0;
 
-	UPROPERTY(EditAnywhere)
-	TArray<FQuizInfo> QuizInfos;
+	// 퀴즈 정보
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TArray<FChatbotQuizData> QuizData;
+
+	UPROPERTY()
+	class AKJH_HttpManager* HttpManager;
+
 
 public:
 	UFUNCTION(BlueprintCallable)
@@ -105,4 +119,7 @@ private:
 	void EndState();
 
 	bool GetPlayerQuizAnswer(class AKJH_PlayerController* TargetPC);
+
+	UFUNCTION()
+	void SetQuizData(TArray<FChatbotQuizData> TargetData);
 };

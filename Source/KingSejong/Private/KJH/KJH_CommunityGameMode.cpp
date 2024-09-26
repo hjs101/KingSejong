@@ -28,18 +28,18 @@ void AKJH_CommunityGameMode::GetAllPlayerControllers()
 		}
 	}
 }
-void AKJH_CommunityGameMode::SetCommunityState(ECommunityState NewState)
-{
-	//if (CommunityState == NewState) return;
-
-	// CommunityState = NewState;
-
-	// FTransform TargetTr = CommunityState == ECommunityState::Debate ? PlayerStartTr : QuizStartTr;
-
-	// (TargetTr);
-
-	// (LogTemp, Warning, TEXT("CommunityState : %d"), CommunityState);
-}
+//void AKJH_CommunityGameMode::SetCommunityState(ECommunityState NewState)
+//{
+//	//if (CommunityState == NewState) return;
+//
+//	// CommunityState = NewState;
+//
+//	// FTransform TargetTr = CommunityState == ECommunityState::Debate ? PlayerStartTr : QuizStartTr;
+//
+//	// (TargetTr);
+//
+//	// (LogTemp, Warning, TEXT("CommunityState : %d"), CommunityState);
+//}
 
 void AKJH_CommunityGameMode::PlayQuizMode()
 {

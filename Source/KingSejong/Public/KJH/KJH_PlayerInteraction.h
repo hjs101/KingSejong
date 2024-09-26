@@ -55,6 +55,9 @@ private:
 
 	bool bHitActor = false;
 
+	// Sound
+    UPROPERTY(EditDefaultsOnly, Category=Sound)
+	class USoundBase* SFX_Interaction;
 		
 private:
 
