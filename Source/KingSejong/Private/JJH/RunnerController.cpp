@@ -9,6 +9,10 @@
 #include "JJH/RunningGameModeBase.h"
 #include "Kismet/GameplayStatics.h"
 #include "JJH/EndGameWidget.h"
+#include "JJH/JJH_GameInstance.h"
+#include "JJH/JJHPlayerState.h"
+#include "GameFramework/Character.h"
+#include "JJH/Runner.h"
 
 void ARunnerController::BeginPlay()
 {
@@ -16,7 +20,19 @@ void ARunnerController::BeginPlay()
 
     //이걸 해야 복제됨
     bReplicates = true;
-    // 서버에서 받은 데이터를 기반으로 위젯을 생성합니다.
+
+	UJJH_GameInstance* GI = Cast<UJJH_GameInstance>(GetWorld()->GetGameInstance());
+	if (GI == nullptr)
+	{
+		return;
+	}
+    ARunner* Char = Cast<ARunner>(GetCharacter());
+    if (Char)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("!@#$!@#!@#!@21412"));
+        ControllerMeshIndex = GI->CharacterMeshIndex;
+        Char->GetMesh()->SetSkeletalMesh(GI->CharacterList[ControllerMeshIndex]);
+    }
 }
 
 void ARunnerController::ClientCreateQuizWidget_Implementation(const FWordsData& QuizData)
@@ -167,6 +183,11 @@ void ARunnerController::ClientShowInitials_Implementation()
     }
 }
 
+
+
+
+
+
 //void ARunnerController::UpdateTextBoxContent(const FString& TextContent)
 //{
 //    위젯에서 컨트롤러 소환해서 컨트롤러에서 게임모드 불러서 서버 -> 멀티캐스트해달라해 
@@ -234,3 +255,14 @@ void ARunnerController::ClientSwitchToEndWidget_Implementation()
 {
     QuizWidgetInstance->SwitchToEnd();
 }
+
+
+
+
+
+
+
+
+
+
+

@@ -8,6 +8,7 @@
 #include "../../../../Plugins/Online/OnlineBase/Source/Public/Online/OnlineSessionNames.h"
 #include "Online/CoreOnline.h"
 #include "JJH/LobbyWidget.h"
+#include "string"
 
 const static FName SESSION_NAME = TEXT("My Session Game");
 const static FName SESSION_CATEGORY = TEXT("RUN");
@@ -105,8 +106,9 @@ void UJJH_GameInstance::CreateSession(const FString& RoomName, int32 PlayerCount
 		SessionSettings.NumPublicConnections = PlayerCount;
 
 		// 세션 설정 시 카테고리 지정 -> 추후에 
+		FString roomname = StringBase64Encode(RoomName);
 		SessionSettings.Set<FString>(FName("Category"), Category, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
-		SessionSettings.Set<FString>(FName("Room_Name"), RoomName, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
+		SessionSettings.Set<FString>(FName("Room_Name"), roomname, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
 		SessionSettings.Set<FString>(FName("Host_Name"), SESSION_NAME.ToString(), EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
 
 		// SessionSettings에서 값을 가져와 로그로 출력
@@ -205,7 +207,7 @@ void UJJH_GameInstance::OnMyFindSessionComplete(bool Success)
 			//방이름
 			FString roomNameString;
 			results[ i ].Session.SessionSettings.Get<FString>(FName("Room_Name"), roomNameString);
-			roomInfo.roomName = roomNameString;
+			roomInfo.roomName = StringBase64Decode(roomNameString);
 			//호스트 이름
 			FString hostNameString;
 			results[ i ].Session.SessionSettings.Get<FString>(FName("Host_Name"), hostNameString);
@@ -320,6 +322,7 @@ void UJJH_GameInstance::OnNetworkFailure(UWorld* World, UNetDriver* NetDriver, E
 {
 	LoadServerWidgetMap();
 }
+
 void UJJH_GameInstance::LoadServerWidgetMap()
 {
 	// AKJH_PlayerController를 가져온다,
@@ -332,4 +335,26 @@ void UJJH_GameInstance::LoadServerWidgetMap()
 		PC->ClientTravel("/Game/JJH/MAP_Reallobby_SHN", ETravelType::TRAVEL_Absolute);
 		UE_LOG(LogTemp, Error, TEXT("Session Destroy Network Failure"));
 	}
+}
+	//============================ 스팀에서 한글명 방제 만들기
+	// 보낼 때
+FString UJJH_GameInstance::StringBase64Encode(const FString & str)
+{
+	// Set 할 때 : FString -> UTF8 (std::string) -> TArray<uint8> -> base64 로 Encode
+	std::string utf8String = TCHAR_TO_UTF8(*str);
+	TArray<uint8> arrayData = TArray<uint8>((uint8*)(utf8String.c_str()),
+	utf8String.length());
+	return FBase64::Encode(arrayData);
+}
+
+// 받을 때
+FString UJJH_GameInstance::StringBase64Decode(const FString & str)
+{
+	// Get 할 때 : base64 로 Decode -> TArray<uint8> -> TCHAR
+	TArray<uint8> arrayData;
+	FBase64::Decode(str, arrayData);
+	std::string ut8String((char*)(arrayData.GetData()), arrayData.Num());
+	return UTF8_TO_TCHAR(ut8String.c_str());
+	
+	
 }

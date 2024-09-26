@@ -15,7 +15,7 @@ void ARunningGameModeBase::BeginPlay()
 {
 	Super::BeginPlay();
 
-	bUseSeamlessTravel = true;
+	//bUseSeamlessTravel = true;
 
 	//FTimerHandle QuizTimer;
 	////3초이따 퀴즈띄우기
@@ -262,6 +262,8 @@ void ARunningGameModeBase::EndGameAndReturnToLobby(ARunnerController* WinningPla
 void ARunningGameModeBase::PostLogin(APlayerController* NewPlayer)
 {
 	Super::PostLogin(NewPlayer);
+
+	UE_LOG(LogTemp, Warning, TEXT("!@#$123"));
 
 	ARunner* rn = Cast<ARunner> (NewPlayer);
 	if (rn)

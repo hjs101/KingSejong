@@ -91,4 +91,8 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<class UEndGameWidget> EndGameWidgetFactory;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int32 ControllerMeshIndex;
+
 };

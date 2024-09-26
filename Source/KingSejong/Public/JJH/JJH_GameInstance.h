@@ -92,6 +92,8 @@ public:
 	void OnMyDestroySessionComplete(FName SessionName, bool Success);
 	void OnNetworkFailure(UWorld* World, UNetDriver* NetDriver, ENetworkFailure::Type FailureType, const FString& ErrorString);
 	void LoadServerWidgetMap();
+	FString StringBase64Encode(const FString& str);
+	FString StringBase64Decode(const FString& str);
 	void OnMyFindSessionComplete(bool Success);
 	void OnMyJoinSessionComplete(FName SessionName, EOnJoinSessionCompleteResult::Type Result);
 	
@@ -116,4 +118,15 @@ public:
 	UFUNCTION(Client, Reliable)
 	void ClientLeaveSession();
 
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TArray<class USkeletalMesh* > CharacterList;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int32 CharacterMeshIndex = 0;
+
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TMap<FString, int32> PlayerMeshMap;
+	
 };
