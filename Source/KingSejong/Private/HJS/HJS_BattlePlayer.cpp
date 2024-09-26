@@ -73,7 +73,7 @@ void AHJS_BattlePlayer::BeginPlay()
 	AINetComp->Me = this;
 	if (HasAuthority())
 	{
-		GetWorldTimerManager().SetTimer(JoinTimerHandle, this, &AHJS_BattlePlayer::LoginSignal, 0.05f, false);
+		GetWorldTimerManager().SetTimer(JoinTimerHandle, this, &AHJS_BattlePlayer::LoginSignal, 1.f, true);
 	}
 	AudioCapture->OnAudioEnvelopeValue.AddDynamic(this,&AHJS_BattlePlayer::OnChangeEnvValue);
 	RecordUIComp->SetVisibility(false);
@@ -215,7 +215,14 @@ void AHJS_BattlePlayer::ServerSetShowRecordComp_Implementation(bool Value)
 
 void AHJS_BattlePlayer::ServerSetMesh_Implementation(int32 MeshIndex)
 {
-	MyMeshIndex = MeshIndex;
+	if (MeshIndex == -1)
+	{
+		MyMeshIndex = 0;
+	}
+	else
+	{
+		MyMeshIndex = MeshIndex;
+	}
 	MulticastSetMesh(MyMeshIndex);
 }
 
@@ -270,6 +277,9 @@ void AHJS_BattlePlayer::LoginSignal_Implementation()
 	{
 		return;
 	}
+
+	GetWorldTimerManager().ClearTimer(JoinTimerHandle);
+
 	GM->JoinPlayer(PC);
 
 }
@@ -540,7 +550,7 @@ void AHJS_BattlePlayer::StopRecording_Implementation()
 		MyRecord = UAudioMixerBlueprintLibrary::StopRecordingOutput(GetWorld(), EAudioRecordingExportType::WavFile, RecordFileName, RecordFilePath, RecordSound);
 		// AI 서버에 보내는 함수
 		// USoundwave to binery
-		GetWorldTimerManager().SetTimer(AINetTimerHandle, this, &AHJS_BattlePlayer::AINetReq, 1.f, false);
+		GetWorldTimerManager().SetTimer(AINetTimerHandle, this, &AHJS_BattlePlayer::AINetReq, 1.f, true);
 		check(MainUI);
 		MainUI->LineText = TEXT("판독중이니 잠시만 기다려주시게.");
 		MainUI->SetTalkCanvasVisiblity(false);

@@ -189,6 +189,8 @@ public:
 
 	UFUNCTION(Client, Reliable)
 	void ClientExitRoom();
+
+	FTimerHandle AINetTimerHandle;
 private:
 
 	bool bIsRecording = false;
@@ -277,8 +279,6 @@ private:
 
 	UPROPERTY()
 	class AHJS_BattleGameMode* GM;
-
-	FTimerHandle AINetTimerHandle;
 	
 	UFUNCTION()
 	void AINetReq();
