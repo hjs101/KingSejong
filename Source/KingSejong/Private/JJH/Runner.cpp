@@ -66,6 +66,20 @@ void ARunner::BeginPlay()
 	//		UpdateMesh();
 	//	}
 	//}
+	UJJH_GameInstance* GI = Cast<UJJH_GameInstance>(GetGameInstance());
+	if (GI)
+	{
+		if (IsLocallyControlled())
+		{
+			ServerChangeMesh(GI->CharacterMeshIndex);
+			UE_LOG(LogTemp, Warning, TEXT("%d"), GI->CharacterMeshIndex);
+		}
+		else
+		{ 
+			GetMesh()->SetSkeletalMesh(GI->CharacterList[ControllerMeshIndex]);
+			UE_LOG(LogTemp, Warning, TEXT("%d"), ControllerMeshIndex);
+		}
+	}
 }
 
 // Called every frame
@@ -208,6 +222,22 @@ void ARunner::MulticastTeleportForward_Implementation(float Speed, float InputVa
 	FVector Direction = FRotationMatrix(GetControlRotation()).GetScaledAxis(EAxis::X);
 	SetActorLocation(GetActorLocation() + Direction * Speed);
 }
+
+void ARunner::ServerChangeMesh_Implementation(int32 Index)
+{
+	ControllerMeshIndex = Index;
+	MultiCastChangeMesh(ControllerMeshIndex);
+}
+
+void ARunner::MultiCastChangeMesh_Implementation(int32 Index)
+{
+	UJJH_GameInstance* GI = Cast<UJJH_GameInstance>(GetGameInstance());
+	if (GI)
+	{
+		GetMesh()->SetSkeletalMesh(GI->CharacterList[Index]);
+	}
+}
+
 //
 //void ARunner::OnRep_RunnerMeshIndex()
 //{
@@ -224,38 +254,9 @@ void ARunner::MulticastTeleportForward_Implementation(float Speed, float InputVa
 //{
 //	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 //	DOREPLIFETIME(ARunner, RunnerMeshIndex);
-//}
-void ARunner::OnRep_RunnerMeshIndex()
-{
-	UpdateMesh();
-}
-
-void ARunner::UpdateMesh()
-{
-	UJJH_GameInstance* GI = Cast<UJJH_GameInstance>(GetGameInstance());
-	if (GI)
-	{
-		GetMesh()->SetSkeletalMesh(GI->CharacterList[RunnerMeshIndex]);
-		UE_LOG(LogTemp, Warning, TEXT("Runner index: %d"), RunnerMeshIndex);
-	}
-}
-
-void ARunner::OnRep_MeshIndex()
-{
-	UJJH_GameInstance* GI = Cast<UJJH_GameInstance>(GetWorld()->GetGameInstance());
-	if (GI)
-	{
-		int32* MeshIndex = GI->PlayerMeshMap.Find(PlayerUniqueID);
-		if (MeshIndex && GI->CharacterList.IsValidIndex(*MeshIndex))
-		{
-			GetMesh()->SetSkeletalMesh(GI->CharacterList[*MeshIndex]);
-		}
-	}
-}
 
 void ARunner::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	DOREPLIFETIME(ARunner, ControllerMeshIndex);
-	DOREPLIFETIME(ARunner, PlayerUniqueID);
 }

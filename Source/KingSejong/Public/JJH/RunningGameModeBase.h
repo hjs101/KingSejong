@@ -86,6 +86,7 @@ public:
 	void CheckAnswer(const FString& UserAnswer, ARunnerController* AnsweringPlayer);
 
 
+	void EndGame();
 	void EndGameAndReturnToLobby(ARunnerController* WinningPlayer);
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastShowTeachSpeak(bool bIsCorrect);

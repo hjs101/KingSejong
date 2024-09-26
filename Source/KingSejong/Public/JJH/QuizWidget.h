@@ -21,6 +21,9 @@ public:
 	//카운트다운 끝나면 결승선 통과한 사람들만 정답 입력칸 뜨기
 	//통과 못했으면 실패위젯 띄우기
 	UPROPERTY(meta = (BindWidget))
+	class UOverlay* CountDownOverlay;
+
+	UPROPERTY(meta = (BindWidget))
 	class UTextBlock* Initials;
 	
 	UPROPERTY(meta = (BindWidget))
@@ -50,6 +53,12 @@ public:
 	UPROPERTY(meta = (BindWidget))
 	class UImage* Teacher;	
 	
+	UPROPERTY(meta = (BindWidget))
+	class UImage* ScrollImage;
+	
+	UPROPERTY(meta = (BindWidget))
+	class UImage* WhiteImage;
+
 	UPROPERTY(meta = (BindWidget))
 	class UHorizontalBox* AnswerHorizontal;
 
@@ -108,7 +117,5 @@ public:
 	void OnQuitButtonClicked();
 	UPROPERTY(meta = (BindWidget))
 	class UButton* QuitButton;		
-	
-	UPROPERTY(meta = (BindWidget))
-	class UButton* RestartButton;
+
 };

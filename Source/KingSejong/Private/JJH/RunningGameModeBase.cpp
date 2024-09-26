@@ -150,8 +150,12 @@ void ARunningGameModeBase::SubmitAnswer()
 		for (ARunnerController* player : Players)
 		{
 			//위젯 스위쳐나 생성함수
-			player->ClientSwitchToEndWidget();
-		
+			//player->ClientSwitchToEndWidget();
+			UJJH_GameInstance* gi = Cast<UJJH_GameInstance>(GetWorld()->GetGameInstance());
+			if (gi)
+			{
+				gi->ExitSession();
+			}
 		}
 		return;
 	}
@@ -169,6 +173,7 @@ void ARunningGameModeBase::SubmitAnswer()
 			OtherController->ClientShowInitials();
 		}	
 	}
+	//모든플레이어가 답을 틀리거나 정답자가 나오면 exitsession 호출해야함
 }
 
 void ARunningGameModeBase::MoveToNextPlayer()
@@ -209,7 +214,8 @@ void ARunningGameModeBase::CheckAnswer(const FString& UserAnswer , ARunnerContro
 	if ( UserAnswer.Equals(CorrectAnswer) )
 	{
 		MulticastShowTeachSpeak(true);
-
+		FTimerHandle EndGameTimerHandle;
+		GetWorld()->GetTimerManager().SetTimer(EndGameTimerHandle, this, &ARunningGameModeBase::EndGame, 2.0f, false);
 	}
 	else
 	{
@@ -218,7 +224,13 @@ void ARunningGameModeBase::CheckAnswer(const FString& UserAnswer , ARunnerContro
 		GetWorld()->GetTimerManager().SetTimer(MovePlayerTimerHandle, this, &ARunningGameModeBase::MoveToNextPlayer, 2.0f, false);
 	}
 }
-
+void ARunningGameModeBase::EndGame()
+{
+	for (ARunnerController* player : Players)
+	{
+		player->ClientEndGame();
+	}
+}
 void ARunningGameModeBase::MulticastShowTeachSpeak_Implementation(bool bIsCorrect)
 {
 	for (ARunnerController* PlayerController : Players)

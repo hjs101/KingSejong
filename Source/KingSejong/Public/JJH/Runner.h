@@ -79,21 +79,15 @@ public:
 	void MulticastTeleportForward(float Speed, float InputValue);
 	void MulticastTeleportForward_Implementation(float Speed, float InputValue);
 
-	UPROPERTY(ReplicatedUsing = OnRep_RunnerMeshIndex)
-	int32 RunnerMeshIndex;
-
-	UFUNCTION()
-	void OnRep_RunnerMeshIndex();
-
-	void UpdateMesh();
-
-
-	UPROPERTY(Replicated)
-	FString PlayerUniqueID;
 
 	UPROPERTY(Replicated)
 	int32 ControllerMeshIndex;
+
+	UFUNCTION(Server, Reliable)
+	void ServerChangeMesh(int32 Index);
 	
-	UFUNCTION()
-	void OnRep_MeshIndex();
+	UFUNCTION(NetMulticast, Reliable)
+	void MultiCastChangeMesh(int32 Index);
+
+
 };

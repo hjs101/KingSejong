@@ -6,6 +6,7 @@
 #include "Components/Button.h"
 #include "Components/CanvasPanel.h"
 #include "Components/HorizontalBox.h"
+#include "Components/Overlay.h"
 #include "Components/WidgetSwitcher.h"
 #include "Components/Image.h"
 #include "Engine/Texture2D.h"
@@ -27,10 +28,11 @@ void UQuizWidget::InitializeQuiz(const FWordsData& WordData)
 	Quiz->SetVisibility(ESlateVisibility::Hidden);
 
 	//3초후에 초성 보여주기 -> 후에 바꿔야함
-	GetWorld()->GetTimerManager().SetTimer(ShowInitialTimerHandle, this, &UQuizWidget::ShowInitials, 3.f, false);
+	GetWorld()->GetTimerManager().SetTimer(ShowInitialTimerHandle, this, &UQuizWidget::ShowInitials, 2.f, false);
 
-	//카운트다운 넘버 숨겨놓기
+	//카운트다운 넘버 설정
 	CountDownText->SetText(FText::FromString(FString::FromInt(CountDownNum)));
+	CountDownOverlay->SetVisibility(ESlateVisibility::Hidden);
 
 	//웃는 훈장
 	FString AssetPath = TEXT("/Game/JJH/UI/SmileTeacher");
@@ -55,6 +57,9 @@ void UQuizWidget::ShowInitials()
 	//뜻 보여주기
 	Meaning->SetText(FText::FromString(CurrentWordData.Meaning));
 	Meaning->SetVisibility(ESlateVisibility::Visible);
+	//두루마리 보여주기
+	WhiteImage->SetVisibility(ESlateVisibility::Visible);
+	ScrollImage->SetVisibility(ESlateVisibility::Visible);
 
 	GetWorld()->GetTimerManager().ClearTimer(ShowInitialTimerHandle);
 
@@ -67,7 +72,11 @@ void UQuizWidget::ShowAnswerTextBox()
 	AnswerHorizontal->SetVisibility(ESlateVisibility::Visible);
 	Meaning->SetVisibility(ESlateVisibility::Visible);
 	Initials->SetVisibility(ESlateVisibility::Visible);
+	//두루마리 보여주기
+	WhiteImage->SetVisibility(ESlateVisibility::Visible);
+	ScrollImage->SetVisibility(ESlateVisibility::Visible);
 }
+
 void  UQuizWidget::HideLoading()
 {
 	QuizLoading->SetVisibility(ESlateVisibility::Hidden);
@@ -81,6 +90,7 @@ void UQuizWidget::StartCountDown()
 {
 	// 타이머 시작
 	GetWorld()->GetTimerManager().SetTimer(CountDownTimerHandle, this, &UQuizWidget::UpdateCountDown, 1.0f, true);
+	CountDownOverlay->SetVisibility(ESlateVisibility::Visible);
 	CountDownText->SetVisibility(ESlateVisibility::Visible);
 }
 
@@ -103,6 +113,8 @@ void UQuizWidget::UpdateCountDown()
 		CountDownText->SetText(FText::FromString(TEXT("종료")));
 		Meaning->SetVisibility(ESlateVisibility::Hidden);
 		Initials->SetVisibility(ESlateVisibility::Hidden);
+		WhiteImage->SetVisibility(ESlateVisibility::Hidden);
+		ScrollImage->SetVisibility(ESlateVisibility::Hidden);
 	}
 }
 
@@ -124,7 +136,6 @@ void UQuizWidget::NativeConstruct()
 	//게임모드는 그거 받아오면 컨트롤러 일렬 불러서 UpdateTextBoxContent부르기.
 
 	QuitButton->OnClicked.AddDynamic(this, &UQuizWidget::OnQuitButtonClicked);
-	RestartButton->OnClicked.AddDynamic(this, &UQuizWidget::OnRestartButtonClicked);
 }
 
 void UQuizWidget::SubmitAnswer()
@@ -197,6 +208,7 @@ void UQuizWidget::ShowTeacherSpeak(bool bIsCorrect)
 	{
 		//Teacher->SetBrushFromTexture(SmileTeacher);
 		TeacherText->SetText(FText::FromString(TEXT("대단하구나!")));
+
 	}
 	else
 	{
@@ -212,6 +224,7 @@ void UQuizWidget::ShowTeacherSpeak(bool bIsCorrect)
 void UQuizWidget::HideTeacherSpeak()
 {
 	TeacherSpeak->SetVisibility(ESlateVisibility::Hidden);
+
 }
 
 void UQuizWidget::HideAnswerText()
