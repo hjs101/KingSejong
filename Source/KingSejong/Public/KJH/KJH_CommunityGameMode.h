@@ -27,7 +27,7 @@ public:
 	TArray<class AKJH_PlayerController*> PlayerControllers;
 
 	UPROPERTY(BlueprintReadWrite)
-	ECommunityMode CommunityMode;
+	ECommunityMode CommunityMode = ECommunityMode::Community;
 
 public:
 	UFUNCTION(BlueprintCallable)

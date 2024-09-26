@@ -30,9 +30,6 @@ public:
 
 	UPROPERTY(EditDefaultsOnly)
 	class USoundBase* SFX_Fail;
-	
-	UPROPERTY(EditDefaultsOnly)
-	class USoundBase* SFX_BGM;
 
 	UPROPERTY(EditDefaultsOnly)
 	class USoundBase* SFX_Tick;

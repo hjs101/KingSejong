@@ -8,6 +8,7 @@
 #include "Blueprint/UserWidget.h"
 #include "KJH/KJH_InteractiveActor.h"
 #include "KJH/KJH_PlayerController.h"
+#include "Kismet/GameplayStatics.h"
 
 
 // Sets default values for this component's properties
@@ -94,6 +95,8 @@ void UKJH_PlayerInteraction::OnActionInteraction(const FInputActionValue& value)
 	// HitActor 상호작용
 	if(HitActor == nullptr) return;
 	if(HitActor->IsInteractable() == false) return;
+
+	UGameplayStatics::PlaySound2D(GetWorld(), SFX_Interaction);
 
 	ServerRPC_InteractiveActor(HitActor, MyPlayerController);
 

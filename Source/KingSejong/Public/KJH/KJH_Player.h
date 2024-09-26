@@ -50,6 +50,10 @@ public:
 	bool bIsMove;
 
 private:
+
+	UPROPERTY()
+	class AKJH_CommunityGameMode* MyGameMode;
+
 	UPROPERTY(EditDefaultsOnly)
 	class USpringArmComponent* SpringArmComp;
 
@@ -74,16 +78,20 @@ private:
 	class UKJH_VoiceRecorder* VoiceRecorderComp;
 	
 	// Audio
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category = Sound)
 	class UAudioComponent* MoveAudioComp;
-	UPROPERTY(EditDefaultsOnly)
-	class USoundBase* SFX_Move;
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category = Sound)
+	class USoundBase* SFX_Move_Wood;
+	UPROPERTY(EditDefaultsOnly, Category = Sound)
+	class USoundBase* SFX_Move_Dirt;
+	UPROPERTY(EditDefaultsOnly, Category = Sound)
 	class USoundBase* SFX_Jump;
+	UPROPERTY(EditDefaultsOnly, Category = Sound)
+	class USoundAttenuation* SA_Player;
+
 
 private:
 	void OnActionMove(const FInputActionValue& value);
-	void OnActionMoveStart(const FInputActionValue& value);
 	void OnActionMoveStop(const FInputActionValue& value);
 	void OnActionLook(const FInputActionValue& value);
 	void OnActionJump(const FInputActionValue& value);
@@ -98,10 +106,19 @@ public:
 
 	void SetPlayerPosition(FTransform TargetTransform);
 
-
+	// Move Sound 동기화
 	UFUNCTION(Server, Unreliable)
 	void ServerRPC_TogglePlayMoveSound(bool bValue);
 
 	UFUNCTION(NetMulticast, Unreliable)
-	void MulticastRPC_TogglePlayMoveSound(bool bValue);
+	void MulticastRPC_TogglePlayMoveSound(bool bValue, class USoundBase* Sound);
+	
+	
+	// Jump Sound 동기화
+	UFUNCTION(Server, Unreliable)
+	void ServerRPC_PlayJumpSound();
+
+	UFUNCTION(NetMulticast, Unreliable)
+	void MulticastRPC_PlayJumpSound();
+
 };

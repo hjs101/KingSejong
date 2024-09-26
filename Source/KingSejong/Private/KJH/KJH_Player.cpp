@@ -15,7 +15,8 @@
 #include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
 #include "Components/AudioComponent.h"
-
+#include "Kismet/GameplayStatics.h"
+#include "KJH/KJH_CommunityGameMode.h"
 
 // Sets default values
 AKJH_Player::AKJH_Player()
@@ -61,6 +62,12 @@ void AKJH_Player::BeginPlay()
 
 	// Animation
 	PlayerAnim = CastChecked<UKJH_PlayerAnimInstance>(GetMesh()->GetAnimInstance());
+	
+	// GameMode
+	if (HasAuthority())
+	{
+		MyGameMode = Cast<AKJH_CommunityGameMode>(GetWorld()->GetAuthGameMode());
+	}
 
 }
 
@@ -81,7 +88,6 @@ void AKJH_Player::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 	{
 		// Move
 		input->BindAction(IA_Move, ETriggerEvent::Triggered, this, &AKJH_Player::OnActionMove);
-        //input->BindAction(IA_Move, ETriggerEvent::Started, this, &AKJH_Player::OnActionMoveStart);
         input->BindAction(IA_Move, ETriggerEvent::Completed, this, &AKJH_Player::OnActionMoveStop);
 
 		// Lock
@@ -120,7 +126,7 @@ void AKJH_Player::OnActionMove(const FInputActionValue& value)
 	AddMovementInput(RightDirection, v.X);
 
 
-	if (MoveAudioComp->IsPlaying() == false)
+	if (MoveAudioComp->IsPlaying() == false || GetCharacterMovement()->IsFalling())
 	{
 		ServerRPC_TogglePlayMoveSound(true);
 		// bIsMove = true;
@@ -128,22 +134,10 @@ void AKJH_Player::OnActionMove(const FInputActionValue& value)
 
 }
 
-void AKJH_Player::OnActionMoveStart(const FInputActionValue& value)
-{
-	if (bIsSit || MoveAudioComp->IsPlaying()) return;
-
-	MoveAudioComp->SetSound(SFX_Move);
-	MoveAudioComp->Play();
-
-	// bIsMove = true;
-}
 
 void AKJH_Player::OnActionMoveStop(const FInputActionValue& value)
 {
 	//if (bIsSit) return;
-
-	MoveAudioComp->Stop();
-
 
 	ServerRPC_TogglePlayMoveSound(false);
 
@@ -162,7 +156,8 @@ void AKJH_Player::OnActionJump(const FInputActionValue& value)
 {
 	Jump();
 
-	MoveAudioComp->Stop();
+	ServerRPC_TogglePlayMoveSound(false);
+	ServerRPC_PlayJumpSound();
 
 	if ( OnEndSitDelegate.IsBound() )
 	{
@@ -211,24 +206,35 @@ void AKJH_Player::SetPlayerPosition(FTransform TargetTransform)
 
 void AKJH_Player::ServerRPC_TogglePlayMoveSound_Implementation(bool bValue)
 {
-	//MoveAudioComp->SetSound(SFX_Move);
-	//MoveAudioComp->Play();
+	if(MyGameMode == nullptr) return;
 
-	MulticastRPC_TogglePlayMoveSound(bValue);
+    USoundBase* footSound = MyGameMode->CommunityMode == ECommunityMode::Community ? SFX_Move_Wood : SFX_Move_Dirt;
+
+
+    MulticastRPC_TogglePlayMoveSound(bValue, footSound);
 }
 
-void AKJH_Player::MulticastRPC_TogglePlayMoveSound_Implementation(bool bValue)
+void AKJH_Player::MulticastRPC_TogglePlayMoveSound_Implementation(bool bValue, class USoundBase* Sound)
 {
-
-	//if(IsLocallyControlled()) return;
-
 	if (bValue)
 	{
-		MoveAudioComp->SetSound(SFX_Move);
+		MoveAudioComp->SetSound(Sound);
 		MoveAudioComp->Play();
 	}
 	else
 	{
+
 		MoveAudioComp->Stop();
 	}
+}
+
+void AKJH_Player::ServerRPC_PlayJumpSound_Implementation()
+{
+	MulticastRPC_PlayJumpSound();
+
+}
+
+void AKJH_Player::MulticastRPC_PlayJumpSound_Implementation()
+{
+	UGameplayStatics::PlaySoundAtLocation(GetWorld(), SFX_Jump, GetActorLocation(), 1, 1, 0, SA_Player);
 }
