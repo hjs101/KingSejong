@@ -6,6 +6,7 @@
 #include "Components/Button.h"
 #include "Components/CanvasPanel.h"
 #include "Components/HorizontalBox.h"
+#include "Components/WidgetSwitcher.h"
 #include "Components/Image.h"
 #include "Engine/Texture2D.h"
 #include "Kismet/KismetSystemLibrary.h"
@@ -14,8 +15,7 @@
 #include "Slate/SlateBrushAsset.h"
 #include "JJH/RunnerController.h"
 #include "JJH/RunningGameModeBase.h"
-
-
+#include "JJH/JJH_GameInstance.h"
 
 void UQuizWidget::InitializeQuiz(const FWordsData& WordData)
 {
@@ -122,6 +122,9 @@ void UQuizWidget::NativeConstruct()
 	AnswerTextBox->OnTextChanged.AddDynamic(this, &UQuizWidget::OnAnswerTextChanged);
 	//입력받을때마다 컨트롤러 불러서 입력한 텍스트 받아와서 게임모드 전달하기?
 	//게임모드는 그거 받아오면 컨트롤러 일렬 불러서 UpdateTextBoxContent부르기.
+
+	QuitButton->OnClicked.AddDynamic(this, &UQuizWidget::OnQuitButtonClicked);
+	RestartButton->OnClicked.AddDynamic(this, &UQuizWidget::OnRestartButtonClicked);
 }
 
 void UQuizWidget::SubmitAnswer()
@@ -214,4 +217,22 @@ void UQuizWidget::HideTeacherSpeak()
 void UQuizWidget::HideAnswerText()
 {
 	AnswerHorizontal->SetVisibility(ESlateVisibility::Hidden);
+}
+
+void UQuizWidget::SwitchToEnd()
+{
+	QuizLoadingSwitcher->SetActiveWidgetIndex(1);
+}
+
+void UQuizWidget::OnQuitButtonClicked()
+{
+	UJJH_GameInstance* gi = Cast<UJJH_GameInstance>(GetWorld()->GetGameInstance());
+	if (gi)
+	{
+		gi->ExitSession();
+	}
+}
+void UQuizWidget::OnRestartButtonClicked()
+{
+
 }

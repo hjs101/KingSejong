@@ -8,7 +8,7 @@
 #include "HJS/HJS_BattlePlayer.h"
 #include "HJS/BattleQuestionStruct.h"
 #include "HJS/BattleResultWidget.h"
-
+#include "Components/CanvasPanel.h"
 void UMainUI::NativeConstruct()
 {
 	Super::NativeConstruct();
@@ -29,6 +29,25 @@ void UMainUI::NativeConstruct()
 	Answer2 = TEXT("가가가");
 	Answer3 = TEXT("가가가");
 	Answer4 = TEXT("가가가");
+
+	SetTalkCanvasVisiblity(false);
+}
+
+void UMainUI::SetInitHP(int32 MaxHP)
+{
+	SetHP(0,MaxHP);
+	SetHP(1,MaxHP);
+}
+
+void UMainUI::SetTalkCanvasVisiblity(bool Value)
+{
+	if (Value)
+	{
+		TalkCanvas->SetVisibility(ESlateVisibility::Visible);
+	}else
+	{
+		TalkCanvas->SetVisibility(ESlateVisibility::Hidden);
+	}
 }
 
 void UMainUI::SetHP(int32 PlayerNum , int32 CurrentHP)

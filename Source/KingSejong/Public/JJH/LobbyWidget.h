@@ -24,8 +24,8 @@ public:
 	class UButton* Host;
 
 	UPROPERTY(meta = (BindWidget))
-	class UButton* Join;		
-	
+	class UButton* Join;
+
 	UPROPERTY(meta = (BindWidget))
 	class UButton* FindButton;
 

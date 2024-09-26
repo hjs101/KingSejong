@@ -90,7 +90,7 @@ void UGoogleNet::FileUploadToFirebase(const FString& FilePath, const FString& Fi
 			}
 			else
 			{
-				UE_LOG(LogTemp , Error , TEXT("File upload failed: %s") , *Response->GetContentAsString());
+				UE_LOG(LogTemp , Error , TEXT("File upload failed !!!"));
 			}
 		});
 
@@ -106,7 +106,7 @@ void UGoogleNet::FileDownloadFromFirebase(const FString& SavePath, const FString
     HttpRequest->SetVerb("GET");
 
     // HTTP 응답 처리
-    HttpRequest->OnProcessRequestComplete().BindLambda([SavePath, this](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful)
+    HttpRequest->OnProcessRequestComplete().BindLambda([SavePath, FileName, this](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful)
         {
             if (bWasSuccessful && Response->GetResponseCode() == 200)
             {
@@ -115,7 +115,7 @@ void UGoogleNet::FileDownloadFromFirebase(const FString& SavePath, const FString
                 {
                     UE_LOG(LogTemp, Log, TEXT("File downloaded successfully"));
                     AHJS_BattlePlayer* You = Cast<AHJS_BattlePlayer>(Me->GetWorld()->GetFirstPlayerController()->GetCharacter());
-                    You->ClientPlaySound(SavePath);
+                    You->ClientPlaySound(FileName);
                     You->PlayResultAnim();
                 }
                 else
