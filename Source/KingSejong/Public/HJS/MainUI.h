@@ -36,11 +36,18 @@ public:
 	UPROPERTY(meta=(BindWidget))
 	class UImage* Player2_HP3;
 
+	void SetInitHP(int32 MaxHP);
+
 	UPROPERTY(meta=(BindWidget))
 	class UTextBlock* Speech;
 
 	UPROPERTY(meta=(BindWidget))
 	class UImage* Teacher;
+
+	UPROPERTY(meta=(BindWidget))
+	class UCanvasPanel* TalkCanvas;
+
+	void SetTalkCanvasVisiblity(bool Value);
 
 	UPROPERTY(meta=(BindWidget))
 	class UBorder* OptionCanvas;
@@ -110,8 +117,8 @@ public:
 	FString CurrentText;
 
 	UPROPERTY(EditAnywhere)
-	float TextSpeed = 0.02f;
-	float NextTextStartRate = 0.5f;
+	float TextSpeed = 0.1f;
+	float NextTextStartRate = 1.f;
 	FTimerHandle TextAnimTimerHandle;
 	FTimerHandle NextTextTimerHandle;
 	int32 CurrentNum = -1;

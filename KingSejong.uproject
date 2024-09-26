@@ -12,7 +12,8 @@
 				"AudioCapture",
 				"Engine",
 				"UMG",
-				"CoreUObject"
+				"CoreUObject",
+				"AlembicLibrary"
 			]
 		}
 	],

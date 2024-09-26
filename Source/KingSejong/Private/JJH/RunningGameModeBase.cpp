@@ -15,7 +15,7 @@ void ARunningGameModeBase::BeginPlay()
 {
 	Super::BeginPlay();
 
-	bUseSeamlessTravel = true;
+	//bUseSeamlessTravel = true;
 
 	//FTimerHandle QuizTimer;
 	////3초이따 퀴즈띄우기
@@ -144,7 +144,17 @@ void ARunningGameModeBase::AbleInput()
 }
 void ARunningGameModeBase::SubmitAnswer()
 {
-	if(PlayerFinishOrder.IsEmpty()) return;
+	//아무도 없으면 종료 위젯 생성하기;
+	if (PlayerFinishOrder.IsEmpty())
+	{
+		for (ARunnerController* player : Players)
+		{
+			//위젯 스위쳐나 생성함수
+			player->ClientSwitchToEndWidget();
+		
+		}
+		return;
+	}
 	//첫번째 플레이어가 정답입력 찬스 가져감
 	ARunnerController* CurrentController = *PlayerFinishOrder.begin();
 	if ( CurrentController )
@@ -252,6 +262,8 @@ void ARunningGameModeBase::EndGameAndReturnToLobby(ARunnerController* WinningPla
 void ARunningGameModeBase::PostLogin(APlayerController* NewPlayer)
 {
 	Super::PostLogin(NewPlayer);
+
+	UE_LOG(LogTemp, Warning, TEXT("!@#$123"));
 
 	ARunner* rn = Cast<ARunner> (NewPlayer);
 	if (rn)
