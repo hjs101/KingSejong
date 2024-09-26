@@ -149,7 +149,7 @@ public:
 	void OnMyTakeDamage(int32 Damage);
 
 	UPROPERTY()
-	int32 MaxHP = 3;
+	int32 MaxHP = 2;
 
 	UPROPERTY()
 	int32 HP = MaxHP;
@@ -211,6 +211,15 @@ private:
 	class UNiagaraComponent* ChargingRightHandComp;
 	UPROPERTY(EditAnywhere, Category="VFX")
 	class UNiagaraComponent* ChargingLeftHandComp;
+
+	UPROPERTY(EditAnywhere, Category="UI", BlueprintReadWrite, meta=(AllowPrivateAccess))
+	class UWidgetComponent* RecordUIComp;
+	
+	UFUNCTION()
+	void OnChangeEnvValue(float Value);
+
+	UFUNCTION(Server, Unreliable)
+	void ServerSetShowRecordComp(bool Value);
 
 	FTimerHandle RecordHandle;
 
