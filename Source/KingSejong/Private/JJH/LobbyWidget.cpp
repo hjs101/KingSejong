@@ -11,6 +11,8 @@
 #include "Components/ScrollBox.h"
 #include "JJH/JJH_GameInstance.h"
 #include "JJH/SessionSlotWidget.h"
+#include "Components/CanvasPanel.h"
+#include "Components/Image.h"
 
 void ULobbyWidget::NativeConstruct()
 {
@@ -37,6 +39,8 @@ void ULobbyWidget::NativeConstruct()
 
 	QuitButton->OnClicked.AddDynamic(this, &ULobbyWidget::OnQuitButtonClicked);
 	QuitButton_1->OnClicked.AddDynamic(this, &ULobbyWidget::OnQuitButtonClicked);
+	DescButton->OnClicked.AddDynamic(this, &ULobbyWidget::OnDescButtonClicked);
+	DescExitButton->OnClicked.AddDynamic(this, &ULobbyWidget::OnDescExitButtonClicked);
 }
 
 void ULobbyWidget::OnQuitButtonClicked()
@@ -54,6 +58,16 @@ void ULobbyWidget::OnQuitButtonClicked()
 void ULobbyWidget::SetMenuInterface(ILobbyInterface* LobbyInterface)
 {
 	this->WidgetLobbyInterface = LobbyInterface;
+}
+
+void ULobbyWidget::OnDescButtonClicked()
+{
+	DescPanel->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+}
+
+void ULobbyWidget::OnDescExitButtonClicked()
+{
+	DescPanel->SetVisibility(ESlateVisibility::Hidden);
 }
 
 void ULobbyWidget::OnRunCheckBoxChecked(bool bIsChecked)
@@ -174,10 +188,20 @@ void ULobbyWidget::OnFindButtonClicked()
 void ULobbyWidget::SetTextAndCategory(const FString& Text, const FString& Category)
 {
 	BattleTypeText->SetText(FText::FromString(Text));
+	BattleTypeText2->SetText(FText::FromString(Text));
 	WidgetCategory = Category;
 	if (Category == "Battle")
 	{
 		PlayerCountSlider->SetMaxValue(2);
+		DescImg->SetBrushFromTexture(BattleTexture);
+	}
+	else if (Category == "Run")
+	{
+		DescImg->SetBrushFromTexture(RunningTexture);
+	}
+	else if(Category == "Talk")
+	{
+		DescImg->SetBrushFromTexture(TalkTexture);
 	}
 	APlayerController* PC = GetOwningPlayer();
 	if (PC)

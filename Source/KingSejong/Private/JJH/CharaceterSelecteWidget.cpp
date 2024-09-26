@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 #include "JJH/JJH_GameInstance.h"
 #include "JJH/JJHPlayerState.h"
+#include "GameFramework/SpringArmComponent.h"
 
 void UCharaceterSelecteWidget::NativeConstruct()
 {
@@ -15,7 +16,7 @@ void UCharaceterSelecteWidget::NativeConstruct()
 
 	AController* Player = GetOwningPlayer();
 	Char = Player->GetCharacter();
-	
+	PlayAnimation(ChooseCharacterAnim);
 }
 
 void UCharaceterSelecteWidget::SelecteButtonClicked()
@@ -26,6 +27,20 @@ void UCharaceterSelecteWidget::SelecteButtonClicked()
 	//PS->SelectedMeshIndex = index;
 	UJJH_GameInstance* GI = Cast<UJJH_GameInstance>(GetWorld()->GetGameInstance());
 	GI->CharacterMeshIndex = index;
+
+	SetVisibility(ESlateVisibility::Hidden);
+
+	auto* PC = GetWorld()->GetFirstPlayerController();
+	PC->SetShowMouseCursor(false);
+	PC->SetInputMode(FInputModeGameOnly());
+	Cast<USpringArmComponent>(Char->GetComponentsByTag(USpringArmComponent::StaticClass(),FName(TEXT("PlayerCamera")))[0])->bUsePawnControlRotation = true;
+
+	UUserWidget* LobbyMain = CreateWidget<UUserWidget>(GetWorld(),LobbyMainFactory);
+	if (LobbyMain)
+	{
+		LobbyMain->AddToViewport();
+	}
+
 }
 
 void UCharaceterSelecteWidget::NextButtonClicked()

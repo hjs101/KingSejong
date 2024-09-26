@@ -10,6 +10,9 @@ UCLASS()
 class KINGSEJONG_API AKJH_PlayerController : public APlayerController
 {
 	GENERATED_BODY()
+public:
+	// Sets default values for this actor's properties
+	AKJH_PlayerController();
 
 public:
 	UPROPERTY(EditDefaultsOnly)
@@ -17,6 +20,31 @@ public:
 
 	UPROPERTY()
 	class UKJH_OXQuizWidget* QuizWidget;
+
+	UPROPERTY(EditDefaultsOnly)
+	class UKJH_QuizSoundHandler* SoundHandler;
+
+public:
+	UPROPERTY(EditDefaultsOnly)
+	class USoundBase* SFX_Correct;
+
+	UPROPERTY(EditDefaultsOnly)
+	class USoundBase* SFX_Fail;
+
+	UPROPERTY(EditDefaultsOnly)
+	class USoundBase* SFX_Tick;
+
+	UPROPERTY(EditDefaultsOnly)
+	class USoundBase* SFX_Buzzer;
+
+	UPROPERTY(EditDefaultsOnly)
+	class USoundBase* SFX_Notification;
+
+	UPROPERTY(EditDefaultsOnly)
+	class USoundBase* SFX_Bright;
+
+	UPROPERTY(EditDefaultsOnly)
+	class UAudioComponent* AudioComp;
 
 public:
 
@@ -35,7 +63,8 @@ public:
 	UFUNCTION(Client, Reliable)
 	void ClientRPC_EndQuiz();
 
-
 private:
 	bool IsValidQuizWidget();
+
+	void PlayQuizSound(USoundBase* Sound);
 };

@@ -97,6 +97,6 @@ void UKJH_VoiceRecorder::SendToChatbot()
 		FString filePath = UKJH_FileDataLib::GetSaveWavFilePath(SaveFileName);
 
 		// 파일 전송
-		HttpManager->Req_AskToChatbot(TEXT(""), filePath);
+		HttpManager->Req_AskToChatbot(filePath);
 	}
 }

@@ -2,20 +2,21 @@
 
 
 #include "KJH/KJH_Player.h"
+#include "KJH/KJH_PlayerInteraction.h"
+#include "KJH/KJH_PlayerAnimInstance.h"
+#include "KJH/KJH_VoiceRecorder.h"
+#include "KJH/API/KJH_HttpManager.h"
 #include "GameFramework/SpringArmComponent.h"
-#include "Camera/CameraComponent.h"
 #include "GameFramework/PlayerController.h"
+#include "GameFramework/CharacterMovementComponent.h"
+#include "Camera/CameraComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "EnhancedInputComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
-#include "KJH/KJH_PlayerInteraction.h"
-#include "KJH/KJH_PlayerAnimInstance.h"
-#include "KJH/KJH_VoiceRecorder.h"
-#include "KJH/KJH_CommunityGameModeBase.h"
-#include "KJH/API/KJH_HttpManager.h"
-#include "GameFramework/CharacterMovementComponent.h"
-
+#include "Components/AudioComponent.h"
+#include "Kismet/GameplayStatics.h"
+#include "KJH/KJH_CommunityGameMode.h"
 
 // Sets default values
 AKJH_Player::AKJH_Player()
@@ -39,6 +40,8 @@ AKJH_Player::AKJH_Player()
 	InteractionComp = CreateDefaultSubobject<UKJH_PlayerInteraction>(TEXT("InteractionComp"));
 	VoiceRecorderComp = CreateDefaultSubobject<UKJH_VoiceRecorder>(TEXT("VoiceRecorderComp"));
 
+	MoveAudioComp = CreateDefaultSubobject<UAudioComponent>(TEXT("AudioComp"));
+	MoveAudioComp->SetupAttachment(RootComponent);
 }
 
 // Called when the game starts or when spawned
@@ -59,9 +62,13 @@ void AKJH_Player::BeginPlay()
 
 	// Animation
 	PlayerAnim = CastChecked<UKJH_PlayerAnimInstance>(GetMesh()->GetAnimInstance());
+	
+	// GameMode
+	if (HasAuthority())
+	{
+		MyGameMode = Cast<AKJH_CommunityGameMode>(GetWorld()->GetAuthGameMode());
+	}
 
-	// HttpManager
-	//HttpManager = Cast<AKJH_HttpManager>(UGameplayStatics::GetActorOfClass(GetWorld(), AKJH_HttpManager::StaticClass()));
 }
 
 // Called every frame
@@ -79,10 +86,15 @@ void AKJH_Player::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 
 	if (input)
 	{
+		// Move
 		input->BindAction(IA_Move, ETriggerEvent::Triggered, this, &AKJH_Player::OnActionMove);
+        input->BindAction(IA_Move, ETriggerEvent::Completed, this, &AKJH_Player::OnActionMoveStop);
+
+		// Lock
 		input->BindAction(IA_Look, ETriggerEvent::Triggered, this, &AKJH_Player::OnActionLook);
+
+		// Jump
 		input->BindAction(IA_Jump, ETriggerEvent::Started, this, &AKJH_Player::OnActionJump);
-		// input->BindAction(IA_Interaction, ETriggerEvent::Started, this, &AKJH_Player::OnActionInteraction);
 	
 		OnInputBindingDelegate.Broadcast(input);
 
@@ -101,7 +113,7 @@ void AKJH_Player::OnActionMove(const FInputActionValue& value)
 {
 	// 앉아있는 상태라면 움직임 종료
 	if (bIsSit) return;
-		
+	
 	FVector2D v = value.Get<FVector2D>();
 
 	const FRotator Rotation = Controller->GetControlRotation();
@@ -112,6 +124,24 @@ void AKJH_Player::OnActionMove(const FInputActionValue& value)
 
 	AddMovementInput(ForwardDirection, v.Y);
 	AddMovementInput(RightDirection, v.X);
+
+
+	if (MoveAudioComp->IsPlaying() == false || GetCharacterMovement()->IsFalling())
+	{
+		ServerRPC_TogglePlayMoveSound(true);
+		// bIsMove = true;
+	}
+
+}
+
+
+void AKJH_Player::OnActionMoveStop(const FInputActionValue& value)
+{
+	//if (bIsSit) return;
+
+	ServerRPC_TogglePlayMoveSound(false);
+
+	//bIsMove = false;
 }
 
 void AKJH_Player::OnActionLook(const FInputActionValue& value)
@@ -126,7 +156,9 @@ void AKJH_Player::OnActionJump(const FInputActionValue& value)
 {
 	Jump();
 
-	UE_LOG(LogTemp, Warning, TEXT("Jump!!"));
+	ServerRPC_TogglePlayMoveSound(false);
+	ServerRPC_PlayJumpSound();
+
 	if ( OnEndSitDelegate.IsBound() )
 	{
 		OnEndSitDelegate.Broadcast();
@@ -170,4 +202,39 @@ void AKJH_Player::SetPlayerPosition(FTransform TargetTransform)
 	// UI도 다 닫혀야 함
 	SetActorLocationAndRotation(TargetTransform.GetLocation(), TargetTransform.GetRotation());
 
+}
+
+void AKJH_Player::ServerRPC_TogglePlayMoveSound_Implementation(bool bValue)
+{
+	if(MyGameMode == nullptr) return;
+
+    USoundBase* footSound = MyGameMode->CommunityMode == ECommunityMode::Community ? SFX_Move_Wood : SFX_Move_Dirt;
+
+
+    MulticastRPC_TogglePlayMoveSound(bValue, footSound);
+}
+
+void AKJH_Player::MulticastRPC_TogglePlayMoveSound_Implementation(bool bValue, class USoundBase* Sound)
+{
+	if (bValue)
+	{
+		MoveAudioComp->SetSound(Sound);
+		MoveAudioComp->Play();
+	}
+	else
+	{
+
+		MoveAudioComp->Stop();
+	}
+}
+
+void AKJH_Player::ServerRPC_PlayJumpSound_Implementation()
+{
+	MulticastRPC_PlayJumpSound();
+
+}
+
+void AKJH_Player::MulticastRPC_PlayJumpSound_Implementation()
+{
+	UGameplayStatics::PlaySoundAtLocation(GetWorld(), SFX_Jump, GetActorLocation(), 1, 1, 0, SA_Player);
 }
