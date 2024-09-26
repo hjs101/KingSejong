@@ -150,12 +150,7 @@ void ARunningGameModeBase::SubmitAnswer()
 		for (ARunnerController* player : Players)
 		{
 			//위젯 스위쳐나 생성함수
-			//player->ClientSwitchToEndWidget();
-			UJJH_GameInstance* gi = Cast<UJJH_GameInstance>(GetWorld()->GetGameInstance());
-			if (gi)
-			{
-				gi->ExitSession();
-			}
+			player->ClientSwitchToEndWidget();
 		}
 		return;
 	}
@@ -228,7 +223,8 @@ void ARunningGameModeBase::EndGame()
 {
 	for (ARunnerController* player : Players)
 	{
-		player->ClientEndGame();
+		//위젯 스위쳐나 생성함수
+		player->ClientSwitchToEndWidget();
 	}
 }
 void ARunningGameModeBase::MulticastShowTeachSpeak_Implementation(bool bIsCorrect)

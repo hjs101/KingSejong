@@ -111,11 +111,16 @@ public:
 
 	void SwitchToEnd();
 
+	void UpdateLobbyCountDown();
 	UFUNCTION()
 	void OnRestartButtonClicked();
 	UFUNCTION()
 	void OnQuitButtonClicked();
 	UPROPERTY(meta = (BindWidget))
 	class UButton* QuitButton;		
+	
+	UPROPERTY(meta = (BindWidget))
+	class UTextBlock* LobbyOutCount;
 
+	float LobbyCountDownNum = 5;
 };

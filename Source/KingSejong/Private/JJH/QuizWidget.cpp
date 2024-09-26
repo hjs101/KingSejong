@@ -61,6 +61,12 @@ void UQuizWidget::ShowInitials()
 	WhiteImage->SetVisibility(ESlateVisibility::Visible);
 	ScrollImage->SetVisibility(ESlateVisibility::Visible);
 
+	FString text = CountDownText->GetText().ToString();
+	if (text != "종료")
+	{
+		CountDownText->SetText(FText::FromString(TEXT("정답은?")));
+	}
+
 	GetWorld()->GetTimerManager().ClearTimer(ShowInitialTimerHandle);
 
 }
@@ -75,6 +81,8 @@ void UQuizWidget::ShowAnswerTextBox()
 	//두루마리 보여주기
 	WhiteImage->SetVisibility(ESlateVisibility::Visible);
 	ScrollImage->SetVisibility(ESlateVisibility::Visible);
+
+	CountDownText->SetText(FText::FromString(TEXT("정답은?")));
 }
 
 void  UQuizWidget::HideLoading()
@@ -224,19 +232,39 @@ void UQuizWidget::ShowTeacherSpeak(bool bIsCorrect)
 void UQuizWidget::HideTeacherSpeak()
 {
 	TeacherSpeak->SetVisibility(ESlateVisibility::Hidden);
-
+	
 }
 
 void UQuizWidget::HideAnswerText()
 {
 	AnswerHorizontal->SetVisibility(ESlateVisibility::Hidden);
+
 }
 
 void UQuizWidget::SwitchToEnd()
 {
 	QuizLoadingSwitcher->SetActiveWidgetIndex(1);
+	LobbyOutCount->SetText(FText::FromString(FString::FromInt(LobbyCountDownNum)));
+	GetWorld()->GetTimerManager().SetTimer(CountDownTimerHandle, this, &UQuizWidget::UpdateLobbyCountDown, 1.0f, true);
 }
 
+void UQuizWidget::UpdateLobbyCountDown()
+{
+	//카운트다운넘버 블루프린트에서 세팅해놓기
+	if (LobbyCountDownNum > 0)
+	{
+		LobbyCountDownNum--;
+		LobbyOutCount->SetText(FText::FromString(FString::FromInt(LobbyCountDownNum)));
+	}
+	else
+	{
+		UJJH_GameInstance* gi = Cast<UJJH_GameInstance>(GetWorld()->GetGameInstance());
+		if (gi)
+		{
+			gi->ExitSession();
+		}
+	}
+}
 void UQuizWidget::OnQuitButtonClicked()
 {
 	UJJH_GameInstance* gi = Cast<UJJH_GameInstance>(GetWorld()->GetGameInstance());
