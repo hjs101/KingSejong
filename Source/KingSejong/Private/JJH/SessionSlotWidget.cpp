@@ -24,7 +24,6 @@ void USessionSlotWidget::UpdateInfo(const FRoomInfo& info)
 	FString Count = FString::Printf(TEXT("%d / %d"), info.CurrentPlayerCount, info.MaxPlayerCount);
 
 	Text_PlayerCount->SetText(FText::FromString(Count));
-	Text_PingMS->SetText(FText::AsNumber(info.pingMS));
 
 	SessionSearchIndex = info.index;
 }

@@ -123,7 +123,7 @@ public:
 	TArray<class USkeletalMesh* > CharacterList;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int32 CharacterMeshIndex = 0;
+	int32 CharacterMeshIndex = -1;
 
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)

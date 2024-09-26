@@ -26,9 +26,6 @@ public:
 	class UTextBlock* Text_PlayerCount;	
 	
 	UPROPERTY(meta = (BindWidget))
-	class UTextBlock* Text_PingMS;
-	
-	UPROPERTY(meta = (BindWidget))
 	class UButton* RowButton;
 
 	int32 SessionSearchIndex;

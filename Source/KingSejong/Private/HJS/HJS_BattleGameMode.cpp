@@ -259,7 +259,6 @@ void AHJS_BattleGameMode::Restart()
 
 void AHJS_BattleGameMode::Exit()
 {
-    UJJH_GameInstance* GameIns = Cast<UJJH_GameInstance>(GetWorld()->GetGameInstance());
-    check(GameIns);
-    GameIns->DestroySession();
+    Player0->ClientExitRoom();
+    Player1->ClientExitRoom();
 }
