@@ -235,7 +235,7 @@ void ARunner::MulticastTeleportForward_Implementation(float Speed, float InputVa
 
 	if (RunningSound || SA_Runner)
 	{
-		UGameplayStatics::PlaySoundAtLocation(GetWorld(), RunningSound, GetActorLocation(), 1, 1, 0, SA_Runner);
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), RunningSound, GetActorLocation(), 0.2f, 1, 0, SA_Runner);
 	}
 }
 
