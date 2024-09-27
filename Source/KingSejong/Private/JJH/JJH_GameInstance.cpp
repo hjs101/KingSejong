@@ -74,7 +74,7 @@ void UJJH_GameInstance::JoinToSession(int32 Index)
 {
 	UE_LOG(LogTemp, Warning, TEXT("Joining"));
 	auto result = SessionSearch->SearchResults[Index];
-	SessionInterface->JoinSession(0, FName(MySessionName), result);
+	SessionInterface->JoinSession(0, FName(SESSION_NAME), result);
 }
 
 void UJJH_GameInstance::CreateSession(const FString& RoomName, int32 PlayerCount, const FString& Category)
