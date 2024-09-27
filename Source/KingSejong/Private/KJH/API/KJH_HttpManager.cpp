@@ -148,7 +148,7 @@ void AKJH_HttpManager::Req_GetChatbotQuizData(const FString& BookName)
 
 	// 통신할 데이터
 	TMap<FString, FString> data;
-	data.Add(TEXT("query"), FString::Printf(TEXT("%s 이야기에서 OX 퀴즈를 내줘"), *BookName));
+	data.Add(TEXT("query"), FString::Printf(TEXT("%s 이야기에서 빈도수가 높고, 중요한 단어와 빈도수가 높고, 중요한 문장 그리고 빈도수가 높고, 중요한 내용을 기반으로 OX퀴즈 내줘"), *BookName));
 	req->SetContentAsString(UKJH_JsonParseLib::MakeJson(data));
 
 	// 요청 정보
