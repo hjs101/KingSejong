@@ -9,6 +9,8 @@
 #include "HJS/BattleQuestionStruct.h"
 #include "HJS/BattleResultWidget.h"
 #include "Components/CanvasPanel.h"
+#include "Kismet/GameplayStatics.h"
+#include "Sound/SoundBase.h"
 void UMainUI::NativeConstruct()
 {
 	Super::NativeConstruct();
@@ -111,6 +113,7 @@ void UMainUI::GameStartUIInit()
 void UMainUI::TurnStartUIInit()
 {
 	CountDown->SetVisibility(ESlateVisibility::Visible);
+	UGameplayStatics::PlaySound2D(GetWorld(), CountDownSound0);
 	GetWorld()->GetTimerManager().SetTimer(CountDownTimerHandle , this , &UMainUI::OnCountDown , 1.f , true);
 }
 
@@ -119,12 +122,15 @@ void UMainUI::OnCountDown()
 	if ( CountDownText.Equals(TEXT("3")))
 	{
 		CountDownText = TEXT("2");
+		UGameplayStatics::PlaySound2D(GetWorld(),CountDownSound0);
 	}else if ( CountDownText.Equals(TEXT("2")) )
 	{
 		CountDownText = TEXT("1");
+		UGameplayStatics::PlaySound2D(GetWorld(), CountDownSound0);
 	}
 	else if (CountDownText.Equals(TEXT("1")))
 	{
+		UGameplayStatics::PlaySound2D(GetWorld(), CountDownSound1);
 		CountDownText = TEXT("시작!!");
 	}
 	else if(CountDownText.Equals(TEXT("시작!!")))

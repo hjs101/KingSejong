@@ -621,6 +621,7 @@ void AHJS_BattlePlayer::OnDIe()
 	if (IsLocallyControlled())
 	{
 		ShowGameEndUI(false);
+		UGameplayStatics::PlaySound2D(GetWorld(), LoseSound, 0.5f);
 	}
 	else
 	{
@@ -628,6 +629,7 @@ void AHJS_BattlePlayer::OnDIe()
 		AHJS_BattlePlayer* MainPlayer = Cast<AHJS_BattlePlayer>(GetWorld()->GetFirstPlayerController()->GetCharacter());
 		check(MainPlayer);
 		MainPlayer->ShowGameEndUI(true);
+		UGameplayStatics::PlaySound2D(GetWorld(),VictorySound, 0.5f);
 	}
 }
 

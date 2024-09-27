@@ -182,6 +182,12 @@ public:
 	class USoundWave* BGM2;
 
 	UPROPERTY(EditAnywhere)
+	class USoundWave* VictorySound;
+
+	UPROPERTY(EditAnywhere)
+	class USoundWave* LoseSound;
+
+	UPROPERTY(EditAnywhere)
 	TSubclassOf<class UMainUI> MainUIFactory;
 
 	UPROPERTY()

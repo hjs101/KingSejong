@@ -19,6 +19,13 @@ class KINGSEJONG_API UMainUI : public UUserWidget
 public:
 
 	virtual void NativeConstruct() override;
+
+	UPROPERTY(EditDefaultsOnly)
+	class USoundBase* CountDownSound0;
+	UPROPERTY(EditDefaultsOnly)
+	class USoundBase* CountDownSound1;
+
+
 	UPROPERTY()
 	class AHJS_BattlePlayer* Me;
 
