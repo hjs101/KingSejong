@@ -648,13 +648,13 @@ void AHJS_BattlePlayer::PlayBGM_Implementation(int32 BGMNum)
 	switch (BGMNum)
 	{
 	case 0:
-		UGameplayStatics::PlaySound2D(GetWorld(), BGM0, 0.2f);
+		UGameplayStatics::PlaySound2D(GetWorld(), BGM0);
 		break;
 	case 1:
-		UGameplayStatics::PlaySound2D(GetWorld(), BGM1, 0.2f);
+		UGameplayStatics::PlaySound2D(GetWorld(), BGM1);
 		break;
 	case 2:
-		UGameplayStatics::PlaySound2D(GetWorld(), BGM2, 0.2f);
+		UGameplayStatics::PlaySound2D(GetWorld(), BGM2);
 		break;
 	}
 }
