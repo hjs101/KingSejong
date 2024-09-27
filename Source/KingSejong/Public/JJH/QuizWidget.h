@@ -123,4 +123,10 @@ public:
 	class UTextBlock* LobbyOutCount;
 
 	float LobbyCountDownNum = 5;
+
+	UPROPERTY(EditAnywhere)
+	class USoundBase* CountDownSound;	
+	
+	UPROPERTY(EditAnywhere)
+	class USoundBase* CountDownEndSound;
 };

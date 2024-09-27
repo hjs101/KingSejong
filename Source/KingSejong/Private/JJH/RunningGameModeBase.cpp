@@ -160,12 +160,13 @@ void ARunningGameModeBase::SubmitAnswer()
 	{
 		//정답입력차례인 플레이어
 		CurrentController->ClientShowAnswerTextBox();
-
+		CurrentController->bShowMouseCursor = true;
 		for ( ARunnerController* OtherController : Players )
 		{
 			
 			OtherController->ClientSpectatePlayer(CurrentController->GetPawn()); // 관전 모드 전환
 			OtherController->ClientShowInitials();
+
 		}	
 	}
 	//모든플레이어가 답을 틀리거나 정답자가 나오면 exitsession 호출해야함

@@ -10,6 +10,7 @@
 #include "JJH/JJHPlayerState.h"
 #include "JJH/JJH_GameInstance.h"
 #include "Net/UnrealNetwork.h"
+#include "Kismet/GameplayStatics.h"
 
 // Sets default values
 ARunner::ARunner()
@@ -23,6 +24,8 @@ ARunner::ARunner()
 
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
 	FollowCamera->SetupAttachment(CameraBoom);
+
+
 
 }
 
@@ -135,6 +138,10 @@ void ARunner::MulticastPlayWinMontage_Implementation()
 		//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, TEXT("Montage is playing"));
 		//PlayAnimMontage(WinMontage);
 		GetMesh()->GetAnimInstance()->Montage_Play(WinMontage);
+		if (WinSound)
+		{
+			UGameplayStatics::PlaySound2D(GetWorld(), WinSound);
+		}
 	}
 	else
 	{
@@ -159,6 +166,10 @@ void ARunner::ServerPlayLoseMontage_Implementation()
 void ARunner::MulticastPlayLoseMontage_Implementation()
 {
 	PlayAnimMontage(LoseMontage);
+	if (LoseSound)
+	{
+		UGameplayStatics::PlaySound2D(GetWorld(), LoseSound);
+	}
 }
 
 
@@ -221,6 +232,11 @@ void ARunner::MulticastTeleportForward_Implementation(float Speed, float InputVa
 
 	FVector Direction = FRotationMatrix(GetControlRotation()).GetScaledAxis(EAxis::X);
 	SetActorLocation(GetActorLocation() + Direction * Speed);
+
+	if (RunningSound || SA_Runner)
+	{
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), RunningSound, GetActorLocation(), 1, 1, 0, SA_Runner);
+	}
 }
 
 void ARunner::ServerChangeMesh_Implementation(int32 Index)

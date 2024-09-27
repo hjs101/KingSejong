@@ -89,5 +89,15 @@ public:
 	UFUNCTION(NetMulticast, Reliable)
 	void MultiCastChangeMesh(int32 Index);
 
+	UPROPERTY(EditDefaultsOnly)
+	class USoundAttenuation* SA_Runner;
 
+	UPROPERTY(EditAnywhere)
+	class USoundBase* RunningSound;	
+	
+	UPROPERTY(EditAnywhere)
+	class USoundBase* WinSound;	
+	
+	UPROPERTY(EditAnywhere)
+	class USoundBase* LoseSound;
 };

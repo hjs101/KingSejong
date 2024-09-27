@@ -17,6 +17,7 @@
 #include "JJH/RunnerController.h"
 #include "JJH/RunningGameModeBase.h"
 #include "JJH/JJH_GameInstance.h"
+#include "Kismet/GameplayStatics.h"
 
 void UQuizWidget::InitializeQuiz(const FWordsData& WordData)
 {
@@ -96,6 +97,7 @@ void UQuizWidget::ShowLoading()
 }
 void UQuizWidget::StartCountDown()
 {
+
 	// 타이머 시작
 	GetWorld()->GetTimerManager().SetTimer(CountDownTimerHandle, this, &UQuizWidget::UpdateCountDown, 1.0f, true);
 	CountDownOverlay->SetVisibility(ESlateVisibility::Visible);
@@ -110,6 +112,10 @@ void UQuizWidget::UpdateCountDown()
 	{
 		CountDownNum--;
 		CountDownText->SetText(FText::FromString(FString::FromInt(CountDownNum)));
+		if (CountDownSound)
+		{
+			UGameplayStatics::PlaySound2D(GetWorld(), CountDownSound);
+		}
 	}
 	else
 	{
@@ -123,6 +129,10 @@ void UQuizWidget::UpdateCountDown()
 		Initials->SetVisibility(ESlateVisibility::Hidden);
 		WhiteImage->SetVisibility(ESlateVisibility::Hidden);
 		ScrollImage->SetVisibility(ESlateVisibility::Hidden);
+		if (CountDownEndSound)
+		{
+			UGameplayStatics::PlaySound2D(GetWorld(), CountDownEndSound);
+		}
 	}
 }
 
