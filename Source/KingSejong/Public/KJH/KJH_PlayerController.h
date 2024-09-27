@@ -25,26 +25,30 @@ public:
 	class UKJH_QuizSoundHandler* SoundHandler;
 
 public:
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category=Sound)
 	class USoundBase* SFX_Correct;
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category = Sound)
 	class USoundBase* SFX_Fail;
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category = Sound)
 	class USoundBase* SFX_Tick;
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category = Sound)
 	class USoundBase* SFX_Buzzer;
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category = Sound)
 	class USoundBase* SFX_Notification;
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category = Sound)
 	class USoundBase* SFX_Bright;
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category = Sound)
 	class UAudioComponent* AudioComp;
+
+	UPROPERTY(EditDefaultsOnly, Category = CameraShake)
+	TSubclassOf<class UCameraShakeBase> CameraShake;
+
 
 public:
 

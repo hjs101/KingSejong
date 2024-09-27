@@ -69,14 +69,19 @@ void AKJH_PlayerController::ClientRPC_ShowWidgetAnswer_Implementation(bool bCorr
 
 	// todo: 플레이어가 선택한 정답이랑 문제의 정답과 비교해서 점수처리 해야 함
 
-	USoundBase* sound = bCorrectAnswer == bSelectedAnswer ? SFX_Correct : SFX_Fail;
-	//UGameplayStatics::PlaySound2D(GetWorld(), sound);
-
-	SoundHandler->PlayQuizSound(sound);
-
+	// 정답 여부에 따른 사운드 및 카메라 쉐이킹
+    bool bIsCorrect = bCorrectAnswer == bSelectedAnswer;
+	if (bIsCorrect)
+	{
+		SoundHandler->PlayQuizSound(SFX_Correct);
+	}
+	else
+	{
+		SoundHandler->PlayQuizSound(SFX_Fail);
+		ClientStartCameraShake(CameraShake);
+	}
 
     UE_LOG(LogTemp, Warning, TEXT("ShowWidgetAnswer!! : bCorrectAnswer(%d), bSelectedAnswer(%d)"), bCorrectAnswer, bSelectedAnswer);
-
 }
 
 void AKJH_PlayerController::ClientRPC_EndQuiz_Implementation()
