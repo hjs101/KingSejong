@@ -107,9 +107,10 @@ void UJJH_GameInstance::CreateSession(const FString& RoomName, int32 PlayerCount
 
 		// 세션 설정 시 카테고리 지정 -> 추후에 
 		FString roomname = StringBase64Encode(RoomName);
+		FString sessionname = StringBase64Encode(SESSION_NAME.ToString());
 		SessionSettings.Set<FString>(FName("Category"), Category, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
 		SessionSettings.Set<FString>(FName("Room_Name"), roomname, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
-		SessionSettings.Set<FString>(FName("Host_Name"), SESSION_NAME.ToString(), EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
+		SessionSettings.Set<FString>(FName("Host_Name"), sessionname, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
 
 		// SessionSettings에서 값을 가져와 로그로 출력
 
@@ -211,7 +212,7 @@ void UJJH_GameInstance::OnMyFindSessionComplete(bool Success)
 			//호스트 이름
 			FString hostNameString;
 			results[ i ].Session.SessionSettings.Get<FString>(FName("Host_Name"), hostNameString);
-			roomInfo.hostName = hostNameString;
+			roomInfo.hostName = StringBase64Decode(hostNameString);
 			//최대 플레이어 수
 			roomInfo.MaxPlayerCount = results[ i ].Session.SessionSettings.NumPublicConnections;
 			//입장 가능한 플레이어 최대 - 지금
