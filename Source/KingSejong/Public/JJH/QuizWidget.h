@@ -128,5 +128,11 @@ public:
 	class USoundBase* CountDownSound;	
 	
 	UPROPERTY(EditAnywhere)
-	class USoundBase* CountDownEndSound;
+	class USoundBase* CountDownEndSound;	
+	
+	UPROPERTY(EditAnywhere)
+	class USoundBase* AnswerSound;
+
+	UPROPERTY(EditAnywhere)
+	class USoundBase* NoAnswerSound;
 };
