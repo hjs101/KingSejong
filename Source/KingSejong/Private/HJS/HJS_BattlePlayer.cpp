@@ -636,6 +636,8 @@ void AHJS_BattlePlayer::ShowGameEndUI(bool bVictory)
 	if (MainUI)
 	{
 		MainUI->ShowEndGameUI(bVictory);
+		APlayerController* PC = Cast<APlayerController>(GetController());
+		PC->SetShowMouseCursor(true);
 	}
 }
 
