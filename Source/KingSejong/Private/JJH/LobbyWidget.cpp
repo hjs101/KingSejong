@@ -13,6 +13,8 @@
 #include "JJH/SessionSlotWidget.h"
 #include "Components/CanvasPanel.h"
 #include "Components/Image.h"
+#include "GameFramework/Character.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 void ULobbyWidget::NativeConstruct()
 {
