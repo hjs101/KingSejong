@@ -10,7 +10,7 @@
 #include "JJH/LobbyWidget.h"
 #include "string"
 
-const static FName SESSION_NAME = TEXT("My Session Game");
+const static FName SESSION_NAME = TEXT("문해력 Zㅣ존");
 const static FName SESSION_CATEGORY = TEXT("RUN");
 
 UJJH_GameInstance::UJJH_GameInstance()

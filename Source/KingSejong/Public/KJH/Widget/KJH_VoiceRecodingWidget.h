@@ -25,9 +25,9 @@ public:
 
 public:
 	// UI
-	UPROPERTY(EditDefaultsOnly, meta=(BindWidget))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(BindWidget))
 	class UButton* BtnRecStart;
-	UPROPERTY(EditDefaultsOnly, meta=(BindWidget))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(BindWidget))
 	class UButton* BtnRecStop;
 	UPROPERTY(EditDefaultsOnly, meta=(BindWidget))
 	class UWidgetSwitcher* ButtonSwitcher;
