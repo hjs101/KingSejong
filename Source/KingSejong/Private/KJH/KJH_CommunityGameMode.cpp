@@ -45,3 +45,13 @@ void AKJH_CommunityGameMode::PlayQuizMode()
 {
 	GetAllPlayerControllers();
 }
+
+void AKJH_CommunityGameMode::ExitSessionAllPlayers()
+{
+	GetAllPlayerControllers();
+
+	for (auto pc : PlayerControllers)
+	{
+		pc->ClientRPC_ExitSession();
+	}
+}

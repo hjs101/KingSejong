@@ -7,6 +7,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Components/AudioComponent.h"
 #include "KJH/KJH_QuizSoundHandler.h"
+#include "JJH/JJH_GameInstance.h"
 
 AKJH_PlayerController::AKJH_PlayerController()
 {
@@ -96,6 +97,17 @@ void AKJH_PlayerController::ClientRPC_EndQuiz_Implementation()
 
 
 	UE_LOG(LogTemp, Warning, TEXT("EndQuiz!!"));
+
+}
+
+void AKJH_PlayerController::ClientRPC_ExitSession_Implementation()
+{
+	auto* gi = Cast<UJJH_GameInstance>(GetWorld()->GetGameInstance());
+
+	if (gi)
+	{
+		gi->ExitSession();
+	}
 
 }
 

@@ -42,4 +42,6 @@ public:
 	//void SetCommunityState(ECommunityState NewState);
 	//void SetAllPlayersPosition(FTransform& TargetTransform);
 
+	UFUNCTION(BlueprintCallable)
+	void ExitSessionAllPlayers();
 };

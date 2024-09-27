@@ -67,6 +67,9 @@ public:
 	UFUNCTION(Client, Reliable)
 	void ClientRPC_EndQuiz();
 
+	UFUNCTION(Client, Reliable)
+	void ClientRPC_ExitSession();
+
 private:
 	bool IsValidQuizWidget();
 
